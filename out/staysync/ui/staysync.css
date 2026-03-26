@@ -140,6 +140,11 @@
     -fx-text-fill: #131b11;
 }
 
+.sidebar-heading {
+    -fx-font-size: 18px;
+    -fx-line-spacing: 2px;
+}
+
 .hero-headline {
     -fx-font-family: "Press Start 2P";
     -fx-font-size: 26px;
@@ -411,6 +416,68 @@
     -fx-background-color: transparent;
 }
 
+.page-scroll .scroll-bar:vertical,
+.page-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.page-scroll .scroll-bar:vertical {
+    -fx-pref-width: 18px;
+}
+
+.page-scroll .scroll-bar:horizontal {
+    -fx-pref-height: 18px;
+}
+
+.page-scroll .scroll-bar .track {
+    -fx-background-color: rgba(225, 231, 198, 0.72);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .thumb {
+    -fx-background-color: #ba852d;
+    -fx-border-color: #6b4f17;
+    -fx-border-width: 1px;
+    -fx-background-insets: 1px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: #c89239;
+}
+
+.page-scroll .scroll-bar .thumb:pressed {
+    -fx-background-color: #9f7422;
+}
+
+.page-scroll .scroll-bar .increment-button,
+.page-scroll .scroll-bar .decrement-button {
+    -fx-background-color: rgba(233, 236, 208, 0.9);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-padding: 2px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .increment-arrow,
+.page-scroll .scroll-bar .decrement-arrow {
+    -fx-background-color: #182015;
+    -fx-shape: "M 0 0 L 4 0 L 2 4 z";
+    -fx-padding: 3px;
+}
+
+.page-scroll .corner {
+    -fx-background-color: rgba(225, 231, 198, 0.72);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px 0 0 1px;
+}
+
 .retro-table {
     -fx-background-color: rgba(239, 241, 221, 0.68);
     -fx-border-color: #354636;
@@ -496,6 +563,8 @@
 .dark-mode .secondary-button,
 .dark-mode .nav-button,
 .dark-mode .chip-button,
+.dark-mode .page-scroll .scroll-bar .track,
+.dark-mode .page-scroll .corner,
 .dark-mode .console-stat,
 .dark-mode .retro-table,
 .dark-mode .retro-table .table-row-cell,
@@ -538,6 +607,30 @@
     -fx-background-color: #ffbf60;
     -fx-border-color: #d28a2b;
     -fx-text-fill: #101410;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb {
+    -fx-background-color: #ffbf60;
+    -fx-border-color: #d28a2b;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: #ffc876;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb:pressed {
+    -fx-background-color: #d28a2b;
+}
+
+.dark-mode .page-scroll .scroll-bar .increment-button,
+.dark-mode .page-scroll .scroll-bar .decrement-button {
+    -fx-background-color: rgba(17, 27, 54, 0.96);
+    -fx-border-color: #35506d;
+}
+
+.dark-mode .page-scroll .scroll-bar .increment-arrow,
+.dark-mode .page-scroll .scroll-bar .decrement-arrow {
+    -fx-background-color: #edf2dd;
 }
 
 .dark-mode .protocol-badge {

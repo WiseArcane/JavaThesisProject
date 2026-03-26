@@ -7,6 +7,9 @@ import java.util.Locale;
 import java.net.URL;
 import java.nio.file.Path;
 
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -16,11 +19,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
@@ -30,6 +35,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -40,6 +46,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import staysync.core.StaySyncService;
 import staysync.core.StaySyncService.DashboardSnapshot;
 import staysync.core.TenantAccount;
@@ -116,6 +123,7 @@ public class StaySyncApp extends Application {
         backgroundLayer.getStyleClass().add("background-layer");
 
         themeButton.getStyleClass().addAll("ui-button", "theme-button");
+        applyButtonHoverAnimation(themeButton);
         themeButton.setOnAction(event -> {
             darkMode = !darkMode;
             applyThemeMode();
@@ -123,7 +131,7 @@ public class StaySyncApp extends Application {
 
         contentHost.setMaxWidth(1280);
         StackPane.setAlignment(contentHost, Pos.TOP_CENTER);
-        StackPane.setMargin(contentHost, new Insets(118, 20, 24, 20));
+        updateContentHostMargin();
         StackPane.setAlignment(themeButton, Pos.TOP_RIGHT);
         StackPane.setMargin(themeButton, new Insets(18, 28, 0, 0));
 
@@ -151,6 +159,7 @@ public class StaySyncApp extends Application {
     }
 
     private void renderCurrentView() {
+        updateContentHostMargin();
         Node content;
         if (view == View.TENANT && currentTenant != null) {
             content = createTenantShell();
@@ -160,6 +169,13 @@ public class StaySyncApp extends Application {
             content = createAuthShell();
         }
         contentHost.getChildren().setAll(content);
+    }
+
+    private void updateContentHostMargin() {
+        Insets margin = view == View.AUTH
+                ? new Insets(118, 20, 24, 20)
+                : new Insets(84, 20, 20, 20);
+        StackPane.setMargin(contentHost, margin);
     }
 
     private Node createAuthShell() {
@@ -378,12 +394,14 @@ public class StaySyncApp extends Application {
     private Node createTenantSidebar() {
         VBox sidebar = new VBox(16);
         sidebar.getStyleClass().addAll("retro-panel", "sidebar-panel");
-        sidebar.setPrefWidth(260);
+        sidebar.setPrefWidth(272);
 
         Label eyebrow = new Label("STAYSYNC");
         eyebrow.getStyleClass().add("eyebrow-copy");
         Label title = new Label("TENANT DECK");
-        title.getStyleClass().add("section-title");
+        title.getStyleClass().addAll("section-title", "sidebar-heading");
+        title.setWrapText(true);
+        title.setTextOverrun(OverrunStyle.CLIP);
         Label tenantName = new Label(currentTenant.getFullName());
         tenantName.getStyleClass().add("sidebar-name");
         Label room = new Label(currentTenant.getRoomInfo().getRoomNumber() + " / " + currentTenant.getRoomInfo().getRoomType());
@@ -435,10 +453,7 @@ public class StaySyncApp extends Application {
         subtitle.setWrapText(true);
         header.getChildren().addAll(title, subtitle, createFeedbackLabel(tenantMessage, tenantMessageSuccess));
 
-        ScrollPane scrollPane = new ScrollPane(createTenantPageBody());
-        scrollPane.getStyleClass().add("page-scroll");
-        scrollPane.setFitToWidth(true);
-        scrollPane.setPannable(true);
+        ScrollPane scrollPane = createPageScrollPane(createTenantPageBody());
 
         panel.setTop(header);
         panel.setCenter(scrollPane);
@@ -645,12 +660,14 @@ public class StaySyncApp extends Application {
     private Node createLandlordSidebar() {
         VBox sidebar = new VBox(16);
         sidebar.getStyleClass().addAll("retro-panel", "sidebar-panel");
-        sidebar.setPrefWidth(244);
+        sidebar.setPrefWidth(272);
 
         Label eyebrow = new Label("STAYSYNC");
         eyebrow.getStyleClass().add("eyebrow-copy");
         Label title = new Label("Admin hub");
-        title.getStyleClass().add("section-title");
+        title.getStyleClass().addAll("section-title", "sidebar-heading");
+        title.setWrapText(true);
+        title.setTextOverrun(OverrunStyle.CLIP);
 
         DashboardSnapshot snapshot = staySyncService.getLandlordDashboardData(landlordQuery);
         Label residentCount = new Label(snapshot.getTotalTenantCount() + " residents");
@@ -698,10 +715,7 @@ public class StaySyncApp extends Application {
         subtitle.setWrapText(true);
         header.getChildren().addAll(title, subtitle);
 
-        ScrollPane scrollPane = new ScrollPane(createLandlordPageBody());
-        scrollPane.getStyleClass().add("page-scroll");
-        scrollPane.setFitToWidth(true);
-        scrollPane.setPannable(true);
+        ScrollPane scrollPane = createPageScrollPane(createLandlordPageBody());
 
         panel.setTop(header);
         panel.setCenter(scrollPane);
@@ -1353,6 +1367,7 @@ public class StaySyncApp extends Application {
         }
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
+        applyButtonHoverAnimation(button);
         button.setOnAction(event -> action.run());
         return button;
     }
@@ -1362,6 +1377,7 @@ public class StaySyncApp extends Application {
         button.setToggleGroup(group);
         button.setSelected(selected);
         button.getStyleClass().add("tab-button");
+        applyButtonHoverAnimation(button);
         return button;
     }
 
@@ -1371,6 +1387,7 @@ public class StaySyncApp extends Application {
         if (active) {
             button.getStyleClass().add("active-chip");
         }
+        applyButtonHoverAnimation(button);
         button.setOnAction(event -> action.run());
         return button;
     }
@@ -1378,13 +1395,79 @@ public class StaySyncApp extends Application {
     private Button createPrimaryButton(String text) {
         Button button = new Button(text);
         button.getStyleClass().addAll("ui-button", "primary-button");
+        applyButtonHoverAnimation(button);
         return button;
     }
 
     private Button createSecondaryButton(String text) {
         Button button = new Button(text);
         button.getStyleClass().addAll("ui-button", "secondary-button");
+        applyButtonHoverAnimation(button);
         return button;
+    }
+
+    private void applyButtonHoverAnimation(ButtonBase button) {
+        Duration duration = Duration.millis(140);
+
+        ScaleTransition scaleIn = new ScaleTransition(duration, button);
+        scaleIn.setToX(1.03);
+        scaleIn.setToY(1.03);
+        TranslateTransition liftIn = new TranslateTransition(duration, button);
+        liftIn.setToY(-2);
+        ParallelTransition hoverIn = new ParallelTransition(scaleIn, liftIn);
+
+        ScaleTransition scaleOut = new ScaleTransition(duration, button);
+        scaleOut.setToX(1.0);
+        scaleOut.setToY(1.0);
+        TranslateTransition liftOut = new TranslateTransition(duration, button);
+        liftOut.setToY(0);
+        ParallelTransition hoverOut = new ParallelTransition(scaleOut, liftOut);
+
+        button.hoverProperty().addListener((observable, wasHovering, isHovering) -> {
+            if (button.isDisabled()) {
+                return;
+            }
+
+            if (isHovering) {
+                hoverOut.stop();
+                hoverIn.playFromStart();
+            } else {
+                hoverIn.stop();
+                hoverOut.playFromStart();
+            }
+        });
+
+        button.disabledProperty().addListener((observable, wasDisabled, isDisabled) -> {
+            if (isDisabled) {
+                hoverIn.stop();
+                hoverOut.stop();
+                button.setScaleX(1.0);
+                button.setScaleY(1.0);
+                button.setTranslateY(0);
+            }
+        });
+    }
+
+    private ScrollPane createPageScrollPane(Node content) {
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.getStyleClass().add("page-scroll");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+            double contentHeight = scrollPane.getContent().getBoundsInLocal().getHeight();
+            double viewportHeight = scrollPane.getViewportBounds().getHeight();
+            double scrollRange = contentHeight - viewportHeight;
+            if (scrollRange <= 0 || event.getDeltaY() == 0) {
+                return;
+            }
+
+            double speedMultiplier = 2.2;
+            double delta = (-event.getDeltaY() / scrollRange) * speedMultiplier;
+            double nextValue = Math.max(0, Math.min(1, scrollPane.getVvalue() + delta));
+            scrollPane.setVvalue(nextValue);
+            event.consume();
+        });
+        return scrollPane;
     }
 
     private VBox createFieldGroup(String labelText, Node control) {
