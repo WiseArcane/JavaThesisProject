@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.project.sourcePaths": ["src/main/java"],
+		"java.project.outputPath": "out"
+	}
+}
