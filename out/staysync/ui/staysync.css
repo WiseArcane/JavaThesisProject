@@ -1,0 +1,679 @@
+@font-face {
+    font-family: "Press Start 2P";
+    src: url("fonts/PressStart2P-Regular.ttf");
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/IBMPlexMono-Regular.ttf");
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("fonts/IBMPlexMono-Bold.ttf");
+    -fx-font-weight: 700;
+}
+
+.app-root {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-background-color:
+        linear-gradient(to bottom right, #eef0db 0%, #dde5bf 48%, #e9e3c3 100%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.018) 0%, rgba(255, 255, 255, 0.02) 100%);
+    -fx-text-fill: #1a2015;
+}
+
+.app-root.dark-mode {
+    -fx-background-color:
+        linear-gradient(to bottom right, #070b1e 0%, #0d1330 40%, #120d2f 100%);
+}
+
+.background-layer {
+    -fx-background-color:
+        radial-gradient(center 18% 12%, radius 60%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0) 72%),
+        radial-gradient(center 82% 18%, radius 55%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.025), rgba(255, 255, 255, 0.02)),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.005) 2%, rgba(255, 255, 255, 0.01) 100%);
+}
+
+.dark-mode .background-layer {
+    -fx-background-color:
+        radial-gradient(center 22% 16%, radius 58%, rgba(92, 78, 156, 0.22), rgba(0, 0, 0, 0) 72%),
+        radial-gradient(center 76% 18%, radius 54%, rgba(45, 64, 118, 0.18), rgba(0, 0, 0, 0) 70%),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.03)),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0%, rgba(255, 255, 255, 0.004) 2%, rgba(0, 0, 0, 0.02) 100%);
+}
+
+.auth-shell {
+    -fx-alignment: top-center;
+}
+
+.retro-panel {
+    -fx-background-color: rgba(239, 241, 221, 0.68);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+    -fx-spacing: 10px;
+}
+
+.dark-mode .retro-panel {
+    -fx-background-color: rgba(35, 24, 67, 0.88);
+    -fx-border-color: #5d4f8c;
+}
+
+.hero-panel {
+    -fx-background-color: rgba(246, 247, 234, 0.72);
+    -fx-spacing: 14px;
+}
+
+.dark-mode .hero-panel {
+    -fx-background-color: rgba(55, 42, 104, 0.92);
+}
+
+.auth-panel {
+    -fx-spacing: 14px;
+}
+
+.console-panel,
+.protocol-panel {
+    -fx-spacing: 12px;
+}
+
+.sidebar-panel {
+    -fx-min-height: 620px;
+}
+
+.content-header {
+    -fx-padding: 16px 18px 14px 18px;
+}
+
+.logo-box {
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-background-color: #4e74c9;
+    -fx-border-color: #263342;
+    -fx-border-width: 2px;
+}
+
+.logo-glyph {
+    -fx-text-fill: #101410;
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+}
+
+.brand-title,
+.section-title,
+.card-title,
+.metric-value,
+.sidebar-name,
+.status-label,
+.mini-title,
+.ui-button,
+.tab-button,
+.theme-button {
+    -fx-font-family: "Press Start 2P";
+}
+
+.field-label,
+.detail-value,
+.inline-code {
+    -fx-font-family: "IBM Plex Mono";
+}
+
+.brand-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #182015;
+}
+
+.eyebrow-copy {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5d6650;
+}
+
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #131b11;
+}
+
+.sidebar-heading {
+    -fx-font-size: 18px;
+    -fx-line-spacing: 2px;
+}
+
+.hero-headline {
+    -fx-font-family: "Press Start 2P";
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #182015;
+    -fx-line-spacing: 4px;
+}
+
+.auth-heading {
+    -fx-font-size: 18px;
+    -fx-line-spacing: 3px;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #182015;
+}
+
+.compact-card-title {
+    -fx-font-size: 14px;
+    -fx-line-spacing: 3px;
+}
+
+.console-value,
+.protocol-badge {
+    -fx-font-family: "Press Start 2P";
+}
+
+.console-value {
+    -fx-font-size: 16px;
+    -fx-text-fill: #182015;
+}
+
+.metric-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #182015;
+}
+
+.sidebar-name,
+.detail-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1a2015;
+}
+
+.body-copy,
+.meta-copy,
+.mini-copy-row,
+.separator *.line {
+    -fx-font-family: "IBM Plex Mono";
+}
+
+.body-copy {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5a6451;
+}
+
+.meta-copy,
+.mini-copy-row {
+    -fx-font-size: 13px;
+    -fx-text-fill: #5a6451;
+}
+
+.mini-title,
+.field-label,
+.status-label,
+.inline-code {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.field-label {
+    -fx-text-fill: #4f5b45;
+}
+
+.chip-label {
+    -fx-padding: 6px 14px;
+    -fx-border-color: #6b4f17;
+    -fx-border-width: 1px;
+    -fx-background-color: #ba852d;
+    -fx-text-fill: #141611;
+}
+
+.inline-code {
+    -fx-padding: 6px 10px;
+    -fx-background-color: rgba(206, 214, 177, 0.75);
+    -fx-border-color: #5b6647;
+    -fx-border-width: 1px;
+    -fx-text-fill: #1a2015;
+}
+
+.ui-input,
+.ui-combo {
+    -fx-background-color: rgba(227, 234, 197, 0.62);
+    -fx-background-insets: 0;
+    -fx-border-color: #425340;
+    -fx-border-width: 1px;
+    -fx-text-fill: #1a2015;
+    -fx-prompt-text-fill: #778169;
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 14px;
+    -fx-padding: 11px 12px;
+}
+
+.ui-combo .list-cell {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 14px;
+}
+
+.ui-button,
+.tab-button {
+    -fx-border-width: 1px;
+    -fx-border-color: #2f3d2f;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 10px 18px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-background-color: #5378d6;
+    -fx-text-fill: #0f120f;
+}
+
+.secondary-button,
+.nav-button,
+.chip-button,
+.theme-button {
+    -fx-background-color: rgba(233, 236, 208, 0.68);
+    -fx-text-fill: #1a2015;
+}
+
+.theme-button {
+    -fx-padding: 10px 16px;
+    -fx-background-color: #ba852d;
+    -fx-text-fill: #101410;
+}
+
+.tab-strip {
+    -fx-padding: 4px;
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+}
+
+.tab-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #55624b;
+    -fx-border-color: transparent;
+}
+
+.tab-button:selected {
+    -fx-background-color: #ba852d;
+    -fx-border-color: #6b4f17;
+    -fx-text-fill: #111511;
+}
+
+.nav-button,
+.chip-button {
+    -fx-alignment: center-left;
+}
+
+.active-nav {
+    -fx-background-color: rgba(83, 120, 214, 0.2);
+}
+
+.active-chip {
+    -fx-background-color: rgba(186, 133, 45, 0.22);
+}
+
+.mini-panel {
+    -fx-pref-width: 0;
+    -fx-padding: 14px;
+}
+
+.console-stat-row {
+    -fx-alignment: center-left;
+}
+
+.console-stat {
+    -fx-padding: 10px 12px;
+    -fx-spacing: 4px;
+    -fx-border-color: #425340;
+    -fx-border-width: 1px;
+    -fx-background-color: rgba(227, 234, 197, 0.42);
+}
+
+.protocol-row {
+    -fx-alignment: top-left;
+}
+
+.protocol-badge {
+    -fx-min-width: 42px;
+    -fx-alignment: center;
+    -fx-padding: 6px 8px;
+    -fx-font-size: 11px;
+    -fx-text-fill: #101410;
+    -fx-background-color: #ba852d;
+    -fx-border-color: #6b4f17;
+    -fx-border-width: 1px;
+}
+
+.feedback-box {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 13px;
+    -fx-padding: 10px 12px;
+    -fx-border-width: 1px;
+}
+
+.success-box {
+    -fx-background-color: rgba(132, 183, 100, 0.18);
+    -fx-border-color: #4d7a37;
+    -fx-text-fill: #315025;
+}
+
+.error-box {
+    -fx-background-color: rgba(176, 74, 63, 0.12);
+    -fx-border-color: #9f4239;
+    -fx-text-fill: #7e3129;
+}
+
+.status-pill {
+    -fx-padding: 6px 12px;
+    -fx-border-width: 1px;
+}
+
+.status-pill.paid {
+    -fx-background-color: rgba(132, 183, 100, 0.16);
+    -fx-border-color: #4d7a37;
+}
+
+.status-pill.pending {
+    -fx-background-color: rgba(204, 167, 88, 0.16);
+    -fx-border-color: #9f7422;
+}
+
+.status-pill.late {
+    -fx-background-color: rgba(176, 74, 63, 0.12);
+    -fx-border-color: #9f4239;
+}
+
+.status-pill.paid .status-label {
+    -fx-text-fill: #315025;
+}
+
+.status-pill.pending .status-label {
+    -fx-text-fill: #77550e;
+}
+
+.status-pill.late .status-label {
+    -fx-text-fill: #7e3129;
+}
+
+.separator .line {
+    -fx-border-color: rgba(72, 82, 62, 0.28);
+}
+
+.page-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+    -fx-fit-to-width: true;
+}
+
+.page-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.page-scroll .scroll-bar:vertical,
+.page-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.page-scroll .scroll-bar:vertical {
+    -fx-pref-width: 18px;
+}
+
+.page-scroll .scroll-bar:horizontal {
+    -fx-pref-height: 18px;
+}
+
+.page-scroll .scroll-bar .track {
+    -fx-background-color: rgba(225, 231, 198, 0.72);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .thumb {
+    -fx-background-color: #ba852d;
+    -fx-border-color: #6b4f17;
+    -fx-border-width: 1px;
+    -fx-background-insets: 1px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: #c89239;
+}
+
+.page-scroll .scroll-bar .thumb:pressed {
+    -fx-background-color: #9f7422;
+}
+
+.page-scroll .scroll-bar .increment-button,
+.page-scroll .scroll-bar .decrement-button {
+    -fx-background-color: rgba(233, 236, 208, 0.9);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-padding: 2px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.page-scroll .scroll-bar .increment-arrow,
+.page-scroll .scroll-bar .decrement-arrow {
+    -fx-background-color: #182015;
+    -fx-shape: "M 0 0 L 4 0 L 2 4 z";
+    -fx-padding: 3px;
+}
+
+.page-scroll .corner {
+    -fx-background-color: rgba(225, 231, 198, 0.72);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px 0 0 1px;
+}
+
+.retro-table {
+    -fx-background-color: rgba(239, 241, 221, 0.68);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+    -fx-fixed-cell-size: 42px;
+}
+
+.retro-table .column-header-background,
+.retro-table .column-header {
+    -fx-background-color: rgba(212, 219, 185, 0.85);
+    -fx-border-color: #354636;
+}
+
+.retro-table .column-header .label {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1a2015;
+}
+
+.retro-table .table-row-cell {
+    -fx-background-color: rgba(246, 247, 234, 0.78);
+    -fx-border-color: rgba(72, 82, 62, 0.18);
+}
+
+.retro-table .table-row-cell:selected {
+    -fx-background-color: rgba(83, 120, 214, 0.24);
+}
+
+.retro-table .table-cell {
+    -fx-text-fill: #1a2015;
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 13px;
+    -fx-border-color: transparent;
+}
+
+.dialog-pane {
+    -fx-background-color: rgba(239, 241, 221, 0.95);
+    -fx-border-color: #354636;
+    -fx-border-width: 1px;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane .content.label {
+    -fx-font-family: "IBM Plex Mono";
+}
+
+.dark-mode .brand-title,
+.dark-mode .section-title,
+.dark-mode .card-title,
+.dark-mode .console-value,
+.dark-mode .metric-value,
+.dark-mode .sidebar-name,
+.dark-mode .detail-value,
+.dark-mode .status-label,
+.dark-mode .mini-title,
+.dark-mode .mini-copy-row,
+.dark-mode .mini-copy-row .label,
+.dark-mode .ui-button,
+.dark-mode .tab-button,
+.dark-mode .field-label,
+.dark-mode .inline-code,
+.dark-mode .retro-table .table-cell,
+.dark-mode .retro-table .column-header .label {
+    -fx-text-fill: #edf2dd;
+}
+
+.dark-mode .hero-headline {
+    -fx-text-fill: #edf2dd;
+}
+
+.dark-mode .eyebrow-copy,
+.dark-mode .body-copy,
+.dark-mode .meta-copy {
+    -fx-text-fill: #a8adc8;
+}
+
+.dark-mode .ui-input,
+.dark-mode .ui-combo,
+.dark-mode .secondary-button,
+.dark-mode .nav-button,
+.dark-mode .chip-button,
+.dark-mode .page-scroll .scroll-bar .track,
+.dark-mode .page-scroll .corner,
+.dark-mode .console-stat,
+.dark-mode .retro-table,
+.dark-mode .retro-table .table-row-cell,
+.dark-mode .dialog-pane,
+.dark-mode .inline-code {
+    -fx-background-color: rgba(17, 27, 54, 0.96);
+    -fx-border-color: #35506d;
+}
+
+.dark-mode .ui-input,
+.dark-mode .ui-combo {
+    -fx-text-fill: #edf2dd;
+    -fx-prompt-text-fill: #a8adc8;
+}
+
+.dark-mode .ui-combo .list-cell {
+    -fx-text-fill: #edf2dd;
+}
+
+.dark-mode .primary-button {
+    -fx-background-color: #b7b6c0;
+    -fx-border-color: #d2d2db;
+    -fx-text-fill: #0f1020;
+}
+
+.dark-mode .theme-button {
+    -fx-background-color: #ffbf60;
+    -fx-border-color: #d28a2b;
+    -fx-text-fill: #101410;
+}
+
+.dark-mode .tab-strip,
+.dark-mode .retro-table .column-header-background,
+.dark-mode .retro-table .column-header {
+    -fx-background-color: rgba(16, 28, 56, 0.98);
+    -fx-border-color: #35506d;
+}
+
+.dark-mode .tab-button:selected {
+    -fx-background-color: #ffbf60;
+    -fx-border-color: #d28a2b;
+    -fx-text-fill: #101410;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb {
+    -fx-background-color: #ffbf60;
+    -fx-border-color: #d28a2b;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: #ffc876;
+}
+
+.dark-mode .page-scroll .scroll-bar .thumb:pressed {
+    -fx-background-color: #d28a2b;
+}
+
+.dark-mode .page-scroll .scroll-bar .increment-button,
+.dark-mode .page-scroll .scroll-bar .decrement-button {
+    -fx-background-color: rgba(17, 27, 54, 0.96);
+    -fx-border-color: #35506d;
+}
+
+.dark-mode .page-scroll .scroll-bar .increment-arrow,
+.dark-mode .page-scroll .scroll-bar .decrement-arrow {
+    -fx-background-color: #edf2dd;
+}
+
+.dark-mode .protocol-badge {
+    -fx-background-color: #ffbf60;
+    -fx-border-color: #d28a2b;
+    -fx-text-fill: #101410;
+}
+
+.dark-mode .success-box {
+    -fx-background-color: rgba(95, 138, 72, 0.2);
+    -fx-border-color: #82b66c;
+    -fx-text-fill: #d5e9c8;
+}
+
+.dark-mode .error-box {
+    -fx-background-color: rgba(135, 56, 47, 0.26);
+    -fx-border-color: #cc756b;
+    -fx-text-fill: #ffd5cf;
+}
+
+.dark-mode .status-pill.paid {
+    -fx-background-color: rgba(83, 139, 137, 0.18);
+    -fx-border-color: #6fbcbb;
+}
+
+.dark-mode .status-pill.pending {
+    -fx-background-color: rgba(255, 191, 96, 0.16);
+    -fx-border-color: #ffbf60;
+}
+
+.dark-mode .status-pill.late {
+    -fx-background-color: rgba(197, 109, 146, 0.18);
+    -fx-border-color: #d97aa0;
+}
+
+.dark-mode .status-pill.paid .status-label {
+    -fx-text-fill: #bde6e5;
+}
+
+.dark-mode .status-pill.pending .status-label {
+    -fx-text-fill: #ffd893;
+}
+
+.dark-mode .status-pill.late .status-label {
+    -fx-text-fill: #f8bfd2;
+}
