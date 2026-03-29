@@ -14,6 +14,7 @@ public class TenantAccount {
     private final RoomInfo roomInfo;
     private PaymentStatus paymentStatus;
     private final List<PaymentRecord> paymentHistory;
+    private final List<NotificationRecord> notifications;
 
     public TenantAccount(String fullName, String username, String password, String contactNumber, RoomInfo roomInfo) {
         this.fullName = fullName;
@@ -23,6 +24,7 @@ public class TenantAccount {
         this.roomInfo = roomInfo;
         this.paymentStatus = PaymentStatus.PENDING;
         this.paymentHistory = new ArrayList<>();
+        this.notifications = new ArrayList<>();
         addPaymentRecord(PaymentStatus.PENDING, "Account created. Payment is waiting to be settled.", "System");
     }
 
@@ -50,6 +52,10 @@ public class TenantAccount {
         return Collections.unmodifiableList(paymentHistory);
     }
 
+    public List<NotificationRecord> getNotifications() {
+        return Collections.unmodifiableList(notifications);
+    }
+
     public boolean passwordMatches(String value) {
         return password.equals(value);
     }
@@ -69,6 +75,10 @@ public class TenantAccount {
     public void updatePaymentStatus(PaymentStatus paymentStatus, String note, String updatedBy) {
         this.paymentStatus = paymentStatus;
         addPaymentRecord(paymentStatus, note, updatedBy);
+    }
+
+    public void addNotification(NotificationType type, String title, String message, String sentBy) {
+        notifications.add(0, new NotificationRecord(type, title, message, sentBy));
     }
 
     public String getPaymentStatusLabel() {
@@ -97,6 +107,27 @@ public class TenantAccount {
         private final String label;
 
         PaymentStatus(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    public enum NotificationType {
+        PAYMENT_REMINDER("Payment reminder"),
+        MAINTENANCE_NOTICE("Maintenance notice"),
+        GENERAL_UPDATE("General update");
+
+        private final String label;
+
+        NotificationType(String label) {
             this.label = label;
         }
 
@@ -177,6 +208,44 @@ public class TenantAccount {
 
         public String getUpdatedBy() {
             return updatedBy;
+        }
+
+        public String getFormattedTimestamp() {
+            return timestamp.format(DISPLAY_FORMATTER);
+        }
+    }
+
+    public static final class NotificationRecord {
+        private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+
+        private final LocalDateTime timestamp;
+        private final NotificationType type;
+        private final String title;
+        private final String message;
+        private final String sentBy;
+
+        public NotificationRecord(NotificationType type, String title, String message, String sentBy) {
+            this.timestamp = LocalDateTime.now();
+            this.type = type;
+            this.title = title;
+            this.message = message;
+            this.sentBy = sentBy;
+        }
+
+        public NotificationType getType() {
+            return type;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getSentBy() {
+            return sentBy;
         }
 
         public String getFormattedTimestamp() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import staysync.core.TenantAccount.NotificationType;
 import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
 
@@ -154,6 +155,30 @@ public class StaySyncService {
         }
 
         tenants.remove(storedTenant);
+        return null;
+    }
+
+    public synchronized String sendNotificationToTenant(
+            TenantAccount tenant,
+            NotificationType type,
+            String title,
+            String message) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+        if (type == null) {
+            return "Choose a notification type.";
+        }
+        if (isBlank(title) || isBlank(message)) {
+            return "Enter both a notification title and message.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        storedTenant.addNotification(type, title.trim(), message.trim(), "Landlord");
         return null;
     }
 

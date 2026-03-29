@@ -24,6 +24,8 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
@@ -32,6 +34,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -45,12 +48,16 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
+import javafx.geometry.Side;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import staysync.core.StaySyncService;
 import staysync.core.StaySyncService.DashboardSnapshot;
 import staysync.core.TenantAccount;
+import staysync.core.TenantAccount.NotificationRecord;
+import staysync.core.TenantAccount.NotificationType;
 import staysync.core.TenantAccount.PaymentRecord;
 import staysync.core.TenantAccount.PaymentStatus;
 
@@ -86,6 +93,7 @@ public class StaySyncApp extends Application {
     private TenantSection tenantSection = TenantSection.OVERVIEW;
     private String tenantMessage = "";
     private boolean tenantMessageSuccess;
+    private ContextMenu tenantNotificationMenu;
 
     private LandlordSection landlordSection = LandlordSection.OVERVIEW;
     private String landlordMessage = "";
@@ -93,6 +101,9 @@ public class StaySyncApp extends Application {
     private String landlordQuery = "";
     private PaymentStatus landlordFilter;
     private String landlordSelectedUsername;
+    private NotificationType landlordNotificationType = NotificationType.PAYMENT_REMINDER;
+    private String landlordNotificationTitle = "";
+    private String landlordNotificationMessageBody = "";
 
     private enum View {
         AUTH,
@@ -456,12 +467,18 @@ public class StaySyncApp extends Application {
 
         VBox header = new VBox(10);
         header.getStyleClass().addAll("surface-card", "content-header");
+        HBox titleRow = new HBox(12);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label(getTenantSectionTitle());
         title.getStyleClass().add("section-title");
+        Region titleSpacer = new Region();
+        HBox.setHgrow(titleSpacer, Priority.ALWAYS);
+        Button bellButton = createTenantNotificationBellButton();
         Label subtitle = new Label(getTenantSectionSubtitle());
         subtitle.getStyleClass().add("body-copy");
         subtitle.setWrapText(true);
-        header.getChildren().addAll(title, subtitle, createFeedbackLabel(tenantMessage, tenantMessageSuccess));
+        titleRow.getChildren().addAll(title, titleSpacer, bellButton);
+        header.getChildren().addAll(titleRow, subtitle, createFeedbackLabel(tenantMessage, tenantMessageSuccess));
 
         ScrollPane scrollPane = createPageScrollPane(createTenantPageBody());
 
@@ -909,9 +926,10 @@ public class StaySyncApp extends Application {
     }
 
     private Node createLandlordControlsRow() {
-        HBox row = new HBox(14, createLandlordSelectedCard(), createLandlordStatusControlCard());
+        VBox actionsColumn = new VBox(14, createLandlordStatusControlCard(), createLandlordNotificationCard());
+        HBox row = new HBox(14, createLandlordSelectedCard(), actionsColumn);
         HBox.setHgrow(row.getChildren().get(0), Priority.ALWAYS);
-        HBox.setHgrow(row.getChildren().get(1), Priority.ALWAYS);
+        HBox.setHgrow(actionsColumn, Priority.ALWAYS);
         return row;
     }
 
@@ -996,6 +1014,67 @@ public class StaySyncApp extends Application {
         return card;
     }
 
+    private Node createLandlordNotificationCard() {
+        VBox card = createPanelCard();
+        Label eyebrow = new Label("Notifications");
+        eyebrow.getStyleClass().add("eyebrow-copy");
+        Label title = new Label("Send tenant notice");
+        title.getStyleClass().add("card-title");
+
+        TenantAccount tenant = getSelectedTenant();
+
+        ComboBox<NotificationType> typeBox = new ComboBox<>(FXCollections.observableArrayList(NotificationType.values()));
+        typeBox.getStyleClass().add("ui-combo");
+        typeBox.setMaxWidth(Double.MAX_VALUE);
+        typeBox.setValue(landlordNotificationType);
+
+        TextField titleField = createTextField("Enter notice title");
+        titleField.setText(landlordNotificationTitle);
+
+        TextArea messageArea = createTextArea("Enter the message the tenant should see");
+        messageArea.setText(landlordNotificationMessageBody);
+
+        Button sendButton = createPrimaryButton("Send notification");
+        sendButton.setDisable(tenant == null);
+        sendButton.setMaxWidth(Double.MAX_VALUE);
+        sendButton.setOnAction(event -> {
+            landlordNotificationType = typeBox.getValue();
+            landlordNotificationTitle = titleField.getText();
+            landlordNotificationMessageBody = messageArea.getText();
+
+            String result = staySyncService.sendNotificationToTenant(
+                    tenant,
+                    landlordNotificationType,
+                    landlordNotificationTitle,
+                    landlordNotificationMessageBody);
+            if (result != null) {
+                showLandlordMessage(result, false);
+                renderCurrentView();
+                return;
+            }
+
+            landlordNotificationType = NotificationType.PAYMENT_REMINDER;
+            landlordNotificationTitle = "";
+            landlordNotificationMessageBody = "";
+            showLandlordMessage("Notification sent to " + tenant.getFullName() + ".", true);
+            renderCurrentView();
+        });
+
+        Label hint = createMutedCopy(tenant == null
+                ? "Select a tenant from Residents to send a payment reminder, maintenance notice, or general update."
+                : "Use this for payment reminders, maintenance announcements, or other important resident updates.");
+
+        card.getChildren().addAll(
+                eyebrow,
+                title,
+                createFieldGroup("NOTICE TYPE", typeBox),
+                createFieldGroup("TITLE", titleField),
+                createFieldGroup("MESSAGE", messageArea),
+                sendButton,
+                hint);
+        return card;
+    }
+
     private Node createLandlordResidentsInsightCard(List<TenantAccount> tenants) {
         VBox card = createPanelCard("hero-panel");
         Label eyebrow = new Label("Resident pulse");
@@ -1056,6 +1135,7 @@ public class StaySyncApp extends Application {
         tenantSection = TenantSection.OVERVIEW;
         tenantMessage = "Signed in successfully. Your dashboard is ready.";
         tenantMessageSuccess = true;
+        tenantNotificationMenu = null;
         authMessage = "";
         view = View.TENANT;
         renderCurrentView();
@@ -1124,10 +1204,17 @@ public class StaySyncApp extends Application {
         authTab = AuthTab.LOGIN;
         authMessage = "";
         tenantMessage = "";
+        if (tenantNotificationMenu != null) {
+            tenantNotificationMenu.hide();
+            tenantNotificationMenu = null;
+        }
         landlordMessage = "";
         landlordSelectedUsername = null;
         landlordQuery = "";
         landlordFilter = null;
+        landlordNotificationType = NotificationType.PAYMENT_REMINDER;
+        landlordNotificationTitle = "";
+        landlordNotificationMessageBody = "";
         renderCurrentView();
     }
 
@@ -1548,6 +1635,69 @@ public class StaySyncApp extends Application {
         return field;
     }
 
+    private TextArea createTextArea(String prompt) {
+        TextArea area = new TextArea();
+        area.setPromptText(prompt);
+        area.setWrapText(true);
+        area.setPrefRowCount(4);
+        area.getStyleClass().add("ui-text-area");
+        return area;
+    }
+
+    private Button createTenantNotificationBellButton() {
+        Button button = new Button();
+        button.getStyleClass().addAll("ui-button", "notification-bell-button");
+        button.setGraphic(createNotificationBellGraphic(currentTenant == null ? 0 : currentTenant.getNotifications().size()));
+        applyButtonHoverAnimation(button);
+        button.setOnAction(event -> {
+            if (tenantNotificationMenu != null && tenantNotificationMenu.isShowing()) {
+                tenantNotificationMenu.hide();
+                return;
+            }
+
+            tenantNotificationMenu = createTenantNotificationMenu();
+            tenantNotificationMenu.setOnHidden(hiddenEvent -> tenantNotificationMenu = null);
+            tenantNotificationMenu.show(button, Side.BOTTOM, -376, 10);
+        });
+        return button;
+    }
+
+    private ContextMenu createTenantNotificationMenu() {
+        ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("notification-menu");
+
+        Node panel = createTenantNotificationsPanel();
+        if (panel instanceof Region region) {
+            region.setPrefWidth(430);
+            region.setMinWidth(430);
+            region.setMaxWidth(430);
+        }
+
+        CustomMenuItem item = new CustomMenuItem(panel, false);
+        item.getStyleClass().add("notification-menu-item");
+        menu.getItems().add(item);
+        return menu;
+    }
+
+    private StackPane createNotificationBellGraphic(int notificationCount) {
+        StackPane graphic = new StackPane();
+        graphic.getStyleClass().add("notification-bell-graphic");
+
+        SVGPath bell = new SVGPath();
+        bell.setContent("M12 3C8.7 3 6 5.7 6 9v3.4c0 .8-.3 1.6-.8 2.2L4 16h16l-1.2-1.4c-.5-.6-.8-1.4-.8-2.2V9c0-3.3-2.7-6-6-6zm0 18c1.5 0 2.7-1 3-2H9c.3 1 1.5 2 3 2z");
+        bell.getStyleClass().add("notification-bell-icon");
+        graphic.getChildren().add(bell);
+
+        if (notificationCount > 0) {
+            Label badge = new Label(String.valueOf(notificationCount));
+            badge.getStyleClass().add("notification-badge");
+            StackPane.setAlignment(badge, Pos.TOP_RIGHT);
+            graphic.getChildren().add(badge);
+        }
+
+        return graphic;
+    }
+
     private Button createAuthThemeButton() {
         Button button = new Button(darkMode ? "Light mode" : "Dark mode");
         button.getStyleClass().addAll("ui-button", "theme-button", "auth-theme-button");
@@ -1623,6 +1773,56 @@ public class StaySyncApp extends Application {
         return box;
     }
 
+    private VBox createNotificationItem(NotificationRecord notification) {
+        VBox item = createPanelCard("mini-panel");
+        item.getStyleClass().add("notification-item");
+        Label type = new Label(notification.getType().getLabel());
+        type.getStyleClass().add("eyebrow-copy");
+
+        Label title = new Label(notification.getTitle());
+        title.getStyleClass().addAll("card-title", "compact-card-title");
+        title.setWrapText(true);
+
+        Label message = new Label(notification.getMessage());
+        message.getStyleClass().add("body-copy");
+        message.setWrapText(true);
+
+        Label meta = new Label(notification.getFormattedTimestamp() + " • " + notification.getSentBy());
+        meta.getStyleClass().add("meta-copy");
+        meta.setWrapText(true);
+        meta.setText(notification.getFormattedTimestamp() + " | " + notification.getSentBy());
+
+        item.getChildren().addAll(type, title, message, meta);
+        return item;
+    }
+
+    private Node createTenantNotificationsPanel() {
+        VBox panel = createPanelCard("notification-panel");
+        Label eyebrow = new Label("ADMIN NOTIFICATIONS");
+        eyebrow.getStyleClass().add("eyebrow-copy");
+        Label title = new Label("Latest notices");
+        title.getStyleClass().add("card-title");
+
+        List<NotificationRecord> notifications = currentTenant.getNotifications();
+        if (notifications.isEmpty()) {
+            panel.getChildren().addAll(
+                    eyebrow,
+                    title,
+                    createMutedCopy("No landlord notifications yet. Payment reminders and maintenance updates will appear here."));
+            return panel;
+        }
+
+        VBox list = new VBox(10);
+        list.getStyleClass().add("notification-list");
+        int visibleCount = Math.min(4, notifications.size());
+        for (int i = 0; i < visibleCount; i++) {
+            list.getChildren().add(createNotificationItem(notifications.get(i)));
+        }
+
+        panel.getChildren().addAll(eyebrow, title, list);
+        return panel;
+    }
+
     private TableColumn<PaymentRecord, String> createRecordColumn(String title, String propertyName, double width) {
         TableColumn<PaymentRecord, String> column = new TableColumn<>(title);
         column.setCellValueFactory(new PropertyValueFactory<>(propertyName));
@@ -1649,7 +1849,7 @@ public class StaySyncApp extends Application {
         return switch (tenantSection) {
             case PAYMENTS -> "Review payment history, due reminders, and the latest status updates.";
             case ACCOUNT -> "Manage identity details, room assignment, and access settings.";
-            default -> "See your room, billing health, and profile details in one place.";
+            default -> "See your room, billing health, profile details, and landlord notifications in one place.";
         };
     }
 
@@ -1664,7 +1864,7 @@ public class StaySyncApp extends Application {
     private String getLandlordSectionSubtitle() {
         return switch (landlordSection) {
             case RESIDENTS -> "Search, filter, and review tenant records without losing payment context.";
-            case CONTROLS -> "Apply payment-status changes with clear selection feedback.";
+            case CONTROLS -> "Apply payment-status changes and send tenant notices from one place.";
             default -> "Track resident counts, search results, and payment health from one workspace.";
         };
     }

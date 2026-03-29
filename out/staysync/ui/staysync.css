@@ -343,6 +343,26 @@
     -fx-padding: 14px 18px;
 }
 
+.ui-text-area {
+    -fx-background-color: -color-input;
+    -fx-background-insets: 0;
+    -fx-background-radius: 18px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 18px;
+    -fx-font-family: "Segoe UI";
+    -fx-font-weight: 400;
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-soft;
+    -fx-font-size: 15px;
+}
+
+.ui-text-area .content {
+    -fx-background-color: transparent;
+    -fx-background-radius: 18px;
+    -fx-padding: 12px 14px;
+}
+
 .auth-panel .ui-input,
 .auth-panel .ui-combo {
     -fx-font-family: "Segoe UI";
@@ -375,6 +395,12 @@
 .combo-box-popup .list-cell:filled:selected {
     -fx-background-color: -color-accent-soft;
     -fx-text-fill: -color-text;
+}
+
+.ui-text-area:focused,
+.ui-input:focused,
+.ui-combo:focused {
+    -fx-border-color: rgba(38, 79, 60, 0.34);
 }
 
 .ui-button,
@@ -462,6 +488,47 @@
     -fx-text-fill: -color-text;
 }
 
+.notification-bell-button {
+    -fx-min-width: 54px;
+    -fx-min-height: 54px;
+    -fx-max-width: 54px;
+    -fx-max-height: 54px;
+    -fx-padding: 0;
+    -fx-background-color: -color-panel-muted;
+    -fx-border-color: -color-border;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+}
+
+.notification-bell-open {
+    -fx-background-color: -color-accent-soft;
+    -fx-border-color: rgba(38, 79, 60, 0.28);
+}
+
+.notification-bell-graphic {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-max-width: 28px;
+    -fx-max-height: 28px;
+}
+
+.notification-bell-icon {
+    -fx-fill: -color-text;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.notification-badge {
+    -fx-background-color: #8d473f;
+    -fx-background-radius: 999px;
+    -fx-text-fill: #fff6f4;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 2px 6px;
+    -fx-translate-x: 9px;
+    -fx-translate-y: -8px;
+}
+
 .auth-theme-button {
     -fx-padding: 14px 28px;
     -fx-font-size: 17px;
@@ -469,6 +536,10 @@
 
 .app-root.dark-mode .theme-button {
     -fx-background-color: rgba(56, 58, 48, 0.52);
+}
+
+.app-root.dark-mode .notification-bell-button {
+    -fx-background-color: rgba(56, 58, 48, 0.7);
 }
 
 .app-root.dark-mode .danger-button {
@@ -742,6 +813,37 @@
     -fx-font-size: 14px;
     -fx-font-weight: 500;
     -fx-text-fill: -color-text-muted;
+}
+
+.notification-panel {
+    -fx-spacing: 14px;
+    -fx-padding: 18px;
+    -fx-background-radius: 22px;
+    -fx-border-radius: 22px;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 22, 0.18, 0, 10);
+}
+
+.notification-list {
+    -fx-spacing: 10px;
+}
+
+.notification-item {
+    -fx-spacing: 8px;
+}
+
+.notification-menu {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.notification-menu .menu-item,
+.notification-menu .menu-item:focused {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.notification-menu-item {
+    -fx-padding: 0;
 }
 
 .auth-panel .inline-link {
