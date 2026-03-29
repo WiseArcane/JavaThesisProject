@@ -22,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -87,6 +88,8 @@ public class StaySyncApp extends Application {
     private boolean tenantMessageSuccess;
 
     private LandlordSection landlordSection = LandlordSection.OVERVIEW;
+    private String landlordMessage = "";
+    private boolean landlordMessageSuccess;
     private String landlordQuery = "";
     private PaymentStatus landlordFilter;
     private String landlordSelectedUsername;
@@ -129,11 +132,11 @@ public class StaySyncApp extends Application {
             applyThemeMode();
         });
 
-        contentHost.setMaxWidth(1280);
+        contentHost.setMaxWidth(1560);
         StackPane.setAlignment(contentHost, Pos.TOP_CENTER);
         updateContentHostMargin();
         StackPane.setAlignment(themeButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(themeButton, new Insets(18, 28, 0, 0));
+        StackPane.setMargin(themeButton, new Insets(26, 34, 0, 0));
 
         root.getChildren().addAll(backgroundLayer, contentHost, themeButton);
 
@@ -155,11 +158,15 @@ public class StaySyncApp extends Application {
         if (darkMode) {
             root.getStyleClass().add("dark-mode");
         }
-        themeButton.setText(darkMode ? "LIGHT MODE" : "DARK MODE");
+        themeButton.setText(darkMode ? "Light mode" : "Dark mode");
     }
 
     private void renderCurrentView() {
         updateContentHostMargin();
+        boolean showFloatingThemeButton = view != View.AUTH;
+        themeButton.setVisible(showFloatingThemeButton);
+        themeButton.setManaged(showFloatingThemeButton);
+        contentHost.setMaxWidth(view == View.AUTH ? 1860 : 1560);
         Node content;
         if (view == View.TENANT && currentTenant != null) {
             content = createTenantShell();
@@ -173,112 +180,130 @@ public class StaySyncApp extends Application {
 
     private void updateContentHostMargin() {
         Insets margin = view == View.AUTH
-                ? new Insets(118, 20, 24, 20)
-                : new Insets(84, 20, 20, 20);
+                ? new Insets(16, 16, 16, 16)
+                : new Insets(24, 16, 16, 16);
         StackPane.setMargin(contentHost, margin);
     }
 
     private Node createAuthShell() {
-        HBox shell = new HBox(18);
-        shell.getStyleClass().add("auth-shell");
-        shell.setFillHeight(false);
+        DashboardSnapshot snapshot = staySyncService.getLandlordDashboardData("");
 
-        VBox heroPanel = new VBox(18);
-        heroPanel.getStyleClass().addAll("retro-panel", "hero-panel");
-        heroPanel.setPrefWidth(600);
-        heroPanel.setMinHeight(660);
+        VBox shell = new VBox(58);
+        shell.getStyleClass().addAll("screen-shell", "auth-shell");
+        shell.setPadding(new Insets(24, 142, 28, 142));
+        shell.setAlignment(Pos.TOP_LEFT);
+
+        HBox topBar = new HBox();
+        topBar.getStyleClass().add("auth-topbar");
+        topBar.setAlignment(Pos.CENTER_LEFT);
+
+        VBox heroPanel = new VBox(24);
+        heroPanel.getStyleClass().add("auth-hero-panel");
+        heroPanel.setPrefWidth(840);
+        heroPanel.setAlignment(Pos.TOP_LEFT);
         HBox.setHgrow(heroPanel, Priority.ALWAYS);
 
-        HBox brandRow = new HBox(12);
+        HBox brandRow = new HBox(14);
         brandRow.setAlignment(Pos.CENTER_LEFT);
 
         StackPane logoBox = new StackPane();
         logoBox.getStyleClass().add("logo-box");
-        Label logoGlyph = new Label("\u2302");
-        logoGlyph.getStyleClass().add("logo-glyph");
-        logoBox.getChildren().add(logoGlyph);
 
         VBox brandCopy = new VBox(3);
-        Label brandName = new Label("STAYSYNC");
+        Label brandName = new Label("StaySync");
         brandName.getStyleClass().add("brand-title");
-        Label brandTagline = new Label("DORM AND APARTMENT OS");
+        Label brandTagline = new Label("Dorm and apartment management");
         brandTagline.getStyleClass().add("eyebrow-copy");
         brandCopy.getChildren().addAll(brandName, brandTagline);
 
+        Region topBarSpacer = new Region();
+        HBox.setHgrow(topBarSpacer, Priority.ALWAYS);
+        Button authThemeButton = createAuthThemeButton();
         brandRow.getChildren().addAll(logoBox, brandCopy);
+        topBar.getChildren().addAll(brandRow, topBarSpacer, authThemeButton);
 
-        Label commandChip = new Label("8-BIT OPERATIONS CONSOLE");
-        commandChip.getStyleClass().addAll("chip-label", "accent-chip");
+        Label commandChip = new Label("PROPERTY OPERATIONS PLATFORM");
+        commandChip.getStyleClass().add("hero-kicker");
 
-        Label headline = new Label("MANAGE ROOMS, RENT, AND REQUESTS FROM ONE PIXEL-PERFECT COMMAND DECK.");
+        Label headline = new Label("Minimal\nhousing\nmanagement\nwith a\npremium feel.");
         headline.getStyleClass().add("hero-headline");
         headline.setWrapText(true);
-        headline.setMaxWidth(Double.MAX_VALUE);
+        headline.setMaxWidth(560);
 
         Label intro = new Label(
-                "StaySync now feels like a retro management sim without losing real workflow clarity. "
-                        + "Sign in to track rooms, residents, billing, maintenance requests, and announcements from one command deck.");
+                "Manage residents, rooms, billing, and maintenance from a calm, focused workspace designed for daily operations.");
         intro.setWrapText(true);
         intro.getStyleClass().add("body-copy");
+        intro.setMaxWidth(580);
 
-        HBox rail = new HBox(10,
-                createMiniCard("Player portal",
-                        "Create an account, view assigned rooms, track billing, submit maintenance requests, and message management."),
-                createMiniCard("Admin HUD",
-                        "Control occupancy, tenant assignments, announcements, billing updates, and service queues from one dashboard."),
-                createDemoCard());
+        HBox rail = new HBox(14,
+                createAuthStatCard(String.valueOf(snapshot.getTotalTenantCount()), "Resident accounts"),
+                createAuthStatCard(formatPercentage(snapshot.getPaidCount(), snapshot.getTotalTenantCount()), "Paid this cycle"),
+                createAuthStatCard(String.format("%02d", snapshot.getPendingCount() + snapshot.getLateCount()), "Needs follow-up"));
+        rail.getStyleClass().add("auth-stats-row");
         rail.setAlignment(Pos.TOP_LEFT);
+        heroPanel.getChildren().addAll(commandChip, headline, intro, rail);
 
-        Region heroSpacer = new Region();
-        VBox.setVgrow(heroSpacer, Priority.ALWAYS);
+        HBox mainRow = new HBox(74);
+        mainRow.getStyleClass().add("auth-main-row");
+        mainRow.setAlignment(Pos.TOP_LEFT);
 
-        heroPanel.getChildren().addAll(brandRow, commandChip, headline, intro, rail, heroSpacer, createHeroConsoleCard());
-
-        VBox authPanel = new VBox(16);
-        authPanel.getStyleClass().addAll("retro-panel", "auth-panel");
-        authPanel.setPrefWidth(560);
-        authPanel.setMinWidth(470);
-        authPanel.setMinHeight(660);
-        authPanel.setPadding(new Insets(36, 16, 16, 16));
+        VBox authPanel = new VBox(22);
+        authPanel.getStyleClass().addAll("surface-card", "auth-panel");
+        authPanel.setPrefWidth(510);
+        authPanel.setMinWidth(490);
+        authPanel.setPadding(new Insets(24));
+        HBox.setMargin(authPanel, new Insets(14, 0, 0, 0));
 
         HBox tabs = new HBox(10);
         tabs.getStyleClass().add("tab-strip");
         ToggleGroup authTabGroup = new ToggleGroup();
-        ToggleButton loginTabButton = createTabButton("LOGIN", authTabGroup, authTab == AuthTab.LOGIN);
-        ToggleButton registerTabButton = createTabButton("CREATE ACCOUNT", authTabGroup, authTab == AuthTab.REGISTER);
+        ToggleButton loginTabButton = createTabButton("Sign in", authTabGroup, authTab == AuthTab.LOGIN);
+        ToggleButton registerTabButton = createTabButton("Create account", authTabGroup, authTab == AuthTab.REGISTER);
         loginTabButton.setOnAction(event -> switchAuthTab(AuthTab.LOGIN));
         registerTabButton.setOnAction(event -> switchAuthTab(AuthTab.REGISTER));
         tabs.getChildren().addAll(loginTabButton, registerTabButton);
 
         VBox formArea = authTab == AuthTab.LOGIN ? createLoginForm() : createRegistrationForm();
-        VBox protocolCard = createAuthProtocolCard();
-        VBox.setMargin(protocolCard, new Insets(14, 0, 0, 0));
-        Region authSpacer = new Region();
-        VBox.setVgrow(authSpacer, Priority.ALWAYS);
-        authPanel.getChildren().addAll(tabs, formArea, authSpacer, protocolCard);
+        authPanel.getChildren().addAll(tabs, formArea, createAuthDemoAccessSection());
 
-        shell.getChildren().setAll(heroPanel, authPanel);
+        mainRow.getChildren().addAll(heroPanel, authPanel);
+        shell.getChildren().setAll(topBar, mainRow);
         return shell;
     }
 
     private VBox createLoginForm() {
-        VBox form = new VBox(12);
+        VBox form = new VBox(14);
 
-        Label heading = new Label("SIGN IN");
+        Label eyebrow = new Label("WELCOME BACK");
+        eyebrow.getStyleClass().add("eyebrow-copy");
+
+        Label heading = new Label("Sign in");
         heading.getStyleClass().addAll("section-title", "auth-heading");
         heading.setWrapText(true);
-        Label intro = new Label("Use your username and password to access your dashboard.");
+        Label intro = new Label("Access your dashboard, track resident activity, and manage billing and maintenance in one place.");
         intro.setWrapText(true);
         intro.getStyleClass().add("body-copy");
 
         Label feedback = createFeedbackLabel(authMessage, authMessageSuccess);
 
-        TextField usernameField = createTextField("wise");
+        TextField usernameField = createTextField("Enter username or email");
         usernameField.setText(loginUsername);
-        PasswordField passwordField = createPasswordField("1234");
+        PasswordField passwordField = createPasswordField("Enter password");
         passwordField.setText(loginPassword);
 
-        Button loginButton = createPrimaryButton("LOGIN");
+        CheckBox rememberMeBox = new CheckBox("Remember me");
+        rememberMeBox.getStyleClass().add("remember-check");
+
+        Label forgotPasswordLabel = new Label("Forgot password?");
+        forgotPasswordLabel.getStyleClass().add("inline-link");
+
+        Region utilitySpacer = new Region();
+        HBox.setHgrow(utilitySpacer, Priority.ALWAYS);
+        HBox utilityRow = new HBox(10, rememberMeBox, utilitySpacer, forgotPasswordLabel);
+        utilityRow.setAlignment(Pos.CENTER_LEFT);
+
+        Button loginButton = createPrimaryButton("Sign in");
         loginButton.setMaxWidth(Double.MAX_VALUE);
         loginButton.setOnAction(event -> {
             loginUsername = usernameField.getText();
@@ -286,61 +311,44 @@ public class StaySyncApp extends Application {
             handleLogin();
         });
 
-        HBox credentialRow = new HBox(8);
-        credentialRow.setAlignment(Pos.CENTER_LEFT);
-        Label adminLabel = new Label("Admin account test:");
-        adminLabel.getStyleClass().add("meta-copy");
-        credentialRow.getChildren().addAll(
-                adminLabel,
-                createInlineCode(StaySyncService.getLandlordUsername()),
-                new Label("/"),
-                createInlineCode(StaySyncService.getLandlordPassword()));
-
-        HBox tenantRow = new HBox(8);
-        tenantRow.setAlignment(Pos.CENTER_LEFT);
-        Label tenantLabel = new Label("Tenant demo:");
-        tenantLabel.getStyleClass().add("meta-copy");
-        tenantRow.getChildren().addAll(
-                tenantLabel,
-                createInlineCode(TENANT_DEMO_USERNAME),
-                new Label("/"),
-                createInlineCode(TENANT_DEMO_PASSWORD));
-
         form.getChildren().addAll(
+                eyebrow,
                 heading,
                 intro,
                 feedback,
-                createFieldGroup("Username", usernameField),
+                createFieldGroup("Username or email", usernameField),
                 createFieldGroup("Password", passwordField),
-                loginButton,
-                credentialRow,
-                tenantRow);
+                utilityRow,
+                loginButton);
         return form;
     }
 
     private VBox createRegistrationForm() {
-        VBox form = new VBox(12);
+        VBox form = new VBox(14);
 
-        Label heading = new Label("CREATE TENANT ACCOUNT");
+        Label eyebrow = new Label("CREATE ACCOUNT");
+        eyebrow.getStyleClass().add("eyebrow-copy");
+
+        Label heading = new Label("Create account");
         heading.getStyleClass().addAll("section-title", "auth-heading");
         heading.setWrapText(true);
-        Label intro = new Label("Register a resident profile and immediately reuse it in the tenant dashboard.");
+        Label intro = new Label("Create a resident profile, assign a room, and use the account immediately in the tenant workspace.");
         intro.setWrapText(true);
         intro.getStyleClass().add("body-copy");
 
         Label feedback = createFeedbackLabel(authMessage, authMessageSuccess);
 
-        TextField fullNameField = createTextField("Juan Dela Cruz");
+        TextField fullNameField = createTextField("Enter full name");
         fullNameField.setText(registerFullName);
-        TextField usernameField = createTextField("resident.username");
+        TextField usernameField = createTextField("Choose a username");
         usernameField.setText(registerUsername);
-        PasswordField passwordField = createPasswordField("Password");
+        PasswordField passwordField = createPasswordField("Create password");
         passwordField.setText(registerPassword);
-        PasswordField confirmPasswordField = createPasswordField("Confirm Password");
+        PasswordField confirmPasswordField = createPasswordField("Confirm password");
         confirmPasswordField.setText(registerConfirmPassword);
-        TextField contactField = createTextField("09171234567");
+        TextField contactField = createTextField("Enter contact number");
         contactField.setText(registerContactNumber);
-        TextField roomField = createTextField("A-101");
+        TextField roomField = createTextField("Enter room number");
         roomField.setText(registerRoomNumber);
         ComboBox<String> roomTypeBox = new ComboBox<>(FXCollections.observableArrayList(StaySyncService.getRoomTypes()));
         roomTypeBox.getStyleClass().add("ui-combo");
@@ -362,7 +370,7 @@ public class StaySyncApp extends Application {
         grid.add(createFieldGroup("Room Number", roomField), 1, 2);
         grid.add(createFieldGroup("Room Type", roomTypeBox), 0, 3);
 
-        Button createButton = createPrimaryButton("CREATE ACCOUNT");
+        Button createButton = createPrimaryButton("Create account");
         createButton.setMaxWidth(Double.MAX_VALUE);
         createButton.setOnAction(event -> {
             registerFullName = fullNameField.getText();
@@ -375,16 +383,18 @@ public class StaySyncApp extends Application {
             handleRegistration();
         });
 
-        Label tip = new Label("Use a unique room number and a valid contact number so the landlord board stays clean.");
+        Label tip = new Label("Use a unique room number and an active contact number so the resident record is ready for daily operations.");
         tip.setWrapText(true);
         tip.getStyleClass().add("meta-copy");
 
-        form.getChildren().addAll(heading, intro, feedback, grid, createButton, tip);
+        form.getChildren().addAll(eyebrow, heading, intro, feedback, grid, createButton, tip);
         return form;
     }
 
     private Node createTenantShell() {
         BorderPane shell = new BorderPane();
+        shell.getStyleClass().add("workspace-shell");
+        shell.setPadding(new Insets(24));
         shell.setPrefSize(1140, 760);
         shell.setLeft(createTenantSidebar());
         shell.setCenter(createTenantContent());
@@ -393,7 +403,7 @@ public class StaySyncApp extends Application {
 
     private Node createTenantSidebar() {
         VBox sidebar = new VBox(16);
-        sidebar.getStyleClass().addAll("retro-panel", "sidebar-panel");
+        sidebar.getStyleClass().addAll("surface-card", "sidebar-panel");
         sidebar.setPrefWidth(272);
 
         Label eyebrow = new Label("STAYSYNC");
@@ -430,7 +440,7 @@ public class StaySyncApp extends Application {
         signOutButton.setMaxWidth(Double.MAX_VALUE);
         signOutButton.setOnAction(event -> signOut());
 
-        Label note = new Label("Use Account for profile edits and password changes without leaving the retro shell.");
+        Label note = new Label("Use Account for profile updates and password changes without leaving the workspace.");
         note.getStyleClass().add("meta-copy");
         note.setWrapText(true);
 
@@ -445,7 +455,7 @@ public class StaySyncApp extends Application {
         panel.setPadding(new Insets(0, 0, 0, 14));
 
         VBox header = new VBox(10);
-        header.getStyleClass().addAll("retro-panel", "content-header");
+        header.getStyleClass().addAll("surface-card", "content-header");
         Label title = new Label(getTenantSectionTitle());
         title.getStyleClass().add("section-title");
         Label subtitle = new Label(getTenantSectionSubtitle());
@@ -585,7 +595,7 @@ public class StaySyncApp extends Application {
         title.getStyleClass().add("card-title");
 
         TableView<PaymentRecord> historyTable = new TableView<>();
-        historyTable.getStyleClass().add("retro-table");
+        historyTable.getStyleClass().add("data-table");
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         historyTable.setPlaceholder(new Label("No payment activity yet."));
         historyTable.getColumns().add(createRecordColumn("Updated On", "formattedTimestamp", 150));
@@ -645,12 +655,14 @@ public class StaySyncApp extends Application {
                 createStatusPill(currentTenant.getPaymentStatusLabel(), currentTenant.getPaymentStatus()),
                 editButton,
                 passwordButton,
-                createMutedCopy("Use this page for profile maintenance and password changes without leaving the tenant deck."));
+                createMutedCopy("Use this page for profile maintenance and password changes in one place."));
         return card;
     }
 
     private Node createLandlordShell() {
         BorderPane shell = new BorderPane();
+        shell.getStyleClass().add("workspace-shell");
+        shell.setPadding(new Insets(24));
         shell.setPrefSize(1100, 640);
         shell.setLeft(createLandlordSidebar());
         shell.setCenter(createLandlordContent());
@@ -659,7 +671,7 @@ public class StaySyncApp extends Application {
 
     private Node createLandlordSidebar() {
         VBox sidebar = new VBox(16);
-        sidebar.getStyleClass().addAll("retro-panel", "sidebar-panel");
+        sidebar.getStyleClass().addAll("surface-card", "sidebar-panel");
         sidebar.setPrefWidth(272);
 
         Label eyebrow = new Label("STAYSYNC");
@@ -707,13 +719,13 @@ public class StaySyncApp extends Application {
         panel.setPadding(new Insets(0, 0, 0, 14));
 
         VBox header = new VBox(10);
-        header.getStyleClass().addAll("retro-panel", "content-header");
+        header.getStyleClass().addAll("surface-card", "content-header");
         Label title = new Label(getLandlordSectionTitle());
         title.getStyleClass().add("section-title");
         Label subtitle = new Label(getLandlordSectionSubtitle());
         subtitle.getStyleClass().add("body-copy");
         subtitle.setWrapText(true);
-        header.getChildren().addAll(title, subtitle);
+        header.getChildren().addAll(title, subtitle, createFeedbackLabel(landlordMessage, landlordMessageSuccess));
 
         ScrollPane scrollPane = createPageScrollPane(createLandlordPageBody());
 
@@ -844,7 +856,7 @@ public class StaySyncApp extends Application {
 
         List<TenantAccount> tenants = getVisibleLandlordTenants();
         TableView<TenantAccount> table = new TableView<>();
-        table.getStyleClass().add("retro-table");
+        table.getStyleClass().add("data-table");
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPlaceholder(new Label("No matching tenants found."));
         table.getColumns().add(createTenantColumn("Tenant Name", tenant -> tenant.getFullName(), 180));
@@ -947,9 +959,15 @@ public class StaySyncApp extends Application {
         applyButton.setOnAction(event -> {
             if (tenant != null && statusBox.getValue() != null) {
                 staySyncService.updateTenantStatusFromLandlord(tenant, statusBox.getValue());
+                showLandlordMessage("Payment status updated for " + tenant.getFullName() + ".", true);
                 renderCurrentView();
             }
         });
+
+        Button deleteButton = createDangerButton("Delete tenant");
+        deleteButton.setDisable(tenant == null);
+        deleteButton.setMaxWidth(Double.MAX_VALUE);
+        deleteButton.setOnAction(event -> handleTenantDeletion(tenant));
 
         Button residentsButton = createSecondaryButton("Back to residents");
         residentsButton.setMaxWidth(Double.MAX_VALUE);
@@ -962,7 +980,19 @@ public class StaySyncApp extends Application {
                 ? "Select a tenant from the residents table to enable payment-status controls."
                 : "Selected tenant is ready for a status update. Choose a new value and apply it from this page.");
 
-        card.getChildren().addAll(eyebrow, title, createFieldGroup("NEW STATUS", statusBox), applyButton, residentsButton, hint);
+        Label deleteHint = createMutedCopy(tenant == null
+                ? "Delete stays disabled until a tenant is selected."
+                : "Deleting a tenant permanently removes the resident account and cannot be undone.");
+
+        card.getChildren().addAll(
+                eyebrow,
+                title,
+                createFieldGroup("NEW STATUS", statusBox),
+                applyButton,
+                deleteButton,
+                residentsButton,
+                hint,
+                deleteHint);
         return card;
     }
 
@@ -1094,10 +1124,74 @@ public class StaySyncApp extends Application {
         authTab = AuthTab.LOGIN;
         authMessage = "";
         tenantMessage = "";
+        landlordMessage = "";
         landlordSelectedUsername = null;
         landlordQuery = "";
         landlordFilter = null;
         renderCurrentView();
+    }
+
+    private void showLandlordMessage(String message, boolean success) {
+        landlordMessage = message == null ? "" : message;
+        landlordMessageSuccess = success;
+    }
+
+    private void clearLandlordMessage() {
+        landlordMessage = "";
+        landlordMessageSuccess = false;
+    }
+
+    private void handleTenantDeletion(TenantAccount tenant) {
+        if (tenant == null) {
+            showLandlordMessage("Select a tenant first.", false);
+            renderCurrentView();
+            return;
+        }
+
+        if (!showDeleteTenantConfirmation(tenant)) {
+            return;
+        }
+
+        String result = staySyncService.deleteTenant(tenant);
+        if (result != null) {
+            showLandlordMessage(result, false);
+            renderCurrentView();
+            return;
+        }
+
+        landlordSelectedUsername = null;
+        landlordSection = LandlordSection.RESIDENTS;
+        showLandlordMessage("Deleted tenant " + tenant.getFullName() + ". This action cannot be undone.", true);
+        renderCurrentView();
+    }
+
+    private boolean showDeleteTenantConfirmation(TenantAccount tenant) {
+        Dialog<ButtonType> dialog = createDialog("Delete Tenant");
+        ButtonType deleteType = new ButtonType("Delete permanently", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(deleteType, ButtonType.CANCEL);
+
+        Label title = new Label("Delete " + tenant.getFullName() + "?");
+        title.getStyleClass().add("card-title");
+
+        Label warning = new Label(
+                "This will permanently remove the tenant account, room assignment details, and payment history. This action is irreversible.");
+        warning.setWrapText(true);
+        warning.getStyleClass().add("body-copy");
+
+        VBox details = new VBox(12,
+                title,
+                warning,
+                createDetailRow("USERNAME", tenant.getUsername()),
+                createDetailRow("ROOM", tenant.getRoomInfo().getRoomNumber() + " / " + tenant.getRoomInfo().getRoomType()));
+        dialog.getDialogPane().setContent(details);
+
+        Node deleteButton = dialog.getDialogPane().lookupButton(deleteType);
+        if (deleteButton != null) {
+            deleteButton.getStyleClass().addAll("ui-button", "danger-button");
+            applyButtonHoverAnimation((ButtonBase) deleteButton);
+        }
+
+        return dialog.showAndWait().filter(deleteType::equals).isPresent();
     }
 
     private List<TenantAccount> getVisibleLandlordTenants() {
@@ -1235,6 +1329,9 @@ public class StaySyncApp extends Application {
         dialog.setTitle(title);
         dialog.getDialogPane().getStylesheets().addAll(scene.getStylesheets());
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
+        if (darkMode) {
+            dialog.getDialogPane().getStyleClass().add("dark-dialog");
+        }
         return dialog;
     }
 
@@ -1248,73 +1345,18 @@ public class StaySyncApp extends Application {
         return label;
     }
 
-    private VBox createMiniCard(String title, String copy) {
-        VBox card = createPanelCard("mini-panel");
-        HBox.setHgrow(card, Priority.ALWAYS);
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("mini-title");
-        Label copyLabel = createMutedCopy(copy);
-        copyLabel.setWrapText(true);
-        card.getChildren().addAll(titleLabel, copyLabel);
-        return card;
-    }
+    private VBox createAuthDemoAccessSection() {
+        VBox section = new VBox(12);
+        section.getStyleClass().add("demo-access");
 
-    private VBox createDemoCard() {
-        VBox card = createPanelCard("mini-panel");
-        HBox.setHgrow(card, Priority.ALWAYS);
-        Label title = new Label("Demo login");
-        title.getStyleClass().add("mini-title");
-        HBox userRow = new HBox(8, new Label("Username:"), createInlineCode(TENANT_DEMO_USERNAME));
-        HBox passwordRow = new HBox(8, new Label("Password:"), createInlineCode(TENANT_DEMO_PASSWORD));
-        userRow.getStyleClass().add("mini-copy-row");
-        passwordRow.getStyleClass().add("mini-copy-row");
-        card.getChildren().addAll(title, userRow, passwordRow);
-        return card;
-    }
-
-    private VBox createHeroConsoleCard() {
-        DashboardSnapshot snapshot = staySyncService.getLandlordDashboardData("");
-
-        VBox card = createPanelCard("console-panel");
-        Label eyebrow = new Label("LIVE SYSTEM FEED");
+        Label eyebrow = new Label("DEMO ACCESS");
         eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("COMMAND DECK STATUS");
-        title.getStyleClass().add("card-title");
-        Label copy = createMutedCopy(
-                "Portfolio sync is online with "
-                        + snapshot.getTotalTenantCount()
-                        + " resident profiles, "
-                        + snapshot.getPendingCount()
-                        + " pending payment checks, and "
-                        + snapshot.getLateCount()
-                        + " late alerts on the board.");
 
-        HBox statRow = new HBox(10,
-                createConsoleStat("RESIDENTS", String.valueOf(snapshot.getTotalTenantCount())),
-                createConsoleStat("PAID", String.valueOf(snapshot.getPaidCount())),
-                createConsoleStat("ALERTS", String.valueOf(snapshot.getPendingCount() + snapshot.getLateCount())));
-        statRow.getStyleClass().add("console-stat-row");
-
-        card.getChildren().addAll(eyebrow, title, copy, statRow);
-        return card;
-    }
-
-    private VBox createAuthProtocolCard() {
-        VBox card = createPanelCard("protocol-panel");
-        Label eyebrow = new Label("ONBOARDING PROTOCOL");
-        eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("TENANT STARTER CHECK");
-        title.getStyleClass().add("card-title");
-
-        VBox checklist = new VBox(8,
-                createProtocolRow("01", "Claim a unique room number before account creation."),
-                createProtocolRow("02", "Use an active contact number so notices reach the resident deck."),
-                createProtocolRow("03", "Jump into the tenant dashboard right after registration."));
-
-        Label note = createMutedCopy("Built to feel like a small retro operations terminal, not an empty signup page.");
-
-        card.getChildren().addAll(eyebrow, title, checklist, note);
-        return card;
+        section.getChildren().addAll(
+                eyebrow,
+                createDemoAccessRow("Admin", StaySyncService.getLandlordUsername() + " / " + StaySyncService.getLandlordPassword()),
+                createDemoAccessRow("Tenant", TENANT_DEMO_USERNAME + " / " + TENANT_DEMO_PASSWORD));
+        return section;
     }
 
     private VBox createConsoleStat(String labelText, String valueText) {
@@ -1329,16 +1371,20 @@ public class StaySyncApp extends Application {
         return stat;
     }
 
-    private HBox createProtocolRow(String id, String text) {
-        HBox row = new HBox(10);
-        row.getStyleClass().add("protocol-row");
-        Label badge = new Label(id);
-        badge.getStyleClass().add("protocol-badge");
-        Label copy = new Label(text);
-        copy.getStyleClass().add("meta-copy");
-        copy.setWrapText(true);
-        row.getChildren().addAll(badge, copy);
-        HBox.setHgrow(copy, Priority.ALWAYS);
+    private HBox createDemoAccessRow(String labelText, String valueText) {
+        HBox row = new HBox(12);
+        row.getStyleClass().add("demo-access-row");
+
+        Label label = new Label(labelText);
+        label.getStyleClass().add("demo-access-label");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label value = new Label(valueText);
+        value.getStyleClass().add("demo-access-value");
+
+        row.getChildren().addAll(label, spacer, value);
         return row;
     }
 
@@ -1402,6 +1448,13 @@ public class StaySyncApp extends Application {
     private Button createSecondaryButton(String text) {
         Button button = new Button(text);
         button.getStyleClass().addAll("ui-button", "secondary-button");
+        applyButtonHoverAnimation(button);
+        return button;
+    }
+
+    private Button createDangerButton(String text) {
+        Button button = new Button(text);
+        button.getStyleClass().addAll("ui-button", "danger-button");
         applyButtonHoverAnimation(button);
         return button;
     }
@@ -1495,19 +1548,25 @@ public class StaySyncApp extends Application {
         return field;
     }
 
+    private Button createAuthThemeButton() {
+        Button button = new Button(darkMode ? "Light mode" : "Dark mode");
+        button.getStyleClass().addAll("ui-button", "theme-button", "auth-theme-button");
+        applyButtonHoverAnimation(button);
+        button.setOnAction(event -> {
+            darkMode = !darkMode;
+            applyThemeMode();
+            renderCurrentView();
+        });
+        return button;
+    }
+
     private VBox createPanelCard(String... extraClasses) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("retro-panel");
+        card.getStyleClass().add("surface-card");
         for (String extraClass : extraClasses) {
             card.getStyleClass().add(extraClass);
         }
         return card;
-    }
-
-    private Label createInlineCode(String text) {
-        Label label = new Label(text);
-        label.getStyleClass().add("inline-code");
-        return label;
     }
 
     private Label createMutedCopy(String text) {
@@ -1521,7 +1580,7 @@ public class StaySyncApp extends Application {
         HBox pill = new HBox();
         pill.setAlignment(Pos.CENTER_LEFT);
         pill.getStyleClass().addAll("status-pill", status.name().toLowerCase(Locale.ROOT));
-        Label label = new Label(text.toUpperCase(Locale.ROOT));
+        Label label = new Label(text);
         label.getStyleClass().add("status-label");
         pill.getChildren().add(label);
         return pill;
@@ -1536,6 +1595,20 @@ public class StaySyncApp extends Application {
         valueLabel.getStyleClass().add("metric-value");
         Label helper = createMutedCopy(helperText);
         card.getChildren().addAll(titleLabel, valueLabel, helper);
+        return card;
+    }
+
+    private VBox createAuthStatCard(String value, String labelText) {
+        VBox card = createPanelCard("auth-stat-card");
+        HBox.setHgrow(card, Priority.ALWAYS);
+        card.setAlignment(Pos.TOP_LEFT);
+        Label valueLabel = new Label(value);
+        valueLabel.getStyleClass().add("auth-stat-value");
+        Label label = new Label(labelText);
+        label.getStyleClass().add("meta-copy");
+        label.setWrapText(true);
+        label.setMaxWidth(Double.MAX_VALUE);
+        card.getChildren().addAll(valueLabel, label);
         return card;
     }
 
@@ -1576,7 +1649,7 @@ public class StaySyncApp extends Application {
         return switch (tenantSection) {
             case PAYMENTS -> "Review payment history, due reminders, and the latest status updates.";
             case ACCOUNT -> "Manage identity details, room assignment, and access settings.";
-            default -> "See your room, billing health, and profile details in one command deck.";
+            default -> "See your room, billing health, and profile details in one place.";
         };
     }
 
@@ -1592,7 +1665,7 @@ public class StaySyncApp extends Application {
         return switch (landlordSection) {
             case RESIDENTS -> "Search, filter, and review tenant records without losing payment context.";
             case CONTROLS -> "Apply payment-status changes with clear selection feedback.";
-            default -> "Track resident counts, search results, and payment health from one shell.";
+            default -> "Track resident counts, search results, and payment health from one workspace.";
         };
     }
 
@@ -1642,6 +1715,14 @@ public class StaySyncApp extends Application {
 
     private String formatCurrency(double amount) {
         return CURRENCY_FORMAT.format(amount);
+    }
+
+    private String formatPercentage(int numerator, int denominator) {
+        if (denominator <= 0) {
+            return "0%";
+        }
+        int percentage = (int) Math.round((numerator * 100.0) / denominator);
+        return percentage + "%";
     }
 
     private String resolveStylesheet() {

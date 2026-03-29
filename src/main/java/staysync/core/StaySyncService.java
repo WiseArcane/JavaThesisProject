@@ -143,6 +143,20 @@ public class StaySyncService {
         return null;
     }
 
+    public synchronized String deleteTenant(TenantAccount tenant) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        tenants.remove(storedTenant);
+        return null;
+    }
+
     public synchronized DashboardSnapshot getLandlordDashboardData(String query) {
         String normalizedQuery = query == null ? "" : query.trim();
         List<TenantAccount> matchingTenants = searchTenants(normalizedQuery);
