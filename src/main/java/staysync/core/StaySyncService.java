@@ -9,8 +9,8 @@ import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
 
 public class StaySyncService {
-    private static final String LANDLORD_USERNAME = "landlord";
-    private static final String LANDLORD_PASSWORD = "admin123";
+    private static final String LANDLORD_USERNAME = "wise";
+    private static final String LANDLORD_PASSWORD = "1234";
     private static final String[] ROOM_TYPES = { "Standard", "Deluxe", "Family" };
     private static final int DEFAULT_DUE_DAY = 5;
 
@@ -22,6 +22,7 @@ public class StaySyncService {
 
     public synchronized String registerTenant(
             String fullName,
+            String email,
             String username,
             String password,
             String confirmPassword,
@@ -29,14 +30,18 @@ public class StaySyncService {
             String roomNumber,
             String roomType) {
         String validationMessage = validateTenantRegistration(
-                fullName, username, password, confirmPassword, contactNumber, roomNumber, roomType);
+                fullName, email, username, password, confirmPassword, contactNumber, roomNumber, roomType);
         if (validationMessage != null) {
             return validationMessage;
         }
 
         String normalizedUsername = username.trim();
+        String normalizedEmail = email == null ? "" : email.trim();
         if (findTenantByUsername(normalizedUsername) != null) {
             return "That username is already in use.";
+        }
+        if (!normalizedEmail.isEmpty() && findTenantByEmail(normalizedEmail) != null) {
+            return "That email is already in use.";
         }
 
         RoomInfo roomInfo = new RoomInfo(
@@ -46,11 +51,23 @@ public class StaySyncService {
                 DEFAULT_DUE_DAY);
         tenants.add(new TenantAccount(
                 fullName.trim(),
+                normalizedEmail,
                 normalizedUsername,
                 password,
                 contactNumber.trim(),
                 roomInfo));
         return null;
+    }
+
+    public synchronized String registerTenant(
+            String fullName,
+            String username,
+            String password,
+            String confirmPassword,
+            String contactNumber,
+            String roomNumber,
+            String roomType) {
+        return registerTenant(fullName, "", username, password, confirmPassword, contactNumber, roomNumber, roomType);
     }
 
     public String validateLoginCredentials(String username, String password) {
@@ -61,7 +78,7 @@ public class StaySyncService {
     }
 
     public synchronized TenantAccount authenticateTenant(String username, String password) {
-        TenantAccount tenant = findTenantByUsername(username);
+        TenantAccount tenant = findTenantByLogin(username);
         if (tenant == null) {
             return null;
         }
@@ -213,6 +230,7 @@ public class StaySyncService {
 
     private String validateTenantRegistration(
             String fullName,
+            String email,
             String username,
             String password,
             String confirmPassword,
@@ -231,6 +249,10 @@ public class StaySyncService {
 
         if (fullName.trim().length() < 3) {
             return "Full name must contain at least 3 characters.";
+        }
+
+        if (!isBlank(email) && !email.trim().matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            return "Enter a valid email address.";
         }
 
         if (!username.trim().matches("[A-Za-z0-9._-]{4,20}")) {
@@ -323,6 +345,21 @@ public class StaySyncService {
         }
     }
 
+    private TenantAccount findTenantByLogin(String loginValue) {
+        if (loginValue == null) {
+            return null;
+        }
+
+        String normalizedLogin = loginValue.trim();
+        for (TenantAccount tenant : tenants) {
+            if (tenant.getUsername().equalsIgnoreCase(normalizedLogin)
+                    || (!tenant.getEmail().isBlank() && tenant.getEmail().equalsIgnoreCase(normalizedLogin))) {
+                return tenant;
+            }
+        }
+        return null;
+    }
+
     private TenantAccount findTenantByUsername(String username) {
         if (username == null) {
             return null;
@@ -331,6 +368,20 @@ public class StaySyncService {
         String normalizedUsername = username.trim();
         for (TenantAccount tenant : tenants) {
             if (tenant.getUsername().equalsIgnoreCase(normalizedUsername)) {
+                return tenant;
+            }
+        }
+        return null;
+    }
+
+    private TenantAccount findTenantByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+
+        String normalizedEmail = email.trim();
+        for (TenantAccount tenant : tenants) {
+            if (!tenant.getEmail().isBlank() && tenant.getEmail().equalsIgnoreCase(normalizedEmail)) {
                 return tenant;
             }
         }

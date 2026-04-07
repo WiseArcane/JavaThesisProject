@@ -8,6 +8,7 @@ import java.util.List;
 
 public class TenantAccount {
     private String fullName;
+    private final String email;
     private final String username;
     private String password;
     private String contactNumber;
@@ -17,7 +18,12 @@ public class TenantAccount {
     private final List<NotificationRecord> notifications;
 
     public TenantAccount(String fullName, String username, String password, String contactNumber, RoomInfo roomInfo) {
+        this(fullName, "", username, password, contactNumber, roomInfo);
+    }
+
+    public TenantAccount(String fullName, String email, String username, String password, String contactNumber, RoomInfo roomInfo) {
         this.fullName = fullName;
+        this.email = email == null ? "" : email.trim();
         this.username = username;
         this.password = password;
         this.contactNumber = contactNumber;
@@ -34,6 +40,10 @@ public class TenantAccount {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getContactNumber() {

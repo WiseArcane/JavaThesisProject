@@ -1,180 +1,445 @@
-@font-face {
-    font-family: "Inter";
-    src: url("fonts/Inter-Regular.ttf");
-}
+/* StaySync JavaFX Theme
+   Screenshot-inspired: warm ivory canvas, amber actions, sage borders, dark ink text. */
 
-@font-face {
-    font-family: "Inter";
-    src: url("fonts/Inter-Medium.ttf");
-    -fx-font-weight: 500;
-}
-
-@font-face {
-    font-family: "Inter";
-    src: url("fonts/Inter-SemiBold.ttf");
-    -fx-font-weight: 600;
-}
-
-@font-face {
-    font-family: "Inter";
-    src: url("fonts/Inter-Bold.ttf");
-    -fx-font-weight: 700;
-}
-
-@font-face {
-    font-family: "Inter";
-    src: url("fonts/Inter-ExtraBold.ttf");
-    -fx-font-weight: 800;
+.root {
+    -fx-font-family: "Segoe UI";
 }
 
 .app-root {
-    -fx-font-family: "Segoe UI";
-    -color-bg: #e7ddcf;
-    -color-bg-alt: #ddd2c2;
-    -color-surface: rgba(243, 238, 231, 0.96);
-    -color-panel: #f4efe8;
-    -color-panel-strong: #eee7dc;
-    -color-panel-muted: #f8f4ee;
-    -color-border: rgba(30, 40, 37, 0.10);
-    -color-border-strong: rgba(30, 40, 37, 0.18);
-    -color-text: #202a28;
-    -color-text-muted: #6f7b74;
-    -color-text-soft: #a59f95;
-    -color-accent: #264f3c;
-    -color-accent-strong: #1f4433;
-    -color-accent-soft: rgba(38, 79, 60, 0.12);
-    -color-highlight: #d2baa0;
-    -color-input: rgba(249, 245, 239, 0.88);
-    -color-shadow: rgba(181, 160, 126, 0.22);
-    -color-success-bg: #e4eee8;
-    -color-success-border: #87a08f;
-    -color-success-text: #355243;
-    -color-warning-bg: #f1e6d4;
-    -color-warning-border: #c8a374;
-    -color-warning-text: #775931;
-    -color-danger-bg: #f4e1dc;
-    -color-danger-border: #c1837a;
-    -color-danger-text: #7b413c;
-    -fx-background-color: linear-gradient(to bottom right, -color-bg 0%, -color-bg-alt 100%);
+    -color-canvas: #f2eedc;
+    -color-canvas-deep: #e7e1c6;
+    -color-surface: rgba(248, 246, 236, 0.96);
+    -color-surface-strong: #fcfbf3;
+    -color-surface-muted: #f2eedf;
+    -color-panel: rgba(246, 243, 231, 0.98);
+    -color-panel-strong: #ece6d2;
+    -color-panel-muted: #f4f0e2;
+    -color-input: rgba(251, 249, 239, 0.98);
+    -color-sidebar: rgba(243, 239, 225, 0.98);
+    -color-border: rgba(99, 95, 67, 0.22);
+    -color-border-strong: rgba(86, 81, 52, 0.34);
+    -color-border-soft: rgba(255, 255, 255, 0.58);
+    -color-text: #172015;
+    -color-text-muted: #68705d;
+    -color-text-soft: #8a917d;
+    -color-accent: #d8a84c;
+    -color-accent-strong: #c18d33;
+    -color-accent-deep: #8a6324;
+    -color-accent-soft: rgba(216, 168, 76, 0.14);
+    -color-accent-soft-strong: rgba(216, 168, 76, 0.22);
+    -color-focus: rgba(202, 151, 56, 0.42);
+    -color-shadow: rgba(124, 104, 54, 0.18);
+    -color-shadow-soft: rgba(124, 104, 54, 0.10);
+    -color-success-bg: #e5efdf;
+    -color-success-border: #91a684;
+    -color-success-text: #3d5640;
+    -color-warning-bg: #f3ead7;
+    -color-warning-border: #c8a56a;
+    -color-warning-text: #72542b;
+    -color-danger-bg: #f5e2dc;
+    -color-danger-border: #c88b82;
+    -color-danger-text: #7b443d;
+    -color-overlay: rgba(27, 32, 21, 0.12);
+    -color-data: #5b7fd7;
+    -color-data-strong: #3f60b5;
+    -fx-background-color: linear-gradient(to bottom, -color-canvas 0%, -color-canvas-deep 100%);
     -fx-text-fill: -color-text;
 }
 
 .app-root.dark-mode {
-    -color-bg: #23241d;
-    -color-bg-alt: #2a2b23;
-    -color-surface: rgba(40, 41, 33, 0.98);
-    -color-panel: #2a2b23;
-    -color-panel-strong: #303228;
-    -color-panel-muted: #383a30;
-    -color-border: rgba(241, 230, 216, 0.10);
-    -color-border-strong: rgba(241, 230, 216, 0.20);
-    -color-text: #f0e7d9;
-    -color-text-muted: #b8afa3;
-    -color-text-soft: #8d887d;
-    -color-accent: #35644c;
-    -color-accent-strong: #478265;
-    -color-accent-soft: rgba(86, 132, 105, 0.18);
-    -color-highlight: #c7b08d;
-    -color-input: rgba(48, 50, 41, 0.96);
-    -color-shadow: rgba(0, 0, 0, 0.34);
-    -color-success-bg: #24352c;
-    -color-success-border: #537260;
-    -color-success-text: #d0e2d6;
-    -color-warning-bg: #3c3122;
-    -color-warning-border: #9e8361;
-    -color-warning-text: #ead6bc;
-    -color-danger-bg: #402926;
-    -color-danger-border: #a06d66;
-    -color-danger-text: #f1d1cb;
-    -fx-background-color: linear-gradient(to bottom right, -color-bg 0%, -color-bg-alt 100%);
+    -color-canvas: #181613;
+    -color-canvas-deep: #12110f;
+    -color-surface: rgba(34, 32, 28, 0.98);
+    -color-surface-strong: #2a2823;
+    -color-surface-muted: #23211d;
+    -color-panel: rgba(38, 35, 31, 0.99);
+    -color-panel-strong: #302c26;
+    -color-panel-muted: #27241f;
+    -color-input: rgba(31, 29, 25, 0.99);
+    -color-sidebar: rgba(33, 31, 27, 0.99);
+    -color-border: rgba(238, 231, 212, 0.10);
+    -color-border-strong: rgba(238, 231, 212, 0.18);
+    -color-border-soft: rgba(255, 255, 255, 0.06);
+    -color-text: #f3ecdc;
+    -color-text-muted: #c9bfad;
+    -color-text-soft: #9f9788;
+    -color-accent: #d7aa56;
+    -color-accent-strong: #c18d3a;
+    -color-accent-deep: #f0c97b;
+    -color-accent-soft: rgba(215, 170, 86, 0.14);
+    -color-accent-soft-strong: rgba(215, 170, 86, 0.22);
+    -color-focus: rgba(230, 188, 105, 0.28);
+    -color-shadow: rgba(0, 0, 0, 0.42);
+    -color-shadow-soft: rgba(0, 0, 0, 0.24);
+    -color-success-bg: #203126;
+    -color-success-border: #587660;
+    -color-success-text: #d3e3d3;
+    -color-warning-bg: #372c1b;
+    -color-warning-border: #bc985a;
+    -color-warning-text: #f0ddb8;
+    -color-danger-bg: #3f2621;
+    -color-danger-border: #ba7a70;
+    -color-danger-text: #f0d0ca;
+    -color-overlay: rgba(0, 0, 0, 0.30);
+    -color-data: #8aa8f4;
+    -color-data-strong: #6486dc;
+    -fx-background-color: linear-gradient(to bottom, -color-canvas 0%, -color-canvas-deep 100%);
+}
+
+.app-root,
+.app-root .label {
+    -fx-text-fill: -color-text;
 }
 
 .background-layer {
     -fx-background-color:
-        radial-gradient(center 18% 14%, radius 48%, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0) 70%),
-        radial-gradient(center 84% 78%, radius 36%, rgba(216, 196, 166, 0.34), rgba(216, 196, 166, 0) 72%);
+        radial-gradient(center 16% 12%, radius 48%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 62%),
+        linear-gradient(to right,
+            rgba(219, 202, 147, 0.22) 0%,
+            rgba(255, 255, 255, 0.08) 10%,
+            rgba(220, 205, 152, 0.20) 22%,
+            rgba(255, 255, 255, 0.06) 34%,
+            rgba(220, 205, 152, 0.16) 48%,
+            rgba(255, 255, 255, 0.05) 62%,
+            rgba(220, 205, 152, 0.12) 78%,
+            rgba(255, 255, 255, 0.03) 90%,
+            rgba(220, 205, 152, 0.10) 100%),
+        linear-gradient(to bottom, rgba(255, 252, 242, 0.26) 0%, rgba(255, 255, 255, 0.02) 24%, rgba(214, 195, 146, 0.12) 100%);
 }
 
 .app-root.dark-mode .background-layer {
     -fx-background-color:
-        radial-gradient(center 20% 16%, radius 44%, rgba(110, 145, 122, 0.16), rgba(110, 145, 122, 0) 72%),
-        radial-gradient(center 82% 74%, radius 34%, rgba(88, 70, 48, 0.22), rgba(88, 70, 48, 0) 72%);
+        radial-gradient(center 18% 12%, radius 46%, rgba(255, 228, 171, 0.06), rgba(255, 228, 171, 0) 62%),
+        linear-gradient(to right,
+            rgba(214, 161, 74, 0.03) 0%,
+            rgba(255, 255, 255, 0.01) 12%,
+            rgba(214, 161, 74, 0.03) 26%,
+            rgba(255, 255, 255, 0.01) 42%,
+            rgba(214, 161, 74, 0.02) 58%,
+            rgba(255, 255, 255, 0.01) 76%,
+            rgba(214, 161, 74, 0.02) 100%),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 0%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 .screen-shell,
 .workspace-shell {
-    -fx-background-color: -color-surface;
-    -fx-background-radius: 36px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.34),
+        linear-gradient(to bottom, rgba(250, 248, 240, 0.95), rgba(239, 235, 220, 0.96));
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 38px, 37px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
-    -fx-border-radius: 36px;
-    -fx-effect: dropshadow(gaussian, -color-shadow, 50, 0.16, 0, 14);
+    -fx-border-radius: 38px;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 52, 0.18, 0, 16);
 }
 
 .auth-shell {
-    -fx-alignment: top-left;
     -fx-spacing: 58px;
 }
 
-.auth-topbar {
+.auth-topbar,
+.auth-main-row,
+.auth-stats-row,
+.console-stat-row,
+.demo-access-row {
     -fx-alignment: center-left;
-}
-
-.auth-main-row {
-    -fx-alignment: top-left;
-    -fx-spacing: 74px;
 }
 
 .workspace-shell {
     -fx-padding: 24px;
 }
 
-.surface-card {
-    -fx-background-color: -color-panel;
-    -fx-background-radius: 28px;
+.surface-card,
+.notification-panel,
+.dialog-pane {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.36),
+        linear-gradient(to bottom, -color-panel 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 30px, 29px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
-    -fx-border-radius: 28px;
-    -fx-padding: 20px;
+    -fx-border-radius: 30px;
+    -fx-effect: dropshadow(gaussian, -color-shadow-soft, 28, 0.14, 0, 8);
+    -fx-padding: 22px;
     -fx-spacing: 14px;
 }
 
 .auth-hero-panel {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-padding: 2px 0 0 0;
-    -fx-spacing: 24px;
+    -fx-effect: null;
+    -fx-padding: 18px 4px 18px 0;
+    -fx-spacing: 28px;
 }
 
 .hero-panel {
-    -fx-background-color: -color-panel-muted;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.28),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
 }
 
 .auth-panel {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.40),
+        linear-gradient(to bottom, -color-surface 0%, -color-panel-muted 100%);
+    -fx-padding: 26px;
     -fx-spacing: 22px;
-    -fx-background-color: -color-panel;
-    -fx-alignment: top-left;
-    -fx-background-radius: 32px;
-    -fx-border-radius: 32px;
 }
 
 .sidebar-panel {
     -fx-min-height: 620px;
-    -fx-background-color: -color-panel-strong;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.28),
+        linear-gradient(to bottom, -color-sidebar 0%, -color-panel-strong 100%);
 }
 
 .content-header {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.34),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-panel-muted 100%);
+    -fx-padding: 22px 24px;
+}
+
+.mini-panel,
+.auth-stat-card,
+.console-stat {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+}
+
+.mini-panel {
+    -fx-padding: 16px 18px;
+}
+
+.auth-stat-card {
+    -fx-min-width: 188px;
+    -fx-pref-width: 188px;
+    -fx-max-width: 188px;
     -fx-padding: 18px 20px;
+    -fx-spacing: 8px;
+}
+
+.console-stat {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 6px;
 }
 
 .logo-box {
-    -fx-min-width: 50px;
-    -fx-min-height: 50px;
-    -fx-max-width: 50px;
-    -fx-max-height: 50px;
-    -fx-background-color: linear-gradient(to bottom right, -color-accent, -color-accent-strong);
-    -fx-background-radius: 16px;
-    -fx-effect: dropshadow(gaussian, rgba(32, 53, 44, 0.18), 18, 0.22, 0, 7);
+    -fx-min-width: 58px;
+    -fx-min-height: 58px;
+    -fx-max-width: 58px;
+    -fx-max-height: 58px;
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.14)),
+        linear-gradient(to bottom, #fff8ea 0%, #f4edda 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 19px, 18px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 19px;
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.24), 20, 0.22, 0, 8);
+    -fx-padding: 7px;
+}
+
+.logo-image {
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.18), 10, 0.18, 0, 2);
+}
+
+.logo-fallback {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: linear-gradient(to right, #244d98 0%, #244d98 52%, #f08a22 52%, #f08a22 100%);
+}
+
+.app-root.dark-mode .screen-shell,
+.app-root.dark-mode .workspace-shell {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, #201d18 0%, #171510 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(238, 231, 212, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.46), 54, 0.22, 0, 18);
+}
+
+.app-root.dark-mode .surface-card,
+.app-root.dark-mode .notification-panel,
+.app-root.dark-mode .dialog-pane,
+.app-root.dark-mode .content-header,
+.app-root.dark-mode .auth-panel,
+.app-root.dark-mode .sidebar-panel,
+.app-root.dark-mode .mini-panel,
+.app-root.dark-mode .auth-stat-card,
+.app-root.dark-mode .console-stat {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, -color-panel 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-border;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 22, 0.16, 0, 8);
+}
+
+.app-root.dark-mode .sidebar-panel {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, -color-sidebar 0%, -color-panel-strong 100%);
+}
+
+.app-root.dark-mode .tab-strip {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #2a261f 0%, #221f19 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .ui-button,
+.app-root.dark-mode .secondary-button,
+.app-root.dark-mode .nav-button,
+.app-root.dark-mode .chip-button,
+.app-root.dark-mode .theme-button,
+.app-root.dark-mode .tab-button,
+.app-root.dark-mode .dialog-pane .button-bar .button {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #2b2721 0%, #22201b 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.14);
+    -fx-text-fill: -color-text;
+}
+
+.app-root.dark-mode .secondary-button:hover,
+.app-root.dark-mode .nav-button:hover,
+.app-root.dark-mode .chip-button:hover,
+.app-root.dark-mode .theme-button:hover,
+.app-root.dark-mode .tab-button:hover,
+.app-root.dark-mode .dialog-pane .button-bar .button:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.05),
+        linear-gradient(to bottom, #312c25 0%, #27231d 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.20);
+}
+
+.app-root.dark-mode .primary-button {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.01)),
+        linear-gradient(to bottom, derive(-color-accent, 4%) 0%, -color-accent 54%, -color-accent-strong 100%);
+    -fx-border-color: rgba(170, 123, 41, 0.50);
+    -fx-text-fill: #1f180f;
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.18), 14, 0.20, 0, 5);
+}
+
+.app-root.dark-mode .primary-button:hover,
+.app-root.dark-mode .primary-button:focused {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02)),
+        linear-gradient(to bottom, derive(-color-accent, 8%) 0%, derive(-color-accent, 3%) 54%, derive(-color-accent-strong, 4%) 100%);
+}
+
+.app-root.dark-mode .tab-button:selected,
+.app-root.dark-mode .active-nav,
+.app-root.dark-mode .active-chip,
+.app-root.dark-mode .notification-bell-open {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.10),
+        linear-gradient(to bottom, derive(-color-accent, 6%) 0%, -color-accent 56%, -color-accent-strong 100%);
+    -fx-border-color: rgba(180, 132, 49, 0.38);
+    -fx-text-fill: #21190f;
+}
+
+.app-root.dark-mode .tab-button:selected:hover,
+.app-root.dark-mode .active-nav:hover,
+.app-root.dark-mode .active-chip:hover,
+.app-root.dark-mode .notification-bell-open:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.10),
+        linear-gradient(to bottom, derive(-color-accent, 6%) 0%, -color-accent 56%, -color-accent-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(180, 132, 49, 0.38);
+    -fx-text-fill: #21190f;
+}
+
+.app-root.dark-mode .text-input,
+.app-root.dark-mode .password-field,
+.app-root.dark-mode .combo-box-base,
+.app-root.dark-mode .ui-input,
+.app-root.dark-mode .ui-combo,
+.app-root.dark-mode .text-area,
+.app-root.dark-mode .ui-text-area {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.02),
+        linear-gradient(to bottom, #23201b 0%, #1d1b17 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.14);
+}
+
+.app-root.dark-mode .text-input:focused,
+.app-root.dark-mode .password-field:focused,
+.app-root.dark-mode .combo-box-base:focused,
+.app-root.dark-mode .text-area:focused,
+.app-root.dark-mode .ui-input:focused,
+.app-root.dark-mode .ui-combo:focused,
+.app-root.dark-mode .ui-text-area:focused {
+    -fx-border-color: rgba(227, 184, 99, 0.34);
+    -fx-effect: dropshadow(gaussian, rgba(227, 184, 99, 0.16), 10, 0.18, 0, 0);
+}
+
+.app-root.dark-mode .combo-box-popup > .list-view {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .table-view,
+.app-root.dark-mode .data-table {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #26231e 0%, #1f1d18 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .table-view .column-header-background,
+.app-root.dark-mode .table-view .column-header,
+.app-root.dark-mode .table-view .filler,
+.app-root.dark-mode .data-table .column-header-background,
+.app-root.dark-mode .data-table .column-header,
+.app-root.dark-mode .data-table .filler {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #312d26 0%, #28241e 100%);
+    -fx-border-color: transparent transparent rgba(238, 231, 212, 0.10) transparent;
+}
+
+.app-root.dark-mode .table-view .table-row-cell,
+.app-root.dark-mode .data-table .table-row-cell {
+    -fx-background-color: #211e19;
+    -fx-border-color: transparent transparent rgba(238, 231, 212, 0.08) transparent;
+}
+
+.app-root.dark-mode .table-view .table-row-cell:odd,
+.app-root.dark-mode .data-table .table-row-cell:odd {
+    -fx-background-color: #26231e;
+}
+
+.app-root.dark-mode .table-view .table-row-cell:filled:hover,
+.app-root.dark-mode .data-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(215, 170, 86, 0.14);
+}
+
+.app-root.dark-mode .table-view .table-row-cell:selected,
+.app-root.dark-mode .data-table .table-row-cell:selected {
+    -fx-background-color: rgba(215, 170, 86, 0.20);
+}
+
+.app-root.dark-mode .brand-title {
+    -fx-text-fill: #f3ecdc;
+}
+
+.app-root.dark-mode .logo-box {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03)),
+        linear-gradient(to bottom, #f7efd9 0%, #eee1be 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
 }
 
 .brand-title,
@@ -182,37 +447,50 @@
 .card-title,
 .metric-value,
 .sidebar-name,
-.status-label,
-.mini-title,
+.detail-value,
+.auth-stat-value,
+.console-value,
+.demo-access-value,
 .ui-button,
 .tab-button,
-.theme-button,
-.console-value,
-.auth-stat-value,
-.demo-access-value {
+.theme-button {
     -fx-font-family: "Segoe UI";
 }
 
 .brand-title {
-    -fx-font-size: 17px;
-    -fx-font-weight: 700;
-    -fx-letter-spacing: -0.02em;
-    -fx-text-fill: -color-text;
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: linear-gradient(to right, #244d98 0%, #244d98 52%, #f08a22 52%, #f08a22 100%);
 }
 
-.hero-kicker,
-.eyebrow-copy {
+.hero-kicker {
+    -fx-padding: 10px 18px;
+    -fx-background-color: linear-gradient(to bottom, derive(-color-accent, 6%), -color-accent-strong);
+    -fx-border-color: rgba(105, 78, 28, 0.38);
+    -fx-border-width: 1px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #231b10;
+}
+
+.eyebrow-copy,
+.field-label,
+.status-label,
+.demo-access-label,
+.inline-link {
     -fx-font-size: 12px;
     -fx-font-weight: 700;
-    -fx-text-transform: uppercase;
-    -fx-letter-spacing: 0.18em;
-    -fx-text-fill: -color-highlight;
+}
+
+.eyebrow-copy {
+    -fx-text-fill: -color-text-soft;
 }
 
 .section-title {
     -fx-font-size: 34px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: -0.04em;
     -fx-text-fill: -color-text;
 }
 
@@ -221,31 +499,20 @@
 }
 
 .hero-headline {
-    -fx-font-size: 74px;
-    -fx-font-weight: 800;
-    -fx-letter-spacing: -0.055em;
-    -fx-line-spacing: -7px;
+    -fx-font-size: 66px;
+    -fx-font-weight: 700;
+    -fx-line-spacing: -8px;
     -fx-text-fill: -color-text;
 }
 
 .auth-heading {
-    -fx-font-size: 30px;
+    -fx-font-size: 34px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: -0.04em;
-}
-
-.auth-panel .auth-heading {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 35px;
-    -fx-font-weight: 700;
-    -fx-letter-spacing: -0.03em;
-    -fx-text-fill: -color-text;
 }
 
 .card-title {
     -fx-font-size: 22px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: -0.03em;
     -fx-text-fill: -color-text;
 }
 
@@ -253,73 +520,43 @@
     -fx-font-size: 18px;
 }
 
-.console-value,
 .metric-value,
-.auth-stat-value {
-    -fx-font-size: 28px;
-    -fx-font-weight: 700;
-    -fx-letter-spacing: -0.04em;
+.auth-stat-value,
+.console-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
     -fx-text-fill: -color-text;
 }
 
 .sidebar-name,
-.detail-value {
+.detail-value,
+.demo-access-value {
     -fx-font-size: 16px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: -0.01em;
+    -fx-font-weight: 700;
     -fx-text-fill: -color-text;
 }
 
 .body-copy {
-    -fx-font-size: 18px;
-    -fx-font-weight: 400;
-    -fx-line-spacing: 10px;
-    -fx-text-fill: -color-text-muted;
-}
-
-.auth-panel .body-copy {
-    -fx-font-family: "Segoe UI";
     -fx-font-size: 16px;
-    -fx-font-weight: 400;
-    -fx-line-spacing: 8px;
+    -fx-line-spacing: 6px;
     -fx-text-fill: -color-text-muted;
 }
 
 .meta-copy,
-.mini-copy-row {
-    -fx-font-size: 16px;
-    -fx-font-weight: 400;
-    -fx-line-spacing: 8px;
+.demo-access-label,
+.inline-link {
+    -fx-font-size: 14px;
     -fx-text-fill: -color-text-muted;
 }
 
-.mini-title,
-.field-label,
-.status-label,
-.inline-code {
-    -fx-font-size: 14px;
-    -fx-font-weight: 700;
-}
-
 .field-label {
-    -fx-font-family: "Inter";
-    -fx-font-size: 13px;
-    -fx-font-weight: 700;
-    -fx-text-fill: -color-text;
-}
-
-.auth-panel .field-label {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 0em;
-    -fx-text-fill: -color-text;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-soft;
 }
 
 .inline-code {
-    -fx-font-family: "Inter";
     -fx-padding: 6px 10px;
-    -fx-background-color: -color-panel-muted;
+    -fx-background-color: -color-surface-muted;
     -fx-background-radius: 12px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
@@ -327,68 +564,100 @@
     -fx-text-fill: -color-text;
 }
 
+.form-grid {
+    -fx-hgap: 14px;
+    -fx-vgap: 14px;
+}
+
+.text-input,
+.password-field,
+.combo-box-base,
 .ui-input,
-.ui-combo {
-    -fx-background-color: -color-input;
-    -fx-background-insets: 0;
-    -fx-background-radius: 18px;
-    -fx-border-color: -color-border;
-    -fx-border-width: 1px;
-    -fx-border-radius: 18px;
-    -fx-font-family: "Inter";
-    -fx-font-weight: 400;
-    -fx-text-fill: -color-text;
-    -fx-prompt-text-fill: -color-text-soft;
-    -fx-font-size: 15px;
-    -fx-padding: 14px 18px;
-}
-
+.ui-combo,
+.text-area,
 .ui-text-area {
-    -fx-background-color: -color-input;
-    -fx-background-insets: 0;
-    -fx-background-radius: 18px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.34),
+        linear-gradient(to bottom, -color-input 0%, -color-surface-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20px, 19px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
-    -fx-border-radius: 18px;
-    -fx-font-family: "Segoe UI";
-    -fx-font-weight: 400;
+    -fx-border-radius: 20px;
+    -fx-font-size: 14px;
     -fx-text-fill: -color-text;
     -fx-prompt-text-fill: -color-text-soft;
-    -fx-font-size: 15px;
+    -fx-highlight-fill: -color-accent-soft-strong;
+    -fx-highlight-text-fill: -color-text;
+    -fx-padding: 13px 16px;
 }
 
+.text-input:focused,
+.password-field:focused,
+.combo-box-base:focused,
+.text-area:focused,
+.ui-input:focused,
+.ui-combo:focused,
+.ui-text-area:focused {
+    -fx-border-color: -color-focus;
+    -fx-effect: dropshadow(gaussian, -color-focus, 14, 0.28, 0, 0);
+}
+
+.text-input:disabled,
+.password-field:disabled,
+.combo-box-base:disabled,
+.text-area:disabled,
+.ui-input:disabled,
+.ui-combo:disabled,
+.ui-text-area:disabled {
+    -fx-opacity: 0.62;
+}
+
+.text-area .content,
 .ui-text-area .content {
     -fx-background-color: transparent;
     -fx-background-radius: 18px;
     -fx-padding: 12px 14px;
 }
 
-.auth-panel .ui-input,
-.auth-panel .ui-combo {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 15px;
-    -fx-font-weight: 400;
-    -fx-letter-spacing: 0em;
-    -fx-text-fill: -color-text;
+.combo-box-base {
+    -fx-padding: 6px 8px 6px 12px;
 }
 
-.ui-combo .list-cell {
-    -fx-font-family: "Inter";
-    -fx-font-weight: 400;
-    -fx-text-fill: -color-text;
-    -fx-font-size: 14px;
+.combo-box-base > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 12px 0 8px;
 }
 
-.combo-box-popup .list-view {
-    -fx-background-color: -color-panel;
+.combo-box-base > .arrow-button > .arrow {
+    -fx-background-color: -color-text-soft;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+    -fx-padding: 4px 5px 4px 5px;
+}
+
+.combo-box-base:showing > .arrow-button > .arrow,
+.combo-box-base:hover > .arrow-button > .arrow {
+    -fx-background-color: -color-accent-deep;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.30),
+        linear-gradient(to bottom, -color-surface 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20px, 19px;
     -fx-border-color: -color-border;
-    -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 22, 0.18, 0, 8);
 }
 
 .combo-box-popup .list-cell {
     -fx-background-color: transparent;
+    -fx-background-radius: 14px;
     -fx-text-fill: -color-text;
+    -fx-padding: 10px 12px;
 }
 
 .combo-box-popup .list-cell:hover,
@@ -397,112 +666,191 @@
     -fx-text-fill: -color-text;
 }
 
-.ui-text-area:focused,
-.ui-input:focused,
-.ui-combo:focused {
-    -fx-border-color: rgba(38, 79, 60, 0.34);
+.button,
+.ui-button,
+.tab-button,
+.dialog-pane .button-bar .button {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 13px 20px;
 }
 
 .ui-button,
-.tab-button {
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: -0.01em;
-    -fx-cursor: hand;
+.dialog-pane .button-bar .button {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-border;
+    -fx-text-fill: -color-text;
 }
 
-.primary-button,
+.primary-button {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.02)),
+        linear-gradient(to bottom, derive(-color-accent, 5%) 0%, -color-accent 54%, -color-accent-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.44);
+    -fx-text-fill: #221a10;
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.28), 18, 0.26, 0, 7);
+}
+
 .secondary-button,
 .nav-button,
 .chip-button,
 .theme-button,
 .tab-button {
-    -fx-font-family: "Inter";
-}
-
-.primary-button,
-.theme-button {
-    -fx-font-weight: 700;
-}
-
-.auth-panel .primary-button {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 17px;
-    -fx-font-weight: 700;
-    -fx-letter-spacing: 0em;
-    -fx-text-fill: white;
-}
-
-.remember-check,
-.remember-check .text,
-.demo-access-label,
-.body-copy,
-.meta-copy {
-    -fx-font-family: "Inter";
-}
-
-.auth-panel .remember-check,
-.auth-panel .remember-check .text {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 14px;
-    -fx-font-weight: 400;
-    -fx-text-fill: -color-text-muted;
-}
-
-.ui-button {
-    -fx-background-radius: 20px;
-    -fx-border-radius: 20px;
-    -fx-border-width: 1px;
-    -fx-padding: 14px 20px;
-}
-
-.primary-button {
-    -fx-background-color: linear-gradient(to bottom, -color-accent, -color-accent-strong);
-    -fx-border-color: transparent;
-    -fx-text-fill: #f8f5ef;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-border;
+    -fx-text-fill: -color-text;
 }
 
 .danger-button {
-    -fx-background-color: linear-gradient(to bottom, #8d473f, #7a3a33);
-    -fx-border-color: transparent;
-    -fx-text-fill: #fff6f4;
-}
-
-.secondary-button,
-.nav-button,
-.chip-button {
-    -fx-background-color: -color-panel-muted;
-    -fx-border-color: -color-border;
-    -fx-text-fill: -color-text;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.12),
+        linear-gradient(to bottom, #b5685d 0%, #9f4c42 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(116, 52, 44, 0.44);
+    -fx-text-fill: #fff7f5;
 }
 
 .theme-button {
-    -fx-background-color: rgba(248, 244, 238, 0.38);
     -fx-background-radius: 999px;
-    -fx-border-color: -color-border-strong;
-    -fx-border-width: 1px;
     -fx-border-radius: 999px;
     -fx-padding: 12px 22px;
-    -fx-font-size: 15px;
-    -fx-font-weight: 700;
-    -fx-text-fill: -color-text;
+}
+
+.nav-button,
+.chip-button {
+    -fx-alignment: center-left;
+}
+
+.primary-button:hover,
+.primary-button:focused {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.04)),
+        linear-gradient(to bottom, derive(-color-accent, 11%) 0%, derive(-color-accent, 4%) 54%, derive(-color-accent-strong, 6%) 100%);
+}
+
+.secondary-button:hover,
+.nav-button:hover,
+.chip-button:hover,
+.theme-button:hover,
+.tab-button:hover,
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.30),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-panel-muted 100%);
+    -fx-border-color: -color-border-strong;
+}
+
+.danger-button:hover,
+.danger-button:focused {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.14),
+        linear-gradient(to bottom, #bf7368 0%, #a8564d 100%);
+}
+
+.button:pressed,
+.ui-button:pressed,
+.tab-button:pressed,
+.dialog-pane .button-bar .button:pressed {
+    -fx-translate-y: 1px;
+}
+
+.button:disabled,
+.ui-button:disabled,
+.tab-button:disabled,
+.dialog-pane .button-bar .button:disabled {
+    -fx-opacity: 0.58;
+    -fx-effect: null;
+}
+
+.tab-strip {
+    -fx-padding: 8px;
+    -fx-spacing: 10px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.20),
+        linear-gradient(to bottom, -color-panel-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 24px, 23px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 24px;
+}
+
+.tab-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text-muted;
+}
+
+.tab-button:selected,
+.active-nav,
+.active-chip,
+.notification-bell-open {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.18),
+        linear-gradient(to bottom, derive(-color-accent, 10%) 0%, -color-accent 58%, -color-accent-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.38);
+    -fx-text-fill: #21190f;
+}
+
+.tab-button:selected:hover,
+.active-nav:hover,
+.active-chip:hover,
+.notification-bell-open:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.18),
+        linear-gradient(to bottom, derive(-color-accent, 10%) 0%, -color-accent 58%, -color-accent-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.38);
+    -fx-text-fill: #21190f;
+}
+
+.remember-check {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-text-muted;
+}
+
+.remember-check > .box {
+    -fx-background-color: -color-surface-strong;
+    -fx-background-radius: 8px;
+    -fx-border-color: -color-border-strong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 4px;
+}
+
+.remember-check:hover > .box,
+.remember-check:focused > .box {
+    -fx-border-color: -color-focus;
+}
+
+.remember-check:selected > .box {
+    -fx-background-color: -color-accent-soft;
+}
+
+.remember-check:selected > .box > .mark {
+    -fx-background-color: -color-accent-deep;
 }
 
 .notification-bell-button {
-    -fx-min-width: 54px;
-    -fx-min-height: 54px;
-    -fx-max-width: 54px;
-    -fx-max-height: 54px;
+    -fx-min-width: 52px;
+    -fx-min-height: 52px;
+    -fx-max-width: 52px;
+    -fx-max-height: 52px;
     -fx-padding: 0;
-    -fx-background-color: -color-panel-muted;
-    -fx-border-color: -color-border;
-    -fx-background-radius: 14px;
-    -fx-border-radius: 14px;
-}
-
-.notification-bell-open {
-    -fx-background-color: -color-accent-soft;
-    -fx-border-color: rgba(38, 79, 60, 0.28);
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
 }
 
 .notification-bell-graphic {
@@ -514,111 +862,25 @@
 
 .notification-bell-icon {
     -fx-fill: -color-text;
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
 }
 
 .notification-badge {
-    -fx-background-color: #8d473f;
+    -fx-background-color: #b05647;
     -fx-background-radius: 999px;
-    -fx-text-fill: #fff6f4;
+    -fx-text-fill: #fff7f4;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 800;
     -fx-padding: 2px 6px;
     -fx-translate-x: 9px;
     -fx-translate-y: -8px;
 }
 
-.auth-theme-button {
-    -fx-padding: 14px 28px;
-    -fx-font-size: 17px;
-}
-
-.app-root.dark-mode .theme-button {
-    -fx-background-color: rgba(56, 58, 48, 0.52);
-}
-
-.app-root.dark-mode .notification-bell-button {
-    -fx-background-color: rgba(56, 58, 48, 0.7);
-}
-
-.app-root.dark-mode .danger-button {
-    -fx-background-color: linear-gradient(to bottom, #9d584f, #84443d);
-}
-
-.tab-strip {
-    -fx-padding: 7px;
-    -fx-spacing: 12px;
-    -fx-background-color: -color-panel-strong;
-    -fx-background-radius: 24px;
-    -fx-border-color: -color-border;
-    -fx-border-width: 1px;
-    -fx-border-radius: 24px;
-}
-
-.tab-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 18px;
-    -fx-border-radius: 18px;
-    -fx-border-color: transparent;
-    -fx-padding: 14px 24px;
-    -fx-text-fill: -color-text-muted;
-}
-
-.tab-button:selected {
-    -fx-background-color: -color-panel-muted;
-    -fx-border-color: -color-border;
-    -fx-text-fill: -color-text;
-}
-
-.nav-button,
-.chip-button {
-    -fx-alignment: center-left;
-}
-
-.active-nav,
-.active-chip {
-    -fx-background-color: -color-accent-soft;
-    -fx-border-color: rgba(38, 79, 60, 0.18);
-}
-
-.mini-panel {
-    -fx-padding: 16px 18px;
-}
-
-.auth-stat-card {
-    -fx-min-width: 186px;
-    -fx-pref-width: 186px;
-    -fx-max-width: 186px;
-    -fx-padding: 18px 20px;
-    -fx-spacing: 8px;
-}
-
-.auth-stats-row {
-    -fx-alignment: center-left;
-    -fx-spacing: 14px;
-}
-
-.console-stat-row {
-    -fx-alignment: center-left;
-}
-
-.console-stat {
-    -fx-background-color: -color-panel-muted;
-    -fx-background-radius: 20px;
-    -fx-border-color: -color-border;
-    -fx-border-width: 1px;
-    -fx-border-radius: 20px;
-    -fx-padding: 12px 14px;
-    -fx-spacing: 6px;
-}
-
 .feedback-box {
-    -fx-font-size: 13px;
     -fx-padding: 12px 14px;
-    -fx-border-width: 1px;
-    -fx-border-radius: 16px;
     -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-font-size: 13px;
 }
 
 .success-box {
@@ -633,11 +895,17 @@
     -fx-text-fill: -color-danger-text;
 }
 
+.warning-box {
+    -fx-background-color: -color-warning-bg;
+    -fx-border-color: -color-warning-border;
+    -fx-text-fill: -color-warning-text;
+}
+
 .status-pill {
     -fx-padding: 8px 14px;
-    -fx-border-width: 1px;
-    -fx-border-radius: 999px;
     -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
 }
 
 .status-pill.paid {
@@ -673,7 +941,7 @@
 
 .page-scroll {
     -fx-background-color: transparent;
-    -fx-background: transparent;
+    -fx-background-insets: 0;
     -fx-padding: 0;
     -fx-fit-to-width: true;
 }
@@ -682,108 +950,142 @@
     -fx-background-color: transparent;
 }
 
-.page-scroll .scroll-bar:vertical,
-.page-scroll .scroll-bar:horizontal {
+.page-scroll .scroll-bar,
+.data-table .scroll-bar {
     -fx-background-color: transparent;
-    -fx-padding: 3px;
+    -fx-padding: 4px;
 }
 
-.page-scroll .scroll-bar:vertical {
-    -fx-pref-width: 16px;
-}
-
-.page-scroll .scroll-bar:horizontal {
-    -fx-pref-height: 16px;
-}
-
-.page-scroll .scroll-bar .track {
+.page-scroll .scroll-bar .track,
+.data-table .scroll-bar .track {
     -fx-background-color: rgba(0, 0, 0, 0.06);
     -fx-background-radius: 999px;
 }
 
-.page-scroll .scroll-bar .thumb {
-    -fx-background-color: -color-accent;
+.page-scroll .scroll-bar .thumb,
+.data-table .scroll-bar .thumb {
+    -fx-background-color: linear-gradient(to bottom, -color-accent 0%, -color-accent-strong 100%);
     -fx-background-radius: 999px;
 }
 
-.page-scroll .scroll-bar .thumb:hover {
-    -fx-background-color: -color-accent-strong;
+.page-scroll .scroll-bar .thumb:hover,
+.data-table .scroll-bar .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-color-accent, 10%) 0%, derive(-color-accent-strong, 8%) 100%);
 }
 
 .page-scroll .scroll-bar .increment-button,
 .page-scroll .scroll-bar .decrement-button,
-.page-scroll .corner {
+.data-table .scroll-bar .increment-button,
+.data-table .scroll-bar .decrement-button,
+.page-scroll .corner,
+.data-table .corner {
     -fx-background-color: transparent;
     -fx-padding: 0;
 }
 
 .page-scroll .scroll-bar .increment-arrow,
-.page-scroll .scroll-bar .decrement-arrow {
+.page-scroll .scroll-bar .decrement-arrow,
+.data-table .scroll-bar .increment-arrow,
+.data-table .scroll-bar .decrement-arrow {
     -fx-background-color: transparent;
     -fx-padding: 0;
 }
 
+.table-view,
 .data-table {
-    -fx-background-color: -color-panel;
-    -fx-background-radius: 22px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, -color-surface 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 24px, 23px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
-    -fx-border-radius: 22px;
+    -fx-border-radius: 24px;
+    -fx-padding: 0;
     -fx-fixed-cell-size: 44px;
+    -fx-table-cell-border-color: transparent;
 }
 
+.table-view .column-header-background,
+.table-view .column-header,
+.table-view .filler,
 .data-table .column-header-background,
-.data-table .column-header {
-    -fx-background-color: -color-panel-strong;
+.data-table .column-header,
+.data-table .filler {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.16),
+        linear-gradient(to bottom, -color-panel-strong 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
     -fx-border-color: transparent transparent -color-border transparent;
 }
 
+.table-view .column-header .label,
 .data-table .column-header .label {
     -fx-font-size: 12px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 800;
     -fx-text-fill: -color-text;
 }
 
+.table-view .table-row-cell,
 .data-table .table-row-cell {
-    -fx-background-color: -color-panel;
+    -fx-background-color: -color-surface;
     -fx-border-color: transparent transparent -color-border transparent;
+    -fx-padding: 0 10px;
 }
 
-.data-table .table-row-cell:selected {
+.table-view .table-row-cell:odd,
+.data-table .table-row-cell:odd {
+    -fx-background-color: rgba(247, 244, 234, 0.96);
+}
+
+.table-view .table-row-cell:filled:hover,
+.data-table .table-row-cell:filled:hover {
     -fx-background-color: -color-accent-soft;
 }
 
+.table-view .table-row-cell:selected,
+.data-table .table-row-cell:selected {
+    -fx-background-color: -color-accent-soft-strong;
+}
+
+.table-view .table-cell,
 .data-table .table-cell {
     -fx-font-size: 13px;
     -fx-text-fill: -color-text;
     -fx-border-color: transparent;
 }
 
+.table-view .placeholder .label,
+.data-table .placeholder .label {
+    -fx-text-fill: -color-text-muted;
+}
+
 .dialog-pane {
-    -fx-background-color: #f4efe8;
-    -fx-border-color: rgba(30, 40, 37, 0.12);
-    -fx-border-width: 1px;
-    -fx-border-radius: 24px;
-    -fx-background-radius: 24px;
+    -fx-background-radius: 26px;
+    -fx-border-radius: 26px;
+    -fx-padding: 0;
 }
 
 .dialog-pane.dark-dialog {
-    -fx-background-color: #2a2b23;
-    -fx-border-color: rgba(241, 230, 216, 0.16);
+    -fx-background-color:
+        rgba(255, 255, 255, 0.08),
+        linear-gradient(to bottom, -color-surface 0%, -color-panel 100%);
+    -fx-border-color: -color-border-strong;
 }
 
 .dialog-pane .header-panel {
     -fx-background-color: transparent;
+    -fx-padding: 22px 24px 8px 24px;
 }
 
 .dialog-pane .content.label,
 .dialog-pane .label {
-    -fx-text-fill: #202a28;
+    -fx-text-fill: -color-text;
 }
 
-.dialog-pane.dark-dialog .content.label,
-.dialog-pane.dark-dialog .label {
-    -fx-text-fill: #f0e7d9;
+.dialog-pane .button-bar > .container {
+    -fx-padding: 12px 24px 22px 24px;
+    -fx-spacing: 12px;
 }
 
 .demo-access {
@@ -793,94 +1095,66 @@
     -fx-spacing: 12px;
 }
 
-.demo-access-row {
+.demo-access-buttons {
     -fx-alignment: center-left;
-    -fx-padding: 2px 0;
 }
 
-.demo-access-label {
-    -fx-font-size: 15px;
-    -fx-text-fill: -color-text-muted;
-}
-
-.demo-access-value {
-    -fx-font-size: 17px;
+.demo-access-button {
+    -fx-padding: 12px 16px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.20),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-font-size: 13px;
     -fx-font-weight: 700;
     -fx-text-fill: -color-text;
 }
 
-.inline-link {
-    -fx-font-size: 14px;
-    -fx-font-weight: 500;
-    -fx-text-fill: -color-text-muted;
+.demo-access-button:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-panel-muted 100%);
+    -fx-border-color: -color-border-strong;
+}
+
+.app-root.dark-mode .demo-access-button {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #2b2721 0%, #22201b 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.14);
+    -fx-text-fill: -color-text;
+}
+
+.app-root.dark-mode .demo-access-button:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.05),
+        linear-gradient(to bottom, #312c25 0%, #27231d 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.20);
 }
 
 .notification-panel {
     -fx-spacing: 14px;
     -fx-padding: 18px;
-    -fx-background-radius: 22px;
-    -fx-border-radius: 22px;
-    -fx-effect: dropshadow(gaussian, -color-shadow, 22, 0.18, 0, 10);
 }
 
-.notification-list {
+.notification-list,
+.notification-item {
     -fx-spacing: 10px;
 }
 
-.notification-item {
-    -fx-spacing: 8px;
-}
-
-.notification-menu {
-    -fx-background-color: transparent;
-    -fx-padding: 0;
-}
-
+.notification-menu,
 .notification-menu .menu-item,
-.notification-menu .menu-item:focused {
-    -fx-background-color: transparent;
-    -fx-padding: 0;
-}
-
+.notification-menu .menu-item:focused,
 .notification-menu-item {
+    -fx-background-color: transparent;
     -fx-padding: 0;
 }
 
-.auth-panel .inline-link {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 14px;
-    -fx-font-weight: 500;
-    -fx-text-fill: -color-text-muted;
-}
-
-.auth-panel .tab-button,
-.auth-panel .theme-button {
-    -fx-font-family: "Segoe UI";
-}
-
-.auth-panel .tab-button {
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
-
-.remember-check {
-    -fx-font-size: 14px;
-    -fx-text-fill: -color-text-muted;
-}
-
-.remember-check > .box {
+.context-menu {
     -fx-background-color: transparent;
-    -fx-background-radius: 7px;
-    -fx-border-color: -color-border-strong;
-    -fx-border-width: 1px;
-    -fx-border-radius: 7px;
-    -fx-padding: 4px;
-}
-
-.remember-check:selected > .box {
-    -fx-background-color: -color-panel-muted;
-}
-
-.remember-check:selected > .box > .mark {
-    -fx-background-color: -color-accent;
+    -fx-padding: 0;
 }
