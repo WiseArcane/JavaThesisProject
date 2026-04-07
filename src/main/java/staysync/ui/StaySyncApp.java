@@ -1,29 +1,32 @@
 package staysync.ui;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.net.URL;
-import java.nio.file.Path;
-
-import javafx.animation.ParallelTransition;
+import java.util.function.DoubleConsumer;
 import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -47,6 +50,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -54,7 +58,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
-import javafx.geometry.Side;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -109,6 +113,10 @@ public class StaySyncApp extends Application {
     private NotificationType landlordNotificationType = NotificationType.PAYMENT_REMINDER;
     private String landlordNotificationTitle = "";
     private String landlordNotificationMessageBody = "";
+    private double tenantScrollVvalue;
+    private double landlordOverviewScrollVvalue;
+    private double landlordResidentsScrollVvalue;
+    private double landlordControlsScrollVvalue;
 
     private enum View {
         AUTH,
@@ -472,7 +480,7 @@ public class StaySyncApp extends Application {
         titleRow.getChildren().addAll(title, titleSpacer, bellButton);
         header.getChildren().addAll(titleRow, subtitle, feedbackLabel);
 
-        ScrollPane scrollPane = createPageScrollPane(createTenantPageBody());
+        ScrollPane scrollPane = createPageScrollPane(createTenantPageBody(), tenantScrollVvalue, value -> tenantScrollVvalue = value);
 
         panel.setTop(header);
         panel.setCenter(scrollPane);
@@ -535,7 +543,8 @@ public class StaySyncApp extends Application {
                 ? "No recent payment updates yet."
                 : latestRecord.getFormattedTimestamp() + "\n"
                         + latestRecord.getStatus().getLabel() + " by " + latestRecord.getUpdatedBy() + "\n"
-                        + latestRecord.getNote());
+                        + latestRecord.getNote()
+                        + (latestRecord.hasReceiptImage() ? "\nReceipt photo attached: " + latestRecord.getReceiptFileName() : ""));
         copy.getStyleClass().add("body-copy");
         copy.setWrapText(true);
         card.getChildren().addAll(eyebrow, title, copy);
@@ -569,28 +578,44 @@ public class StaySyncApp extends Application {
                 createStatusPill(currentTenant.getPaymentStatusLabel(), currentTenant.getPaymentStatus()));
 
         VBox actionCard = createPanelCard();
-        Label actionEyebrow = new Label("PAYMENT ACTION");
+        Label actionEyebrow = new Label("PAYMENT RECEIPT");
         actionEyebrow.getStyleClass().add("eyebrow-copy");
-        Label latest = new Label("LAST STATUS UPDATE");
+        Label latest = new Label("SEND RECEIPT PHOTO");
         latest.getStyleClass().add("card-title");
-        PaymentRecord latestRecord = currentTenant.getPaymentHistory().isEmpty() ? null : currentTenant.getPaymentHistory().get(0);
-        Label latestCopy = new Label(latestRecord == null
-                ? "No recent payment updates yet."
-                : latestRecord.getFormattedTimestamp() + "\n"
-                        + latestRecord.getStatus().getLabel() + " update from " + latestRecord.getUpdatedBy() + "\n"
-                        + latestRecord.getNote());
+        PaymentRecord latestReceipt = findLatestReceiptRecord(currentTenant);
+        Label latestCopy = new Label(latestReceipt == null
+                ? "Attach a clear photo of your receipt so the landlord can review your payment proof."
+                : "Last receipt sent on " + latestReceipt.getFormattedTimestamp() + "\n"
+                        + latestReceipt.getReceiptFileName() + "\n"
+                        + latestReceipt.getNote());
         latestCopy.getStyleClass().add("body-copy");
         latestCopy.setWrapText(true);
-        Button button = createPrimaryButton("CONFIRM PAID STATUS");
-        button.setDisable(currentTenant.getPaymentStatus() == PaymentStatus.PAID);
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setOnAction(event -> {
+
+        Node receiptPreview = createReceiptPreview(
+                latestReceipt,
+                "No receipt photo sent yet. Choose an image to send proof of payment.",
+                340,
+                190);
+
+        Button sendReceiptButton = createPrimaryButton("SEND RECEIPT PHOTO");
+        sendReceiptButton.setMaxWidth(Double.MAX_VALUE);
+        sendReceiptButton.setOnAction(event -> handleTenantReceiptSubmission());
+
+        Button openReceiptButton = createSecondaryButton("OPEN LAST RECEIPT");
+        openReceiptButton.setDisable(latestReceipt == null || !latestReceipt.hasReceiptImage());
+        openReceiptButton.setMaxWidth(Double.MAX_VALUE);
+        openReceiptButton.setOnAction(event -> openReceiptImage(latestReceipt, false));
+
+        Button confirmButton = createSecondaryButton("CONFIRM PAID STATUS");
+        confirmButton.setDisable(currentTenant.getPaymentStatus() == PaymentStatus.PAID);
+        confirmButton.setMaxWidth(Double.MAX_VALUE);
+        confirmButton.setOnAction(event -> {
             staySyncService.markTenantAsPaid(currentTenant);
             tenantMessage = "Payment status updated to Paid.";
             tenantMessageSuccess = true;
             renderCurrentView();
         });
-        actionCard.getChildren().addAll(actionEyebrow, latest, latestCopy, button);
+        actionCard.getChildren().addAll(actionEyebrow, latest, latestCopy, receiptPreview, sendReceiptButton, openReceiptButton, confirmButton);
 
         HBox.setHgrow(reminderCard, Priority.ALWAYS);
         HBox.setHgrow(actionCard, Priority.ALWAYS);
@@ -610,6 +635,7 @@ public class StaySyncApp extends Application {
         historyTable.getColumns().add(createRecordColumn("Updated On", "formattedTimestamp", 150));
         historyTable.getColumns().add(createRecordColumn("Status", "status", 110));
         historyTable.getColumns().add(createRecordColumn("Updated By", "updatedBy", 110));
+        historyTable.getColumns().add(createRecordColumn("Receipt", "receiptStatusLabel", 120));
         historyTable.getColumns().add(createRecordColumn("Note", "note", 320));
         historyTable.getItems().setAll(currentTenant.getPaymentHistory());
         VBox.setVgrow(historyTable, Priority.ALWAYS);
@@ -685,7 +711,7 @@ public class StaySyncApp extends Application {
 
         Label eyebrow = new Label("STAYSYNC");
         eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Admin hub");
+        Label title = new Label("Landlord hub");
         title.getStyleClass().addAll("section-title", "sidebar-heading");
         title.setWrapText(true);
         title.setTextOverrun(OverrunStyle.CLIP);
@@ -736,7 +762,7 @@ public class StaySyncApp extends Application {
         subtitle.setWrapText(true);
         header.getChildren().addAll(title, subtitle, createFeedbackLabel(landlordMessage, landlordMessageSuccess));
 
-        ScrollPane scrollPane = createPageScrollPane(createLandlordPageBody());
+        ScrollPane scrollPane = createPageScrollPane(createLandlordPageBody(), getLandlordScrollVvalue(), this::setLandlordScrollVvalue);
 
         panel.setTop(header);
         panel.setCenter(scrollPane);
@@ -759,9 +785,9 @@ public class StaySyncApp extends Application {
     private Node createLandlordStatsRow() {
         DashboardSnapshot snapshot = staySyncService.getLandlordDashboardData(landlordQuery);
         HBox row = new HBox(14,
-                createMetricCard("RESIDENT ACCOUNTS", String.valueOf(snapshot.getTotalTenantCount()), "Total registered residents"),
-                createMetricCard("PAID THIS CYCLE", formatPercentage(snapshot.getPaidCount(), snapshot.getTotalTenantCount()), "Current collection rate"),
-                createMetricCard("NEEDS FOLLOW-UP", String.format("%02d", snapshot.getPendingCount() + snapshot.getLateCount()), "Pending and late accounts"));
+                createMetricCard("RESIDENT ACCOUNTS", String.valueOf(snapshot.getTotalTenantCount()), "Registered residents"),
+                createMetricCard("PAID THIS CYCLE", formatPercentage(snapshot.getPaidCount(), snapshot.getTotalTenantCount()), "Collection rate"),
+                createMetricCard("NEEDS FOLLOW-UP", String.format("%02d", snapshot.getPendingCount() + snapshot.getLateCount()), "Pending and late"));
         return row;
     }
 
@@ -770,46 +796,112 @@ public class StaySyncApp extends Application {
         Node summaryCard = createLandlordSummaryCard(snapshot);
         Node guideCard = createLandlordGuideCard(snapshot);
         HBox row = new HBox(14, summaryCard, guideCard);
+        row.getStyleClass().add("landlord-overview-row");
         if (summaryCard instanceof Region summaryRegion) {
-            summaryRegion.setPrefWidth(340);
-            summaryRegion.setMinWidth(320);
+            summaryRegion.setPrefWidth(430);
+            summaryRegion.setMinWidth(380);
         }
         if (guideCard instanceof Region guideRegion) {
             HBox.setHgrow(guideRegion, Priority.ALWAYS);
-            guideRegion.setPrefWidth(580);
+            guideRegion.setPrefWidth(560);
         }
         return row;
     }
 
     private Node createLandlordSummaryCard(DashboardSnapshot snapshot) {
-        VBox card = createPanelCard("hero-panel");
+        VBox card = createPanelCard("hero-panel", "landlord-summary-card");
+        HBox header = new HBox(10);
+        header.getStyleClass().add("overview-header-row");
+        header.setAlignment(Pos.CENTER_LEFT);
+
         Label eyebrow = new Label("Operations summary");
         eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Resident payment board");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        header.getChildren().addAll(eyebrow, spacer, createOverviewBadge(
+                snapshot.getQuery().isBlank() ? "Live" : "Filtered",
+                snapshot.getQuery().isBlank() ? "live" : "filtered"));
+
+        Label title = new Label("Payment board");
         title.getStyleClass().addAll("card-title", "compact-card-title");
         title.setWrapText(true);
-        Label description = new Label(buildOverviewSummary(snapshot));
-        description.getStyleClass().add("body-copy");
-        description.setWrapText(true);
-        card.getChildren().addAll(eyebrow, title, description);
+
+        int visibleResidents = snapshot.getQuery().isBlank() ? snapshot.getTotalTenantCount() : snapshot.getTenants().size();
+        int followUpCount = snapshot.getPendingCount() + snapshot.getLateCount();
+        HBox metricsRow = new HBox(10,
+                createOverviewMiniCard(
+                        "Visible now",
+                        String.valueOf(visibleResidents),
+                        snapshot.getQuery().isBlank()
+                                ? "All residents"
+                                : "Matches current search"),
+                createOverviewMiniCard(
+                        "Collection rate",
+                        formatPercentage(snapshot.getPaidCount(), snapshot.getTotalTenantCount()),
+                        followUpCount == 0
+                                ? "No follow-up"
+                                : followUpCount + " to review"));
+        metricsRow.getStyleClass().add("overview-metric-row");
+
+        FlowPane statusRow = new FlowPane();
+        statusRow.getStyleClass().add("portfolio-chip-row");
+        statusRow.setHgap(8);
+        statusRow.setVgap(8);
+        statusRow.getChildren().addAll(
+                createPortfolioStatusChip("Paid", snapshot.getPaidCount(), PaymentStatus.PAID),
+                createPortfolioStatusChip("Pending", snapshot.getPendingCount(), PaymentStatus.PENDING),
+                createPortfolioStatusChip("Late", snapshot.getLateCount(), PaymentStatus.LATE));
+
+        card.getChildren().addAll(header, title, metricsRow, statusRow);
         return card;
     }
 
     private Node createLandlordGuideCard(DashboardSnapshot snapshot) {
-        VBox card = createPanelCard();
+        VBox card = createPanelCard("landlord-guide-card");
+        HBox header = new HBox(10);
+        header.getStyleClass().add("overview-header-row");
+        header.setAlignment(Pos.CENTER_LEFT);
+
         Label eyebrow = new Label("Attention needed");
         eyebrow.getStyleClass().add("eyebrow-copy");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        header.getChildren().addAll(eyebrow, spacer, createOverviewBadge(
+                snapshot.getLateCount() > 0 ? "Urgent" : snapshot.getPendingCount() > 0 ? "Pending" : "Clear",
+                snapshot.getLateCount() > 0 ? "danger" : snapshot.getPendingCount() > 0 ? "warning" : "calm"));
+
         Label title = new Label("Collection watchlist");
         title.getStyleClass().addAll("card-title", "compact-card-title");
         title.setWrapText(true);
-        Label description = new Label(buildAttentionSummary(snapshot));
-        description.getStyleClass().add("body-copy");
-        description.setWrapText(true);
+
+        HBox watchStatsRow = new HBox(10,
+                createOverviewMiniCard(
+                        "Late accounts",
+                        String.format("%02d", snapshot.getLateCount()),
+                        snapshot.getLateCount() > 0 ? "Review now" : "No urgent items",
+                        "watch-stat-card",
+                        snapshot.getLateCount() > 0 ? "danger" : "calm"),
+                createOverviewMiniCard(
+                        "Pending",
+                        String.format("%02d", snapshot.getPendingCount()),
+                        snapshot.getPendingCount() > 0 ? "Due soon" : "Nothing queued",
+                        "watch-stat-card",
+                        snapshot.getPendingCount() > 0 ? "warning" : "calm"));
+        watchStatsRow.getStyleClass().add("watch-stats-row");
+
+        VBox workflowBand = new VBox(6);
+        workflowBand.getStyleClass().add("workflow-band");
+        Label workflowEyebrow = new Label(snapshot.getQuery().isBlank() ? "Next step" : "Search context");
+        workflowEyebrow.getStyleClass().add("eyebrow-copy");
+        Label workflowCopy = createMutedCopy(buildWorkflowSummary(snapshot));
+        workflowCopy.getStyleClass().add("workflow-copy");
+        workflowBand.getChildren().addAll(workflowEyebrow, workflowCopy);
+
         card.getChildren().addAll(
-                eyebrow,
+                header,
                 title,
-                description,
-                createMutedCopy(buildWorkflowSummary(snapshot)));
+                watchStatsRow,
+                workflowBand);
         return card;
     }
 
@@ -863,61 +955,42 @@ public class StaySyncApp extends Application {
         title.getStyleClass().add("card-title");
 
         List<TenantAccount> tenants = getVisibleLandlordTenants();
-        TableView<TenantAccount> table = new TableView<>();
-        table.getStyleClass().add("data-table");
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPlaceholder(new Label("No matching tenants found."));
-        table.getColumns().add(createTenantColumn("Tenant Name", tenant -> tenant.getFullName(), 180));
-        table.getColumns().add(createTenantColumn("Username", tenant -> tenant.getUsername(), 120));
-        table.getColumns().add(createTenantColumn("Room Number", tenant -> tenant.getRoomInfo().getRoomNumber(), 110));
-        table.getColumns().add(createTenantColumn("Room Type", tenant -> tenant.getRoomInfo().getRoomType(), 110));
-        table.getColumns().add(createTenantColumn("Contact", tenant -> tenant.getContactNumber(), 140));
-        table.getColumns().add(createTenantColumn("Monthly Rent", tenant -> formatCurrency(tenant.getRoomInfo().getMonthlyRent()), 120));
-        table.getColumns().add(createTenantColumn("Payment Status", tenant -> tenant.getPaymentStatusLabel(), 120));
+        TenantAccount selectedTenant = getSelectedTenant();
 
-        ObservableList<TenantAccount> items = FXCollections.observableArrayList(tenants);
-        table.setItems(items);
-        if (landlordSelectedUsername != null) {
-            for (TenantAccount tenant : items) {
-                if (tenant.getUsername().equalsIgnoreCase(landlordSelectedUsername)) {
-                    table.getSelectionModel().select(tenant);
-                    break;
-                }
-            }
+        VBox pickerSection = new VBox(10);
+        pickerSection.getStyleClass().add("resident-picker-section");
+        Label pickerEyebrow = new Label("Quick select");
+        pickerEyebrow.getStyleClass().add("eyebrow-copy");
+        Label pickerSummary = createMutedCopy(selectedTenant == null
+                ? "Pick a resident card below to load their details and controls."
+                : "Selected: " + selectedTenant.getFullName() + " | Room "
+                        + selectedTenant.getRoomInfo().getRoomNumber() + " | "
+                        + selectedTenant.getPaymentStatusLabel());
+
+        FlowPane pickerGrid = new FlowPane();
+        pickerGrid.getStyleClass().add("resident-picker-grid");
+        pickerGrid.setHgap(10);
+        pickerGrid.setVgap(10);
+        for (TenantAccount tenant : tenants) {
+            pickerGrid.getChildren().add(createResidentPickerCard(
+                    tenant,
+                    selectedTenant != null && tenant.getUsername().equalsIgnoreCase(selectedTenant.getUsername())));
         }
-        table.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            landlordSelectedUsername = newValue == null ? null : newValue.getUsername();
-        });
-        table.setPrefHeight(calculateResidentTableHeight(tenants.size()));
-        table.setMinHeight(Region.USE_PREF_SIZE);
-        table.setMaxHeight(Region.USE_PREF_SIZE);
-
-        Label summary = createMutedCopy("Current view: "
-                + tenants.size()
-                + " visible resident(s). Paid "
-                + countStatus(tenants, PaymentStatus.PAID)
-                + ", pending "
-                + countStatus(tenants, PaymentStatus.PENDING)
-                + ", late "
-                + countStatus(tenants, PaymentStatus.LATE)
-                + ".");
-
-        Button controlsButton = createSecondaryButton("Jump to controls");
-        controlsButton.setOnAction(event -> {
-            landlordSection = LandlordSection.CONTROLS;
-            renderCurrentView();
-        });
+        if (tenants.isEmpty()) {
+            pickerGrid.getChildren().add(createMutedCopy("No residents match the current search or filter."));
+        }
+        pickerSection.getChildren().addAll(pickerEyebrow, pickerSummary, pickerGrid);
 
         HBox lowerRow = new HBox(14, createLandlordSelectedCard(), createLandlordResidentsInsightCard(tenants));
         HBox.setHgrow(lowerRow.getChildren().get(0), Priority.ALWAYS);
         HBox.setHgrow(lowerRow.getChildren().get(1), Priority.ALWAYS);
 
-        card.getChildren().addAll(title, table, summary, controlsButton, lowerRow);
+        card.getChildren().addAll(title, pickerSection, lowerRow);
         return card;
     }
 
     private Node createLandlordControlsRow() {
-        VBox actionsColumn = new VBox(14, createLandlordStatusControlCard(), createLandlordNotificationCard());
+        VBox actionsColumn = new VBox(14, createLandlordReceiptReviewCard(), createLandlordStatusControlCard(), createLandlordNotificationCard());
         HBox row = new HBox(14, createLandlordSelectedCard(), actionsColumn);
         HBox.setHgrow(row.getChildren().get(0), Priority.ALWAYS);
         HBox.setHgrow(actionsColumn, Priority.ALWAYS);
@@ -949,11 +1022,54 @@ public class StaySyncApp extends Application {
         return card;
     }
 
+    private Node createLandlordReceiptReviewCard() {
+        VBox card = createPanelCard();
+        Label eyebrow = new Label("Receipt review");
+        eyebrow.getStyleClass().add("eyebrow-copy");
+        Label title = new Label("Latest tenant receipt");
+        title.getStyleClass().add("card-title");
+
+        TenantAccount tenant = getSelectedTenant();
+        if (tenant == null) {
+            card.getChildren().addAll(
+                    eyebrow,
+                    title,
+                    createMutedCopy("Select a tenant from Residents to review the latest payment receipt photo."));
+            return card;
+        }
+
+        PaymentRecord latestReceipt = findLatestReceiptRecord(tenant);
+        if (latestReceipt == null) {
+            card.getChildren().addAll(
+                    eyebrow,
+                    title,
+                    createMutedCopy("No receipt photo has been submitted for " + tenant.getFullName() + " yet."));
+            return card;
+        }
+
+        Label submittedMeta = createMutedCopy(
+                latestReceipt.getFormattedTimestamp() + " | " + latestReceipt.getReceiptFileName());
+        submittedMeta.getStyleClass().add("receipt-meta");
+
+        Button openButton = createSecondaryButton("Open full photo");
+        openButton.setMaxWidth(Double.MAX_VALUE);
+        openButton.setOnAction(event -> openReceiptImage(latestReceipt, true));
+
+        card.getChildren().addAll(
+                eyebrow,
+                title,
+                submittedMeta,
+                createReceiptPreview(latestReceipt, "Receipt image is unavailable.", 360, 220),
+                openButton,
+                createMutedCopy(latestReceipt.getNote()));
+        return card;
+    }
+
     private Node createLandlordStatusControlCard() {
         VBox card = createPanelCard();
         Label eyebrow = new Label("Controls");
         eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Update payment status");
+        Label title = new Label("Update status and rent");
         title.getStyleClass().add("card-title");
 
         TenantAccount tenant = getSelectedTenant();
@@ -961,6 +1077,9 @@ public class StaySyncApp extends Application {
         statusBox.getStyleClass().add("ui-combo");
         statusBox.setMaxWidth(Double.MAX_VALUE);
         statusBox.setValue(tenant == null ? PaymentStatus.PENDING : tenant.getPaymentStatus());
+
+        TextField rentField = createTextField("Enter monthly rent");
+        rentField.setText(tenant == null ? "" : formatEditableAmount(tenant.getRoomInfo().getMonthlyRent()));
 
         Button applyButton = createPrimaryButton("Apply status");
         applyButton.setDisable(tenant == null);
@@ -971,6 +1090,34 @@ public class StaySyncApp extends Application {
                 showLandlordMessage("Payment status updated for " + tenant.getFullName() + ".", true);
                 renderCurrentView();
             }
+        });
+
+        Button saveRentButton = createSecondaryButton("Save rent");
+        saveRentButton.setDisable(tenant == null);
+        saveRentButton.setMaxWidth(Double.MAX_VALUE);
+        saveRentButton.setOnAction(event -> {
+            if (tenant == null) {
+                return;
+            }
+
+            double monthlyRent;
+            try {
+                monthlyRent = Double.parseDouble(rentField.getText().trim());
+            } catch (NumberFormatException exception) {
+                showLandlordMessage("Enter a valid rent amount.", false);
+                renderCurrentView();
+                return;
+            }
+
+            String result = staySyncService.updateTenantMonthlyRent(tenant, monthlyRent);
+            if (result != null) {
+                showLandlordMessage(result, false);
+                renderCurrentView();
+                return;
+            }
+
+            showLandlordMessage("Monthly rent updated for " + tenant.getFullName() + ".", true);
+            renderCurrentView();
         });
 
         Button deleteButton = createDangerButton("Delete tenant");
@@ -986,8 +1133,8 @@ public class StaySyncApp extends Application {
         });
 
         Label hint = createMutedCopy(tenant == null
-                ? "Select a tenant from the residents table to enable payment-status controls."
-                : "Selected tenant is ready for a status update. Choose a new value and apply it from this page.");
+                ? "Select a tenant to enable status and rent controls."
+                : "Adjust payment status or update the tenant's monthly rent here.");
 
         Label deleteHint = createMutedCopy(tenant == null
                 ? "Delete stays disabled until a tenant is selected."
@@ -998,6 +1145,8 @@ public class StaySyncApp extends Application {
                 title,
                 createFieldGroup("NEW STATUS", statusBox),
                 applyButton,
+                createFieldGroup("MONTHLY RENT", rentField),
+                saveRentButton,
                 deleteButton,
                 residentsButton,
                 hint,
@@ -1067,37 +1216,49 @@ public class StaySyncApp extends Application {
     }
 
     private Node createLandlordResidentsInsightCard(List<TenantAccount> tenants) {
-        VBox card = createPanelCard("hero-panel");
-        Label eyebrow = new Label("Resident pulse");
-        eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Collection snapshot");
-        title.getStyleClass().add("card-title");
-
+        VBox card = createPanelCard("hero-panel", "residents-insight-card");
+        int totalVisible = tenants.size();
         int paid = countStatus(tenants, PaymentStatus.PAID);
         int pending = countStatus(tenants, PaymentStatus.PENDING);
         int late = countStatus(tenants, PaymentStatus.LATE);
+        int followUp = pending + late;
 
-        String summaryText;
-        if (late > 0) {
-            summaryText = late + " resident account(s) need immediate follow-up before the next billing sweep.";
-        } else if (pending > 0) {
-            summaryText = pending + " resident account(s) are still pending and should be reviewed soon.";
-        } else {
-            summaryText = "This filtered board is clear. All visible residents are marked paid.";
-        }
+        HBox header = new HBox(10);
+        header.getStyleClass().add("overview-header-row");
+        header.setAlignment(Pos.CENTER_LEFT);
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
 
-        HBox chips = new HBox(10,
-                createConsoleStat("Paid", String.valueOf(paid)),
-                createConsoleStat("Pending", String.valueOf(pending)),
-                createConsoleStat("Late", String.valueOf(late)));
-        chips.getStyleClass().add("console-stat-row");
+        Label title = new Label("Payment overview");
+        title.getStyleClass().add("card-title");
+        header.getChildren().addAll(
+                title,
+                headerSpacer,
+                createOverviewBadge(
+                        followUp == 0 ? "Clear" : followUp + " need review",
+                        late > 0 ? "danger" : pending > 0 ? "warning" : "calm"));
+
+        HBox spotlight = new HBox(16);
+        spotlight.getStyleClass().add("residents-insight-spotlight");
+        spotlight.setAlignment(Pos.CENTER_LEFT);
+        Label spotlightValue = new Label(String.format("%02d", followUp));
+        spotlightValue.getStyleClass().add("residents-insight-spotlight-value");
+        VBox spotlightCopy = new VBox(4);
+        Label spotlightLabel = new Label("Needs attention");
+        spotlightLabel.getStyleClass().add("sidebar-name");
+        spotlightCopy.getChildren().add(spotlightLabel);
+        spotlight.getChildren().addAll(spotlightValue, spotlightCopy);
+
+        HBox statsRow = new HBox(10,
+                createResidentsInsightStat("Paid", paid, "paid"),
+                createResidentsInsightStat("Pending", pending, "pending"),
+                createResidentsInsightStat("Late", late, "late"));
+        statsRow.getStyleClass().add("residents-insight-stats");
 
         card.getChildren().addAll(
-                eyebrow,
-                title,
-                createMutedCopy(summaryText),
-                chips,
-                createMutedCopy("Use Residents to scan the board quickly, then switch to Controls only when a status update is needed."));
+                header,
+                spotlight,
+                statsRow);
         return card;
     }
 
@@ -1196,6 +1357,22 @@ public class StaySyncApp extends Application {
         renderCurrentView();
     }
 
+    private double getLandlordScrollVvalue() {
+        return switch (landlordSection) {
+            case RESIDENTS -> landlordResidentsScrollVvalue;
+            case CONTROLS -> landlordControlsScrollVvalue;
+            default -> landlordOverviewScrollVvalue;
+        };
+    }
+
+    private void setLandlordScrollVvalue(double value) {
+        switch (landlordSection) {
+            case RESIDENTS -> landlordResidentsScrollVvalue = value;
+            case CONTROLS -> landlordControlsScrollVvalue = value;
+            default -> landlordOverviewScrollVvalue = value;
+        }
+    }
+
     private void signOut() {
         currentTenant = null;
         view = View.AUTH;
@@ -1213,6 +1390,10 @@ public class StaySyncApp extends Application {
         landlordNotificationType = NotificationType.PAYMENT_REMINDER;
         landlordNotificationTitle = "";
         landlordNotificationMessageBody = "";
+        tenantScrollVvalue = 0;
+        landlordOverviewScrollVvalue = 0;
+        landlordResidentsScrollVvalue = 0;
+        landlordControlsScrollVvalue = 0;
         renderCurrentView();
     }
 
@@ -1224,6 +1405,71 @@ public class StaySyncApp extends Application {
     private void clearLandlordMessage() {
         landlordMessage = "";
         landlordMessageSuccess = false;
+    }
+
+    private void handleTenantReceiptSubmission() {
+        if (currentTenant == null) {
+            tenantMessage = "Tenant account was not found.";
+            tenantMessageSuccess = false;
+            renderCurrentView();
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose receipt photo");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+
+        File initialDirectory = new File(System.getProperty("user.home", "."));
+        if (initialDirectory.exists() && initialDirectory.isDirectory()) {
+            chooser.setInitialDirectory(initialDirectory);
+        }
+
+        File selectedFile = chooser.showOpenDialog(stage);
+        if (selectedFile == null) {
+            return;
+        }
+
+        String result = staySyncService.submitTenantPaymentReceipt(currentTenant, selectedFile.toPath());
+        if (result != null) {
+            tenantMessage = result;
+            tenantMessageSuccess = false;
+            renderCurrentView();
+            return;
+        }
+
+        tenantMessage = "Receipt photo sent to admin for review.";
+        tenantMessageSuccess = true;
+        renderCurrentView();
+    }
+
+    private void openReceiptImage(PaymentRecord record, boolean landlordContext) {
+        if (record == null || !record.hasReceiptImage()) {
+            if (landlordContext) {
+                showLandlordMessage("No receipt photo is available for this record.", false);
+            } else {
+                tenantMessage = "No receipt photo is available for this record.";
+                tenantMessageSuccess = false;
+            }
+            renderCurrentView();
+            return;
+        }
+
+        try {
+            Path receiptPath = Path.of(record.getReceiptImagePath());
+            if (!Files.exists(receiptPath)) {
+                throw new IllegalStateException("Missing receipt image");
+            }
+            getHostServices().showDocument(receiptPath.toUri().toString());
+        } catch (RuntimeException exception) {
+            if (landlordContext) {
+                showLandlordMessage("The receipt photo could not be opened.", false);
+            } else {
+                tenantMessage = "The receipt photo could not be opened.";
+                tenantMessageSuccess = false;
+            }
+            renderCurrentView();
+        }
     }
 
     private void handleTenantDeletion(TenantAccount tenant) {
@@ -1576,7 +1822,7 @@ public class StaySyncApp extends Application {
         });
     }
 
-    private ScrollPane createPageScrollPane(Node content) {
+    private ScrollPane createPageScrollPane(Node content, double initialVvalue, DoubleConsumer onVvalueChanged) {
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.getStyleClass().add("page-scroll");
         scrollPane.setFitToWidth(true);
@@ -1595,6 +1841,10 @@ public class StaySyncApp extends Application {
             scrollPane.setVvalue(nextValue);
             event.consume();
         });
+        if (onVvalueChanged != null) {
+            scrollPane.vvalueProperty().addListener((observable, oldValue, newValue) -> onVvalueChanged.accept(newValue.doubleValue()));
+        }
+        Platform.runLater(() -> scrollPane.setVvalue(initialVvalue));
         return scrollPane;
     }
 
@@ -1748,6 +1998,182 @@ public class StaySyncApp extends Application {
         return pill;
     }
 
+    private Label createOverviewBadge(String text, String toneClass) {
+        Label badge = new Label(text);
+        badge.getStyleClass().addAll("overview-badge", toneClass);
+        return badge;
+    }
+
+    private HBox createPortfolioStatusChip(String labelText, int count, PaymentStatus status) {
+        HBox chip = createStatusPill(labelText + " " + String.format("%02d", count), status);
+        chip.getStyleClass().add("portfolio-status-chip");
+        return chip;
+    }
+
+    private VBox createOverviewMiniCard(String title, String value, String helperText, String... extraClasses) {
+        VBox card = new VBox(4);
+        card.getStyleClass().add("overview-mini-card");
+        Collections.addAll(card.getStyleClass(), extraClasses);
+        HBox.setHgrow(card, Priority.ALWAYS);
+
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("field-label");
+        Label valueLabel = new Label(value);
+        valueLabel.getStyleClass().addAll("metric-value", "overview-mini-value");
+        Label helper = createMutedCopy(helperText);
+        helper.getStyleClass().add("overview-mini-helper");
+
+        card.getChildren().addAll(titleLabel, valueLabel, helper);
+        return card;
+    }
+
+    private VBox createResidentsInsightStat(String title, int count, String toneClass) {
+        VBox card = new VBox(4);
+        card.getStyleClass().addAll("residents-insight-stat", toneClass);
+        HBox.setHgrow(card, Priority.ALWAYS);
+
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("field-label");
+        Label valueLabel = new Label(String.format("%02d", count));
+        valueLabel.getStyleClass().add("residents-insight-stat-value");
+
+        card.getChildren().addAll(titleLabel, valueLabel);
+        return card;
+    }
+
+    private PaymentRecord findLatestReceiptRecord(TenantAccount tenant) {
+        if (tenant == null) {
+            return null;
+        }
+        for (PaymentRecord record : tenant.getPaymentHistory()) {
+            if (record.hasReceiptImage()) {
+                return record;
+            }
+        }
+        return null;
+    }
+
+    private Node createReceiptPreview(PaymentRecord record, String emptyMessage, double fitWidth, double fitHeight) {
+        StackPane preview = new StackPane();
+        preview.getStyleClass().add("receipt-preview");
+        preview.setMinHeight(fitHeight);
+        preview.setPrefHeight(fitHeight);
+        preview.setMaxWidth(Double.MAX_VALUE);
+
+        if (record == null || !record.hasReceiptImage()) {
+            Label placeholder = createMutedCopy(emptyMessage);
+            placeholder.getStyleClass().add("receipt-placeholder");
+            preview.getChildren().add(placeholder);
+            return preview;
+        }
+
+        try {
+            Path receiptPath = Path.of(record.getReceiptImagePath());
+            if (Files.exists(receiptPath)) {
+                Image image = new Image(receiptPath.toUri().toString(), fitWidth, fitHeight, true, true, true);
+                if (!image.isError()) {
+                    ImageView imageView = new ImageView(image);
+                    imageView.getStyleClass().add("receipt-preview-image");
+                    imageView.setFitWidth(fitWidth);
+                    imageView.setFitHeight(fitHeight);
+                    imageView.setPreserveRatio(true);
+                    preview.getChildren().add(imageView);
+                    return preview;
+                }
+            }
+        } catch (RuntimeException ignored) {
+            // Fall back to an unavailable-state placeholder below.
+        }
+
+        Label unavailable = createMutedCopy("Receipt image is unavailable.");
+        unavailable.getStyleClass().add("receipt-placeholder");
+        preview.getChildren().add(unavailable);
+        return preview;
+    }
+
+    private VBox createResidentPickerCard(TenantAccount tenant, boolean selected) {
+        VBox card = createPanelCard("mini-panel", "resident-picker-card");
+        if (selected) {
+            card.getStyleClass().add("selected");
+        }
+        card.setPrefWidth(288);
+
+        HBox header = new HBox(8);
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label name = new Label(tenant.getFullName());
+        name.getStyleClass().add("sidebar-name");
+        name.setWrapText(true);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox statusRow = new HBox(8);
+        statusRow.setAlignment(Pos.CENTER_LEFT);
+        statusRow.getChildren().add(createStatusPill(tenant.getPaymentStatusLabel(), tenant.getPaymentStatus()));
+
+        VBox meta = new VBox(2);
+        meta.getStyleClass().add("resident-picker-meta");
+        Label room = new Label("Room " + tenant.getRoomInfo().getRoomNumber() + " | " + tenant.getRoomInfo().getRoomType());
+        room.getStyleClass().add("field-label");
+        Label username = new Label("@" + tenant.getUsername());
+        username.getStyleClass().add("meta-copy");
+        username.setWrapText(true);
+        meta.getChildren().addAll(room, username);
+
+        GridPane details = new GridPane();
+        details.getStyleClass().add("resident-picker-details");
+        details.setHgap(12);
+        details.setVgap(10);
+        details.add(createResidentPickerDetail("Contact", tenant.getContactNumber()), 0, 0);
+        details.add(createResidentPickerDetail("Monthly rent", formatCurrency(tenant.getRoomInfo().getMonthlyRent())), 1, 0);
+        details.add(createResidentPickerDetail("Username", tenant.getUsername()), 0, 1);
+        details.add(createResidentPickerDetail("Room type", tenant.getRoomInfo().getRoomType()), 1, 1);
+
+        Button selectButton = createSecondaryButton(selected ? "Selected" : "Select");
+        selectButton.setMaxWidth(Double.MAX_VALUE);
+        if (selected) {
+            selectButton.getStyleClass().add("resident-picker-action-active");
+        }
+        selectButton.setOnAction(event -> {
+            landlordSelectedUsername = tenant.getUsername();
+            renderCurrentView();
+        });
+
+        Button controlsButton = createPrimaryButton("Open controls");
+        controlsButton.setMaxWidth(Double.MAX_VALUE);
+        controlsButton.setOnAction(event -> {
+            landlordSelectedUsername = tenant.getUsername();
+            landlordSection = LandlordSection.CONTROLS;
+            renderCurrentView();
+        });
+
+        HBox actions = new HBox(10, selectButton, controlsButton);
+        actions.getStyleClass().add("resident-picker-actions");
+        HBox.setHgrow(selectButton, Priority.ALWAYS);
+        HBox.setHgrow(controlsButton, Priority.ALWAYS);
+
+        card.getChildren().addAll(
+                header,
+                meta,
+                statusRow,
+                details,
+                actions);
+        header.getChildren().addAll(name, spacer);
+        return card;
+    }
+
+    private VBox createResidentPickerDetail(String labelText, String valueText) {
+        VBox box = new VBox(2);
+        box.getStyleClass().add("resident-picker-detail");
+
+        Label label = new Label(labelText);
+        label.getStyleClass().add("field-label");
+        Label value = new Label(valueText);
+        value.getStyleClass().add("detail-value");
+        value.setWrapText(true);
+
+        box.getChildren().addAll(label, value);
+        return box;
+    }
+
     private VBox createMetricCard(String title, String value, String helperText) {
         VBox card = createPanelCard();
         HBox.setHgrow(card, Priority.ALWAYS);
@@ -1828,13 +2254,6 @@ public class StaySyncApp extends Application {
         return column;
     }
 
-    private TableColumn<TenantAccount, String> createTenantColumn(String title, java.util.function.Function<TenantAccount, String> mapper, double width) {
-        TableColumn<TenantAccount, String> column = new TableColumn<>(title);
-        column.setCellValueFactory(data -> new ReadOnlyStringWrapper(mapper.apply(data.getValue())));
-        column.setPrefWidth(width);
-        return column;
-    }
-
     private String getTenantSectionTitle() {
         return switch (tenantSection) {
             case PAYMENTS -> "PAYMENTS";
@@ -1861,44 +2280,39 @@ public class StaySyncApp extends Application {
 
     private String getLandlordSectionSubtitle() {
         return switch (landlordSection) {
-            case RESIDENTS -> "Search, filter, and review tenant records without losing payment context.";
-            case CONTROLS -> "Apply payment-status changes and send tenant notices from one place.";
-            default -> "Track resident counts, search results, and payment health from one workspace.";
+            case RESIDENTS -> "Search and review residents.";
+            case CONTROLS -> "Update payment status and notices.";
+            default -> "Monitor residents and payment status.";
         };
     }
 
     private String buildOverviewSummary(DashboardSnapshot snapshot) {
         if (snapshot.getQuery().isBlank()) {
-            return "Showing " + snapshot.getTotalTenantCount() + " resident accounts. Paid: " + snapshot.getPaidCount()
-                    + ", pending: " + snapshot.getPendingCount() + ", late: " + snapshot.getLateCount() + ".";
+            return snapshot.getTotalTenantCount() + " residents in view: "
+                    + snapshot.getPaidCount() + " paid, " + snapshot.getPendingCount() + " pending, "
+                    + snapshot.getLateCount() + " late.";
         }
-        return "Showing " + snapshot.getTenants().size() + " of " + snapshot.getTotalTenantCount() + " residents for \""
-                + snapshot.getQuery() + "\". Paid: " + snapshot.getPaidCount() + ", pending: " + snapshot.getPendingCount()
-                + ", late: " + snapshot.getLateCount() + ".";
+        return snapshot.getTenants().size() + " match" + (snapshot.getTenants().size() == 1 ? "" : "es")
+                + " for \"" + snapshot.getQuery() + "\". Portfolio: "
+                + snapshot.getPaidCount() + " paid, " + snapshot.getPendingCount() + " pending, "
+                + snapshot.getLateCount() + " late.";
     }
 
     private String buildAttentionSummary(DashboardSnapshot snapshot) {
         if (snapshot.getLateCount() > 0) {
-            return snapshot.getLateCount()
-                    + " late account(s) need immediate review. Prioritize those entries before moving on to pending accounts.";
+            return snapshot.getLateCount() + " late account(s) need review first.";
         }
         if (snapshot.getPendingCount() > 0) {
-            return snapshot.getPendingCount()
-                    + " pending account(s) are still open. Review them before the due date passes.";
+            return snapshot.getPendingCount() + " pending account(s) still need review.";
         }
-        return "No urgent payment issues right now. The board is clear for routine monitoring.";
+        return "No urgent payment issues.";
     }
 
     private String buildWorkflowSummary(DashboardSnapshot snapshot) {
         if (!snapshot.getQuery().isBlank()) {
-            return "A filtered search is active. Review the residents list, select a record, then move to Controls for payment updates.";
+            return "Review matches here, then update them in Controls.";
         }
-        return "Start in Residents to search or filter the portfolio, then use Controls only when a selected tenant needs a status change.";
-    }
-
-    private double calculateResidentTableHeight(int visibleTenants) {
-        int rowCount = Math.max(4, Math.min(visibleTenants, 6));
-        return 44 + (rowCount * 42);
+        return "Search in Residents, update in Controls.";
     }
 
     private int countStatus(List<TenantAccount> tenants, PaymentStatus status) {
@@ -1913,6 +2327,10 @@ public class StaySyncApp extends Application {
 
     private String formatCurrency(double amount) {
         return CURRENCY_FORMAT.format(amount);
+    }
+
+    private String formatEditableAmount(double amount) {
+        return String.format(Locale.US, "%.2f", amount);
     }
 
     private String formatPercentage(int numerator, int denominator) {

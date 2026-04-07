@@ -1,8 +1,13 @@
 package staysync.core;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import staysync.core.TenantAccount.NotificationType;
 import staysync.core.TenantAccount.PaymentStatus;
@@ -13,6 +18,7 @@ public class StaySyncService {
     private static final String LANDLORD_PASSWORD = "1234";
     private static final String[] ROOM_TYPES = { "Standard", "Deluxe", "Family" };
     private static final int DEFAULT_DUE_DAY = 5;
+    private static final Path RECEIPT_STORAGE_DIRECTORY = Path.of("storage", "receipts");
 
     private final List<TenantAccount> tenants = new ArrayList<>();
 
@@ -106,6 +112,34 @@ public class StaySyncService {
                 "Landlord");
     }
 
+    public synchronized String submitTenantPaymentReceipt(TenantAccount tenant, Path sourceImage) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        String validationMessage = validateReceiptFile(sourceImage);
+        if (validationMessage != null) {
+            return validationMessage;
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        try {
+            Path storedReceipt = storeReceiptCopy(storedTenant, sourceImage);
+            storedTenant.submitPaymentReceipt(
+                    "Receipt photo submitted by the tenant for landlord review.",
+                    "Tenant",
+                    storedReceipt.toString(),
+                    sourceImage.getFileName().toString());
+            return null;
+        } catch (IOException exception) {
+            return "The receipt photo could not be saved. Please try a different image.";
+        }
+    }
+
     public synchronized String updateTenantProfile(
             TenantAccount tenant,
             String fullName,
@@ -132,6 +166,23 @@ public class StaySyncService {
                 roomNumber.trim(),
                 roomType,
                 getMonthlyRentForRoomType(roomType));
+        return null;
+    }
+
+    public synchronized String updateTenantMonthlyRent(TenantAccount tenant, double monthlyRent) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+        if (monthlyRent <= 0) {
+            return "Monthly rent must be greater than 0.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        storedTenant.updateMonthlyRent(monthlyRent);
         return null;
     }
 
@@ -406,6 +457,41 @@ public class StaySyncService {
             return 6000.00;
         }
         return 3200.00;
+    }
+
+    private String validateReceiptFile(Path sourceImage) {
+        if (sourceImage == null) {
+            return "Choose a receipt image first.";
+        }
+        if (!Files.exists(sourceImage) || !Files.isRegularFile(sourceImage)) {
+            return "The selected receipt image could not be found.";
+        }
+
+        String fileName = sourceImage.getFileName() == null ? "" : sourceImage.getFileName().toString().toLowerCase(Locale.ROOT);
+        if (!(fileName.endsWith(".png")
+                || fileName.endsWith(".jpg")
+                || fileName.endsWith(".jpeg")
+                || fileName.endsWith(".gif")
+                || fileName.endsWith(".bmp"))) {
+            return "Choose a PNG, JPG, JPEG, GIF, or BMP receipt image.";
+        }
+        return null;
+    }
+
+    private Path storeReceiptCopy(TenantAccount tenant, Path sourceImage) throws IOException {
+        Path tenantDirectory = RECEIPT_STORAGE_DIRECTORY.resolve(tenant.getUsername());
+        Files.createDirectories(tenantDirectory);
+
+        String originalName = sourceImage.getFileName() == null ? "receipt.png" : sourceImage.getFileName().toString();
+        String extension = "";
+        int extensionIndex = originalName.lastIndexOf('.');
+        if (extensionIndex >= 0) {
+            extension = originalName.substring(extensionIndex);
+        }
+
+        Path target = tenantDirectory.resolve("receipt-" + System.currentTimeMillis() + extension);
+        Files.copy(sourceImage, target, StandardCopyOption.REPLACE_EXISTING);
+        return target.toAbsolutePath().normalize();
     }
 
     private boolean isBlank(String value) {

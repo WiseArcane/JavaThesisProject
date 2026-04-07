@@ -78,6 +78,10 @@ public class TenantAccount {
         roomInfo.setMonthlyRent(monthlyRent);
     }
 
+    public void updateMonthlyRent(double monthlyRent) {
+        roomInfo.setMonthlyRent(monthlyRent);
+    }
+
     public void changePassword(String newPassword) {
         password = newPassword;
     }
@@ -85,6 +89,10 @@ public class TenantAccount {
     public void updatePaymentStatus(PaymentStatus paymentStatus, String note, String updatedBy) {
         this.paymentStatus = paymentStatus;
         addPaymentRecord(paymentStatus, note, updatedBy);
+    }
+
+    public void submitPaymentReceipt(String note, String updatedBy, String receiptImagePath, String receiptFileName) {
+        addPaymentRecord(paymentStatus, note, updatedBy, receiptImagePath, receiptFileName);
     }
 
     public void addNotification(NotificationType type, String title, String message, String sentBy) {
@@ -106,7 +114,16 @@ public class TenantAccount {
     }
 
     private void addPaymentRecord(PaymentStatus status, String note, String updatedBy) {
-        paymentHistory.add(0, new PaymentRecord(status, note, updatedBy));
+        addPaymentRecord(status, note, updatedBy, "", "");
+    }
+
+    private void addPaymentRecord(
+            PaymentStatus status,
+            String note,
+            String updatedBy,
+            String receiptImagePath,
+            String receiptFileName) {
+        paymentHistory.add(0, new PaymentRecord(status, note, updatedBy, receiptImagePath, receiptFileName));
     }
 
     public enum PaymentStatus {
@@ -200,12 +217,25 @@ public class TenantAccount {
         private final PaymentStatus status;
         private final String note;
         private final String updatedBy;
+        private final String receiptImagePath;
+        private final String receiptFileName;
 
         public PaymentRecord(PaymentStatus status, String note, String updatedBy) {
+            this(status, note, updatedBy, "", "");
+        }
+
+        public PaymentRecord(
+                PaymentStatus status,
+                String note,
+                String updatedBy,
+                String receiptImagePath,
+                String receiptFileName) {
             this.timestamp = LocalDateTime.now();
             this.status = status;
             this.note = note;
             this.updatedBy = updatedBy;
+            this.receiptImagePath = receiptImagePath == null ? "" : receiptImagePath;
+            this.receiptFileName = receiptFileName == null ? "" : receiptFileName;
         }
 
         public PaymentStatus getStatus() {
@@ -218,6 +248,22 @@ public class TenantAccount {
 
         public String getUpdatedBy() {
             return updatedBy;
+        }
+
+        public String getReceiptImagePath() {
+            return receiptImagePath;
+        }
+
+        public String getReceiptFileName() {
+            return receiptFileName;
+        }
+
+        public boolean hasReceiptImage() {
+            return !receiptImagePath.isBlank();
+        }
+
+        public String getReceiptStatusLabel() {
+            return hasReceiptImage() ? "Photo attached" : "No photo";
         }
 
         public String getFormattedTimestamp() {

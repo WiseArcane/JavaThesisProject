@@ -180,6 +180,287 @@
         linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
 }
 
+.landlord-overview-row {
+    -fx-alignment: top-left;
+}
+
+.landlord-summary-card {
+    -fx-padding: 24px;
+    -fx-spacing: 16px;
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.12)),
+        radial-gradient(center 14% 16%, radius 62%, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 3%) 0%, -color-panel-muted 58%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 32px, 31px, 30px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-radius: 32px;
+}
+
+.landlord-guide-card {
+    -fx-padding: 24px;
+    -fx-spacing: 16px;
+}
+
+.overview-header-row,
+.overview-metric-row,
+.watch-stats-row {
+    -fx-alignment: center-left;
+}
+
+.overview-metric-row,
+.watch-stats-row {
+    -fx-spacing: 10px;
+}
+
+.overview-badge {
+    -fx-padding: 7px 12px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.overview-badge.live {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-accent-soft;
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.22);
+    -fx-text-fill: -color-accent-deep;
+}
+
+.overview-badge.filtered {
+    -fx-background-color: rgba(255, 255, 255, 0.22), rgba(91, 127, 215, 0.16);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(63, 96, 181, 0.28);
+    -fx-text-fill: -color-data-strong;
+}
+
+.overview-badge.warning {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-warning-bg;
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-warning-border;
+    -fx-text-fill: -color-warning-text;
+}
+
+.overview-badge.danger {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-danger-bg;
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-danger-border;
+    -fx-text-fill: -color-danger-text;
+}
+
+.overview-badge.calm {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-success-bg;
+    -fx-background-insets: 0, 1;
+    -fx-border-color: -color-success-border;
+    -fx-text-fill: -color-success-text;
+}
+
+.overview-mini-card,
+.watch-stat-card,
+.workflow-band {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.overview-mini-card,
+.watch-stat-card {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 4px;
+}
+
+.overview-mini-card {
+    -fx-min-height: 108px;
+}
+
+.watch-stat-card.danger {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-danger-bg;
+    -fx-border-color: -color-danger-border;
+}
+
+.watch-stat-card.warning {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-warning-bg;
+    -fx-border-color: -color-warning-border;
+}
+
+.watch-stat-card.calm {
+    -fx-background-color: rgba(255, 255, 255, 0.22), -color-success-bg;
+    -fx-border-color: -color-success-border;
+}
+
+.overview-mini-value {
+    -fx-font-size: 26px;
+}
+
+.overview-mini-helper,
+.workflow-copy {
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.portfolio-chip-row {
+    -fx-hgap: 8px;
+    -fx-vgap: 8px;
+}
+
+.portfolio-status-chip {
+    -fx-padding: 8px 14px;
+}
+
+.workflow-band {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 6px;
+}
+
+.residents-insight-card {
+    -fx-padding: 22px;
+    -fx-spacing: 14px;
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.10)),
+        radial-gradient(center 12% 14%, radius 60%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 2%) 0%, -color-panel-muted 54%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 30px, 29px, 28px;
+    -fx-border-color: rgba(109, 81, 28, 0.16);
+    -fx-border-radius: 30px;
+}
+
+.residents-insight-summary {
+    -fx-font-size: 15px;
+}
+
+.residents-insight-spotlight {
+    -fx-padding: 16px 18px;
+    -fx-spacing: 16px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.18),
+        linear-gradient(to bottom, derive(-color-accent-soft, 18%) 0%, -color-accent-soft 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 24px, 23px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-radius: 24px;
+}
+
+.residents-insight-spotlight-value {
+    -fx-min-width: 72px;
+    -fx-alignment: center;
+    -fx-padding: 12px 0;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.28),
+        linear-gradient(to bottom, derive(-color-accent, 12%) 0%, -color-accent 62%, -color-accent-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: rgba(109, 81, 28, 0.24);
+    -fx-border-radius: 22px;
+    -fx-font-size: 34px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #231a0e;
+}
+
+.residents-insight-helper {
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.residents-insight-stats {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.residents-insight-stat {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 4px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.residents-insight-stat.paid {
+    -fx-border-color: -color-success-border;
+}
+
+.residents-insight-stat.pending {
+    -fx-border-color: -color-warning-border;
+}
+
+.residents-insight-stat.late {
+    -fx-border-color: -color-danger-border;
+}
+
+.residents-insight-stat-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-text;
+}
+
+.residents-insight-stat.paid .residents-insight-stat-value {
+    -fx-text-fill: -color-success-text;
+}
+
+.residents-insight-stat.pending .residents-insight-stat-value {
+    -fx-text-fill: -color-warning-text;
+}
+
+.residents-insight-stat.late .residents-insight-stat-value {
+    -fx-text-fill: -color-danger-text;
+}
+
+.residents-insight-stat-meta {
+    -fx-font-size: 12px;
+    -fx-line-spacing: 3px;
+}
+
+.residents-insight-footer {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 10px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to right, rgba(216, 168, 76, 0.10) 0%, rgba(255, 255, 255, 0.00) 42%),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 22px, 21px, 20px;
+    -fx-border-color: rgba(193, 141, 51, 0.16);
+    -fx-border-radius: 22px;
+}
+
+.workflow-route {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.workflow-step {
+    -fx-padding: 9px 14px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 999px, 998px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-width: 1px;
+    -fx-border-radius: 999px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-text;
+}
+
+.workflow-arrow {
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-accent-deep;
+}
+
 .auth-panel {
     -fx-background-color:
         rgba(255, 255, 255, 0.40),
@@ -285,6 +566,54 @@
     -fx-background-color:
         rgba(255, 255, 255, 0.03),
         linear-gradient(to bottom, -color-sidebar 0%, -color-panel-strong 100%);
+}
+
+.app-root.dark-mode .landlord-summary-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 18% 14%, radius 66%, rgba(215, 170, 86, 0.08), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-panel, 3%) 0%, -color-panel-muted 62%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.18);
+}
+
+.app-root.dark-mode .residents-insight-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 15% 12%, radius 64%, rgba(215, 170, 86, 0.07), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-panel, 2%) 0%, -color-panel-muted 58%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.16);
+}
+
+.app-root.dark-mode .residents-insight-spotlight {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.05),
+        linear-gradient(to bottom, rgba(215, 170, 86, 0.18) 0%, rgba(215, 170, 86, 0.10) 100%);
+    -fx-border-color: rgba(215, 170, 86, 0.18);
+}
+
+.app-root.dark-mode .residents-insight-spotlight-value {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.06),
+        linear-gradient(to bottom, derive(-color-accent, 8%) 0%, -color-accent 60%, -color-accent-strong 100%);
+    -fx-border-color: rgba(215, 170, 86, 0.22);
+}
+
+.app-root.dark-mode .residents-insight-footer {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to right, rgba(215, 170, 86, 0.10) 0%, rgba(255, 255, 255, 0.00) 42%),
+        linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.14);
+}
+
+.app-root.dark-mode .workflow-step {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.05),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
 }
 
 .app-root.dark-mode .tab-strip {
@@ -1157,4 +1486,135 @@
 .context-menu {
     -fx-background-color: transparent;
     -fx-padding: 0;
+}
+
+.receipt-preview {
+    -fx-alignment: center;
+    -fx-padding: 12px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.20),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.receipt-preview-image {
+    -fx-effect: dropshadow(gaussian, -color-shadow-soft, 18, 0.14, 0, 6);
+}
+
+.receipt-placeholder,
+.receipt-meta {
+    -fx-text-fill: -color-text-muted;
+}
+
+.receipt-placeholder {
+    -fx-font-size: 14px;
+    -fx-line-spacing: 4px;
+}
+
+.receipt-meta {
+    -fx-font-size: 13px;
+}
+
+.resident-picker-section {
+    -fx-spacing: 10px;
+}
+
+.resident-picker-grid {
+    -fx-hgap: 10px;
+    -fx-vgap: 10px;
+}
+
+.resident-picker-card {
+    -fx-padding: 16px 18px;
+    -fx-spacing: 12px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.20),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 24px, 23px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 24px;
+}
+
+.resident-picker-details {
+    -fx-padding: 2px 0 0 0;
+}
+
+.resident-picker-detail {
+    -fx-padding: 10px 12px;
+    -fx-spacing: 2px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.14),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 16px, 15px;
+    -fx-border-color: rgba(99, 95, 67, 0.10);
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+}
+
+.resident-picker-actions {
+    -fx-spacing: 10px;
+}
+
+.resident-picker-card.selected {
+    -fx-border-color: rgba(193, 141, 51, 0.58);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.18), 18, 0.16, 0, 4);
+}
+
+.resident-picker-card.selected .resident-picker-detail {
+    -fx-border-color: rgba(193, 141, 51, 0.24);
+}
+
+.resident-picker-action-active {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, rgba(42, 34, 20, 0.16) 0%, rgba(42, 34, 20, 0.08) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(63, 46, 16, 0.26);
+    -fx-text-fill: #231a0f;
+}
+
+.resident-picker-action-active:hover {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom, rgba(42, 34, 20, 0.20) 0%, rgba(42, 34, 20, 0.10) 100%);
+    -fx-border-color: rgba(63, 46, 16, 0.34);
+}
+
+.app-root.dark-mode .receipt-preview {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .resident-picker-card {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .resident-picker-detail {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.08);
+}
+
+.app-root.dark-mode .resident-picker-card.selected {
+    -fx-border-color: rgba(215, 170, 86, 0.46);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(215, 170, 86, 0.16), 18, 0.16, 0, 4);
+}
+
+.app-root.dark-mode .resident-picker-card.selected .resident-picker-detail {
+    -fx-border-color: rgba(215, 170, 86, 0.22);
 }
