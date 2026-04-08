@@ -225,9 +225,7 @@ public class StaySyncFrame extends JFrame implements AuthActions, TenantActions,
             String updateMessage = staySyncService.updateTenantProfile(
                     tenant,
                     formPanel.getFullNameValue(),
-                    formPanel.getContactNumberValue(),
-                    formPanel.getRoomNumberValue(),
-                    formPanel.getRoomTypeValue());
+                    formPanel.getContactNumberValue());
             if (updateMessage != null) {
                 JOptionPane.showMessageDialog(this, updateMessage, "Profile Error", JOptionPane.ERROR_MESSAGE);
                 continue;

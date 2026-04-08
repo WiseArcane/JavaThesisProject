@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 import staysync.core.TenantAccount.NotificationType;
+import staysync.core.TenantAccount.CoOccupantRequest;
 import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
 
@@ -51,9 +52,9 @@ public class StaySyncService {
         }
 
         RoomInfo roomInfo = new RoomInfo(
-                roomNumber.trim(),
-                roomType,
-                getMonthlyRentForRoomType(roomType),
+                "TBD",
+                "",
+                0,
                 DEFAULT_DUE_DAY);
         tenants.add(new TenantAccount(
                 fullName.trim(),
@@ -97,10 +98,14 @@ public class StaySyncService {
     }
 
     public synchronized void markTenantAsPaid(TenantAccount tenant) {
+        submitTenantPaymentForVerification(tenant);
+    }
+
+    public synchronized void submitTenantPaymentForVerification(TenantAccount tenant) {
         updatePaymentStatus(
                 tenant,
-                PaymentStatus.PAID,
-                "Payment marked as paid by the tenant.",
+                null,
+                "Payment submitted by the tenant and is waiting for landlord verification.",
                 "Tenant");
     }
 
@@ -143,14 +148,12 @@ public class StaySyncService {
     public synchronized String updateTenantProfile(
             TenantAccount tenant,
             String fullName,
-            String contactNumber,
-            String roomNumber,
-            String roomType) {
+            String contactNumber) {
         if (tenant == null) {
             return "Tenant account was not found.";
         }
 
-        String validationMessage = validateTenantProfile(fullName, contactNumber, roomNumber, roomType);
+        String validationMessage = validateTenantProfile(fullName, contactNumber);
         if (validationMessage != null) {
             return validationMessage;
         }
@@ -162,10 +165,30 @@ public class StaySyncService {
 
         storedTenant.updateProfile(
                 fullName.trim(),
-                contactNumber.trim(),
-                roomNumber.trim(),
-                roomType,
-                getMonthlyRentForRoomType(roomType));
+                contactNumber.trim());
+        return null;
+    }
+
+    public synchronized String updateTenantRoomAssignment(
+            TenantAccount tenant,
+            String roomNumber,
+            String roomType,
+            double monthlyRent) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+
+        String validationMessage = validateTenantRoomAssignment(roomNumber, roomType, monthlyRent);
+        if (validationMessage != null) {
+            return validationMessage;
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        storedTenant.updateRoomAssignment(roomNumber.trim(), roomType, monthlyRent);
         return null;
     }
 
@@ -180,6 +203,12 @@ public class StaySyncService {
         TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
         if (storedTenant == null) {
             return "Tenant account was not found.";
+        }
+        if (!storedTenant.getRoomInfo().hasAssignedRoom()) {
+            return "Assign a room before setting the monthly rent.";
+        }
+        if (!storedTenant.getRoomInfo().hasAssignedRoomType()) {
+            return "Assign a room type before setting the monthly rent.";
         }
 
         storedTenant.updateMonthlyRent(monthlyRent);
@@ -209,6 +238,103 @@ public class StaySyncService {
         }
 
         storedTenant.changePassword(newPassword);
+        return null;
+    }
+
+    public synchronized String submitCoOccupantRequest(TenantAccount tenant, String requestedName) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (!storedTenant.getRoomInfo().hasAssignedRoom()) {
+            return "Your landlord needs to assign your room before you can request a co-occupant.";
+        }
+
+        String validationMessage = validateCoOccupantName(storedTenant, requestedName);
+        if (validationMessage != null) {
+            return validationMessage;
+        }
+
+        String normalizedRequestedName = requestedName.trim();
+        if (storedTenant.hasApprovedCoOccupant()
+                && storedTenant.getApprovedCoOccupantName().equalsIgnoreCase(normalizedRequestedName)) {
+            return normalizedRequestedName + " is already approved for this room.";
+        }
+
+        CoOccupantRequest existingRequest = storedTenant.getCoOccupantRequest();
+        if (existingRequest != null
+                && existingRequest.isPending()
+                && existingRequest.getRequestedName().equalsIgnoreCase(normalizedRequestedName)) {
+            return "That co-occupant request is already waiting for landlord approval.";
+        }
+
+        storedTenant.submitCoOccupantRequest(
+                normalizedRequestedName,
+                "Requested approval for " + normalizedRequestedName + " to share the room.",
+                "Tenant");
+        storedTenant.addNotification(
+                NotificationType.CO_OCCUPANT_UPDATE,
+                "Co-occupant request sent",
+                "Your request for " + normalizedRequestedName + " was sent to the landlord for approval.",
+                "System");
+        return null;
+    }
+
+    public synchronized String approveCoOccupantRequest(TenantAccount tenant) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        CoOccupantRequest request = storedTenant.getCoOccupantRequest();
+        if (request == null || !request.isPending()) {
+            return "There is no pending co-occupant request to approve.";
+        }
+
+        storedTenant.approveCoOccupantRequest(
+                "Co-occupant request approved for " + request.getRequestedName() + ".",
+                "Landlord");
+        storedTenant.addNotification(
+                NotificationType.CO_OCCUPANT_UPDATE,
+                "Co-occupant approved",
+                request.getRequestedName() + " was approved as a co-occupant for room "
+                        + storedTenant.getRoomInfo().getRoomNumber() + ".",
+                "Landlord");
+        return null;
+    }
+
+    public synchronized String rejectCoOccupantRequest(TenantAccount tenant) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        CoOccupantRequest request = storedTenant.getCoOccupantRequest();
+        if (request == null || !request.isPending()) {
+            return "There is no pending co-occupant request to reject.";
+        }
+
+        String requestedName = request.getRequestedName();
+        storedTenant.rejectCoOccupantRequest(
+                "Co-occupant request rejected for " + requestedName + ".",
+                "Landlord");
+        storedTenant.addNotification(
+                NotificationType.CO_OCCUPANT_UPDATE,
+                "Co-occupant request rejected",
+                "Your request for " + requestedName + " was reviewed and not approved.",
+                "Landlord");
         return null;
     }
 
@@ -292,9 +418,7 @@ public class StaySyncService {
                 || isBlank(username)
                 || isBlank(password)
                 || isBlank(confirmPassword)
-                || isBlank(contactNumber)
-                || isBlank(roomNumber)
-                || isBlank(roomType)) {
+                || isBlank(contactNumber)) {
             return "All fields are required.";
         }
 
@@ -322,15 +446,11 @@ public class StaySyncService {
             return "Contact number must be 7 to 15 characters and may include digits, spaces, plus, or dash.";
         }
 
-        if (!roomNumber.trim().matches("[A-Za-z0-9-]{1,12}")) {
-            return "Room number must be 1 to 12 characters and may include letters, numbers, or dash.";
-        }
-
         return null;
     }
 
-    private String validateTenantProfile(String fullName, String contactNumber, String roomNumber, String roomType) {
-        if (isBlank(fullName) || isBlank(contactNumber) || isBlank(roomNumber) || isBlank(roomType)) {
+    private String validateTenantProfile(String fullName, String contactNumber) {
+        if (isBlank(fullName) || isBlank(contactNumber)) {
             return "All profile fields are required.";
         }
 
@@ -342,10 +462,47 @@ public class StaySyncService {
             return "Contact number must be 7 to 15 characters and may include digits, spaces, plus, or dash.";
         }
 
+        return null;
+    }
+
+    private String validateTenantRoomAssignment(String roomNumber, String roomType, double monthlyRent) {
+        if (isBlank(roomNumber) || isBlank(roomType)) {
+            return "Room number and room type are required.";
+        }
+
         if (!roomNumber.trim().matches("[A-Za-z0-9-]{1,12}")) {
             return "Room number must be 1 to 12 characters and may include letters, numbers, or dash.";
         }
 
+        if (!isRecognizedRoomType(roomType)) {
+            return "Choose a valid room type.";
+        }
+
+        if (monthlyRent <= 0) {
+            return "Monthly rent must be greater than 0.";
+        }
+
+        return null;
+    }
+
+    private String validateCoOccupantName(TenantAccount tenant, String requestedName) {
+        if (isBlank(requestedName)) {
+            return "Enter the co-occupant's full name.";
+        }
+
+        String normalizedName = requestedName.trim();
+        if (normalizedName.length() < 3) {
+            return "Co-occupant name must contain at least 3 characters.";
+        }
+        if (normalizedName.length() > 60) {
+            return "Co-occupant name must be 60 characters or fewer.";
+        }
+        if (!normalizedName.matches("[A-Za-z][A-Za-z .'-]{1,59}")) {
+            return "Co-occupant name may include letters, spaces, apostrophe, dot, or dash.";
+        }
+        if (tenant != null && tenant.getFullName().equalsIgnoreCase(normalizedName)) {
+            return "The co-occupant name must be different from the tenant name.";
+        }
         return null;
     }
 
@@ -378,6 +535,8 @@ public class StaySyncService {
         List<TenantAccount> matches = new ArrayList<>();
         for (TenantAccount tenant : tenants) {
             if (tenant.getFullName().toLowerCase().contains(searchValue)
+                    || tenant.getOccupantDisplayName().toLowerCase().contains(searchValue)
+                    || tenant.getApprovedCoOccupantName().toLowerCase().contains(searchValue)
                     || tenant.getRoomInfo().getRoomNumber().toLowerCase().contains(searchValue)) {
                 matches.add(tenant);
             }
@@ -386,12 +545,18 @@ public class StaySyncService {
     }
 
     private void updatePaymentStatus(TenantAccount tenant, PaymentStatus status, String note, String updatedBy) {
-        if (tenant == null || status == null) {
+        if (tenant == null) {
             return;
         }
 
         TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
         if (storedTenant != null) {
+            if (status == null) {
+                if (!storedTenant.isPaymentAwaitingVerification()) {
+                    storedTenant.submitPaymentForVerification(note, updatedBy);
+                }
+                return;
+            }
             storedTenant.updatePaymentStatus(status, note, updatedBy);
         }
     }
@@ -496,6 +661,19 @@ public class StaySyncService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isRecognizedRoomType(String roomType) {
+        if (isBlank(roomType)) {
+            return false;
+        }
+
+        for (String supportedRoomType : ROOM_TYPES) {
+            if (supportedRoomType.equalsIgnoreCase(roomType.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void seedDemoData() {

@@ -14,8 +14,11 @@ public class TenantAccount {
     private String contactNumber;
     private final RoomInfo roomInfo;
     private PaymentStatus paymentStatus;
+    private boolean paymentAwaitingVerification;
     private final List<PaymentRecord> paymentHistory;
     private final List<NotificationRecord> notifications;
+    private String approvedCoOccupantName;
+    private CoOccupantRequest coOccupantRequest;
 
     public TenantAccount(String fullName, String username, String password, String contactNumber, RoomInfo roomInfo) {
         this(fullName, "", username, password, contactNumber, roomInfo);
@@ -29,9 +32,17 @@ public class TenantAccount {
         this.contactNumber = contactNumber;
         this.roomInfo = roomInfo;
         this.paymentStatus = PaymentStatus.PENDING;
+        this.paymentAwaitingVerification = false;
         this.paymentHistory = new ArrayList<>();
         this.notifications = new ArrayList<>();
-        addPaymentRecord(PaymentStatus.PENDING, "Account created. Payment is waiting to be settled.", "System");
+        this.approvedCoOccupantName = "";
+        this.coOccupantRequest = null;
+        addPaymentRecord(
+                PaymentStatus.PENDING,
+                roomInfo.isAssignmentComplete()
+                        ? "Account created. Payment is waiting to be settled."
+                        : "Account created. Waiting for the landlord to assign a room and monthly rent.",
+                "System");
     }
 
     public String getFullName() {
@@ -66,13 +77,42 @@ public class TenantAccount {
         return Collections.unmodifiableList(notifications);
     }
 
+    public String getApprovedCoOccupantName() {
+        return approvedCoOccupantName;
+    }
+
+    public CoOccupantRequest getCoOccupantRequest() {
+        return coOccupantRequest;
+    }
+
+    public boolean isPaymentAwaitingVerification() {
+        return paymentAwaitingVerification;
+    }
+
+    public boolean hasApprovedCoOccupant() {
+        return !approvedCoOccupantName.isBlank();
+    }
+
+    public boolean hasPendingCoOccupantRequest() {
+        return coOccupantRequest != null && coOccupantRequest.isPending();
+    }
+
+    public String getOccupantDisplayName() {
+        return hasApprovedCoOccupant()
+                ? fullName + " & " + approvedCoOccupantName
+                : fullName;
+    }
+
     public boolean passwordMatches(String value) {
         return password.equals(value);
     }
 
-    public void updateProfile(String fullName, String contactNumber, String roomNumber, String roomType, double monthlyRent) {
+    public void updateProfile(String fullName, String contactNumber) {
         this.fullName = fullName;
         this.contactNumber = contactNumber;
+    }
+
+    public void updateRoomAssignment(String roomNumber, String roomType, double monthlyRent) {
         roomInfo.setRoomNumber(roomNumber);
         roomInfo.setRoomType(roomType);
         roomInfo.setMonthlyRent(monthlyRent);
@@ -88,6 +128,7 @@ public class TenantAccount {
 
     public void updatePaymentStatus(PaymentStatus paymentStatus, String note, String updatedBy) {
         this.paymentStatus = paymentStatus;
+        this.paymentAwaitingVerification = false;
         addPaymentRecord(paymentStatus, note, updatedBy);
     }
 
@@ -95,8 +136,34 @@ public class TenantAccount {
         addPaymentRecord(paymentStatus, note, updatedBy, receiptImagePath, receiptFileName);
     }
 
+    public void submitPaymentForVerification(String note, String updatedBy) {
+        paymentAwaitingVerification = true;
+        addPaymentRecord(paymentStatus, note, updatedBy);
+    }
+
     public void addNotification(NotificationType type, String title, String message, String sentBy) {
         notifications.add(0, new NotificationRecord(type, title, message, sentBy));
+    }
+
+    public void submitCoOccupantRequest(String requestedName, String note, String updatedBy) {
+        coOccupantRequest = new CoOccupantRequest(requestedName, note, updatedBy);
+    }
+
+    public void approveCoOccupantRequest(String note, String updatedBy) {
+        if (coOccupantRequest == null) {
+            return;
+        }
+
+        approvedCoOccupantName = coOccupantRequest.getRequestedName();
+        coOccupantRequest.markApproved(note, updatedBy);
+    }
+
+    public void rejectCoOccupantRequest(String note, String updatedBy) {
+        if (coOccupantRequest == null) {
+            return;
+        }
+
+        coOccupantRequest.markRejected(note, updatedBy);
     }
 
     public String getPaymentStatusLabel() {
@@ -104,8 +171,14 @@ public class TenantAccount {
     }
 
     public String getDueNotificationMessage() {
+        if (!roomInfo.isAssignmentComplete()) {
+            return "Your landlord will assign your room and monthly rent before billing starts.";
+        }
         if (paymentStatus == PaymentStatus.PAID) {
             return "No due payment right now. Your account is updated.";
+        }
+        if (paymentAwaitingVerification) {
+            return "Payment sent. Waiting for the landlord to verify and update your account.";
         }
         if (paymentStatus == PaymentStatus.LATE) {
             return "Payment is overdue. Please settle it as soon as possible.";
@@ -150,11 +223,33 @@ public class TenantAccount {
     public enum NotificationType {
         PAYMENT_REMINDER("Payment reminder"),
         MAINTENANCE_NOTICE("Maintenance notice"),
-        GENERAL_UPDATE("General update");
+        GENERAL_UPDATE("General update"),
+        CO_OCCUPANT_UPDATE("Co-occupant update");
 
         private final String label;
 
         NotificationType(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    public enum CoOccupantRequestStatus {
+        PENDING("Pending"),
+        APPROVED("Approved"),
+        REJECTED("Rejected");
+
+        private final String label;
+
+        CoOccupantRequestStatus(String label) {
             this.label = label;
         }
 
@@ -197,6 +292,22 @@ public class TenantAccount {
             return dueDay;
         }
 
+        public boolean hasAssignedRoom() {
+            return isAssignedValue(roomNumber);
+        }
+
+        public boolean hasAssignedRoomType() {
+            return isAssignedValue(roomType);
+        }
+
+        public boolean hasAssignedRent() {
+            return monthlyRent > 0;
+        }
+
+        public boolean isAssignmentComplete() {
+            return hasAssignedRoom() && hasAssignedRoomType() && hasAssignedRent();
+        }
+
         private void setRoomNumber(String roomNumber) {
             this.roomNumber = roomNumber;
         }
@@ -207,6 +318,17 @@ public class TenantAccount {
 
         private void setMonthlyRent(double monthlyRent) {
             this.monthlyRent = monthlyRent;
+        }
+
+        private boolean isAssignedValue(String value) {
+            if (value == null) {
+                return false;
+            }
+
+            String normalizedValue = value.trim();
+            return !normalizedValue.isEmpty()
+                    && !"TBD".equalsIgnoreCase(normalizedValue)
+                    && !"UNASSIGNED".equalsIgnoreCase(normalizedValue);
         }
     }
 
@@ -268,6 +390,73 @@ public class TenantAccount {
 
         public String getFormattedTimestamp() {
             return timestamp.format(DISPLAY_FORMATTER);
+        }
+    }
+
+    public static final class CoOccupantRequest {
+        private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+
+        private final String requestedName;
+        private final LocalDateTime submittedAt;
+        private LocalDateTime updatedAt;
+        private CoOccupantRequestStatus status;
+        private String note;
+        private String updatedBy;
+
+        public CoOccupantRequest(String requestedName, String note, String updatedBy) {
+            this.requestedName = requestedName == null ? "" : requestedName.trim();
+            this.submittedAt = LocalDateTime.now();
+            this.updatedAt = submittedAt;
+            this.status = CoOccupantRequestStatus.PENDING;
+            this.note = note == null ? "" : note;
+            this.updatedBy = updatedBy == null ? "" : updatedBy;
+        }
+
+        public String getRequestedName() {
+            return requestedName;
+        }
+
+        public CoOccupantRequestStatus getStatus() {
+            return status;
+        }
+
+        public String getStatusLabel() {
+            return status.getLabel();
+        }
+
+        public String getNote() {
+            return note;
+        }
+
+        public String getUpdatedBy() {
+            return updatedBy;
+        }
+
+        public boolean isPending() {
+            return status == CoOccupantRequestStatus.PENDING;
+        }
+
+        public String getFormattedSubmittedAt() {
+            return submittedAt.format(DISPLAY_FORMATTER);
+        }
+
+        public String getFormattedUpdatedAt() {
+            return updatedAt.format(DISPLAY_FORMATTER);
+        }
+
+        private void markApproved(String note, String updatedBy) {
+            update(CoOccupantRequestStatus.APPROVED, note, updatedBy);
+        }
+
+        private void markRejected(String note, String updatedBy) {
+            update(CoOccupantRequestStatus.REJECTED, note, updatedBy);
+        }
+
+        private void update(CoOccupantRequestStatus nextStatus, String note, String updatedBy) {
+            status = nextStatus;
+            this.note = note == null ? "" : note;
+            this.updatedBy = updatedBy == null ? "" : updatedBy;
+            updatedAt = LocalDateTime.now();
         }
     }
 

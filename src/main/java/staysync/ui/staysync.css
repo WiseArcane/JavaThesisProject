@@ -184,6 +184,64 @@
     -fx-alignment: top-left;
 }
 
+.landlord-controls-row {
+    -fx-alignment: top-left;
+}
+
+.controls-primary-column {
+    -fx-spacing: 14px;
+}
+
+.controls-card-grid {
+    -fx-padding: 0;
+}
+
+.controls-summary-card,
+.controls-form-card {
+    -fx-padding: 24px;
+    -fx-spacing: 16px;
+}
+
+.controls-badge-row,
+.controls-inline-actions {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.controls-detail-grid {
+    -fx-padding: 2px 0 0 0;
+}
+
+.controls-detail-cell {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 4px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.controls-detail-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.controls-form-grid {
+    -fx-padding: 2px 0 0 0;
+}
+
+.controls-action-grid {
+    -fx-padding: 2px 0 0 0;
+}
+
+.controls-notification-card .text-area {
+    -fx-pref-height: 128px;
+}
+
 .landlord-summary-card {
     -fx-padding: 24px;
     -fx-spacing: 16px;
@@ -584,6 +642,14 @@
         linear-gradient(to bottom right, derive(-color-panel, 2%) 0%, -color-panel-muted 58%, derive(-color-panel-strong, -2%) 100%);
     -fx-background-insets: 0, 1, 2;
     -fx-border-color: rgba(215, 170, 86, 0.16);
+}
+
+.app-root.dark-mode .controls-detail-cell {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(238, 231, 212, 0.10);
 }
 
 .app-root.dark-mode .residents-insight-spotlight {
@@ -1386,6 +1452,186 @@
 
 .table-view .placeholder .label,
 .data-table .placeholder .label {
+    -fx-text-fill: -color-text-muted;
+}
+
+.payment-history-card {
+    -fx-spacing: 18px;
+}
+
+.payment-history-summary {
+    -fx-padding: 0 0 4px 0;
+}
+
+.payment-history-table {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.42),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.90) 0%, rgba(242, 237, 223, 0.98) 100%),
+        linear-gradient(to bottom, rgba(216, 168, 76, 0.08) 0%, rgba(255, 255, 255, 0) 44%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 28px, 27px, 26px;
+    -fx-border-color: rgba(109, 81, 28, 0.16);
+    -fx-border-radius: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(124, 104, 54, 0.12), 26, 0.14, 0, 8);
+    -fx-fixed-cell-size: 58px;
+}
+
+.payment-history-table .column-header-background,
+.payment-history-table .column-header,
+.payment-history-table .filler {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.18),
+        linear-gradient(to bottom, rgba(237, 231, 212, 0.98) 0%, rgba(229, 221, 196, 0.98) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: transparent transparent rgba(109, 81, 28, 0.14) transparent;
+}
+
+.payment-history-table .column-header {
+    -fx-padding: 0 14px;
+}
+
+.payment-history-table .column-header .label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-text-soft;
+}
+
+.payment-history-table .table-row-cell {
+    -fx-background-color: transparent, rgba(255, 252, 245, 0.86);
+    -fx-background-insets: 0, 4 10 4 10;
+    -fx-background-radius: 0, 16px;
+    -fx-border-color: transparent;
+    -fx-padding: 0 12px;
+}
+
+.payment-history-table .table-row-cell:odd {
+    -fx-background-color: transparent, rgba(245, 240, 226, 0.96);
+}
+
+.payment-history-table .table-row-cell:filled:hover {
+    -fx-background-color: transparent, rgba(244, 227, 186, 0.76);
+}
+
+.payment-history-table .table-row-cell:selected {
+    -fx-background-color: transparent, rgba(237, 216, 167, 0.88);
+}
+
+.payment-history-table .table-cell {
+    -fx-background-color: transparent;
+    -fx-font-size: 13px;
+    -fx-padding: 0 14px;
+    -fx-border-color: transparent;
+}
+
+.payment-history-text-cell {
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-text;
+}
+
+.payment-history-timestamp-cell {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+
+.payment-history-author-cell {
+    -fx-font-weight: 700;
+}
+
+.payment-history-note-cell {
+    -fx-text-fill: -color-text-muted;
+}
+
+.payment-history-status-cell,
+.payment-history-receipt-cell {
+    -fx-alignment: center-left;
+}
+
+.table-status-pill {
+    -fx-padding: 6px 12px;
+}
+
+.receipt-badge {
+    -fx-padding: 6px 10px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.receipt-badge.attached {
+    -fx-background-color: rgba(91, 127, 215, 0.12);
+    -fx-border-color: rgba(63, 96, 181, 0.28);
+    -fx-text-fill: -color-data-strong;
+}
+
+.receipt-badge.missing {
+    -fx-background-color: rgba(104, 112, 93, 0.10);
+    -fx-border-color: rgba(104, 112, 93, 0.18);
+    -fx-text-fill: -color-text-muted;
+}
+
+.payment-history-empty-state {
+    -fx-alignment: center;
+    -fx-spacing: 8px;
+    -fx-padding: 34px 18px;
+}
+
+.payment-history-empty-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-text;
+}
+
+.payment-history-empty-copy {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+}
+
+.app-root.dark-mode .payment-history-table {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, rgba(40, 37, 32, 0.98) 0%, rgba(28, 26, 22, 0.99) 100%),
+        linear-gradient(to bottom, rgba(215, 170, 86, 0.05) 0%, rgba(255, 255, 255, 0) 42%);
+    -fx-border-color: rgba(238, 231, 212, 0.14);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 26, 0.18, 0, 10);
+}
+
+.app-root.dark-mode .payment-history-table .column-header-background,
+.app-root.dark-mode .payment-history-table .column-header,
+.app-root.dark-mode .payment-history-table .filler {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, rgba(53, 48, 40, 0.98) 0%, rgba(41, 37, 31, 0.98) 100%);
+    -fx-border-color: transparent transparent rgba(238, 231, 212, 0.10) transparent;
+}
+
+.app-root.dark-mode .payment-history-table .table-row-cell {
+    -fx-background-color: transparent, rgba(42, 38, 32, 0.92);
+}
+
+.app-root.dark-mode .payment-history-table .table-row-cell:odd {
+    -fx-background-color: transparent, rgba(48, 43, 36, 0.94);
+}
+
+.app-root.dark-mode .payment-history-table .table-row-cell:filled:hover {
+    -fx-background-color: transparent, rgba(215, 170, 86, 0.18);
+}
+
+.app-root.dark-mode .payment-history-table .table-row-cell:selected {
+    -fx-background-color: transparent, rgba(215, 170, 86, 0.24);
+}
+
+.app-root.dark-mode .payment-history-table .column-header .label,
+.app-root.dark-mode .payment-history-timestamp-cell,
+.app-root.dark-mode .payment-history-note-cell {
+    -fx-text-fill: -color-text-muted;
+}
+
+.app-root.dark-mode .receipt-badge.missing {
+    -fx-background-color: rgba(243, 236, 220, 0.06);
+    -fx-border-color: rgba(243, 236, 220, 0.12);
     -fx-text-fill: -color-text-muted;
 }
 
