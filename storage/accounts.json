@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "tenants": [
+    {
+      "fullName": "Maria Santos",
+      "email": "",
+      "username": "maria.s",
+      "password": "maria123",
+      "contactNumber": "09171234567",
+      "paymentStatus": "PAID",
+      "paymentAwaitingVerification": false,
+      "approvedCoOccupantName": "",
+      "roomInfo": {
+        "roomNumber": "A-101",
+        "roomType": "Standard",
+        "monthlyRent": 3200.0,
+        "dueDay": 5
+      },
+      "paymentHistory": [
+        {
+          "timestamp": "2026-04-08T19:50:31.174600500",
+          "status": "PAID",
+          "note": "Payment settled for the current month.",
+          "updatedBy": "Landlord",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-08T19:50:31.174085800",
+          "status": "PENDING",
+          "note": "Account created. Payment is waiting to be settled.",
+          "updatedBy": "System",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        }
+      ],
+      "notifications": [],
+      "coOccupantRequest": null
+    },
+    {
+      "fullName": "Joshua Lim",
+      "email": "",
+      "username": "josh.l",
+      "password": "josh123",
+      "contactNumber": "09184561234",
+      "paymentStatus": "PENDING",
+      "paymentAwaitingVerification": false,
+      "approvedCoOccupantName": "",
+      "roomInfo": {
+        "roomNumber": "B-204",
+        "roomType": "Deluxe",
+        "monthlyRent": 4500.0,
+        "dueDay": 5
+      },
+      "paymentHistory": [
+        {
+          "timestamp": "2026-04-08T19:50:31.174600500",
+          "status": "PENDING",
+          "note": "Awaiting payment before the due date.",
+          "updatedBy": "System",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-08T19:50:31.174600500",
+          "status": "PENDING",
+          "note": "Account created. Payment is waiting to be settled.",
+          "updatedBy": "System",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        }
+      ],
+      "notifications": [],
+      "coOccupantRequest": null
+    },
+    {
+      "fullName": "Angela Cruz",
+      "email": "",
+      "username": "angela.c",
+      "password": "angela123",
+      "contactNumber": "09221239876",
+      "paymentStatus": "LATE",
+      "paymentAwaitingVerification": false,
+      "approvedCoOccupantName": "",
+      "roomInfo": {
+        "roomNumber": "C-301",
+        "roomType": "Family",
+        "monthlyRent": 6000.0,
+        "dueDay": 5
+      },
+      "paymentHistory": [
+        {
+          "timestamp": "2026-04-08T19:50:31.174600500",
+          "status": "LATE",
+          "note": "Payment has not been received after the deadline.",
+          "updatedBy": "Landlord",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-08T19:50:31.174600500",
+          "status": "PENDING",
+          "note": "Account created. Payment is waiting to be settled.",
+          "updatedBy": "System",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        }
+      ],
+      "notifications": [],
+      "coOccupantRequest": null
+    }
+  ]
+}

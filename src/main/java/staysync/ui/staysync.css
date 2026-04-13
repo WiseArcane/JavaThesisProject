@@ -944,6 +944,28 @@
     -fx-text-fill: -color-text-muted;
 }
 
+.dialog-title {
+    -fx-font-size: 28px;
+}
+
+.dialog-copy {
+    -fx-line-spacing: 5px;
+}
+
+.dialog-content-shell,
+.dialog-copy-block {
+    -fx-spacing: 10px;
+}
+
+.dialog-separator {
+    -fx-opacity: 0.75;
+}
+
+.dialog-separator .line {
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px 0 0 0;
+}
+
 .field-label {
     -fx-font-size: 12px;
     -fx-text-fill: -color-text-soft;
@@ -1120,6 +1142,16 @@
     -fx-background-radius: 999px;
     -fx-border-radius: 999px;
     -fx-padding: 12px 22px;
+}
+
+.utility-link-button {
+    -fx-padding: 9px 16px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, rgba(216, 168, 76, 0.24) 0%, rgba(216, 168, 76, 0.12) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.24);
+    -fx-text-fill: -color-accent-deep;
 }
 
 .nav-button,
@@ -1641,6 +1673,15 @@
     -fx-padding: 0;
 }
 
+.dialog-note-card {
+    -fx-padding: 16px 18px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, rgba(216, 168, 76, 0.13) 0%, rgba(248, 246, 236, 0.96) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+}
+
 .dialog-pane.dark-dialog {
     -fx-background-color:
         rgba(255, 255, 255, 0.08),
@@ -1661,6 +1702,21 @@
 .dialog-pane .button-bar > .container {
     -fx-padding: 12px 24px 22px 24px;
     -fx-spacing: 12px;
+}
+
+.app-root.dark-mode .utility-link-button {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.10),
+        linear-gradient(to bottom, rgba(215, 170, 86, 0.22) 0%, rgba(215, 170, 86, 0.08) 100%);
+    -fx-border-color: rgba(240, 201, 123, 0.18);
+    -fx-text-fill: -color-accent-deep;
+}
+
+.app-root.dark-mode .dialog-note-card {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.08),
+        linear-gradient(to bottom, rgba(215, 170, 86, 0.14) 0%, rgba(34, 32, 28, 0.98) 100%);
+    -fx-border-color: rgba(240, 201, 123, 0.10);
 }
 
 .demo-access {

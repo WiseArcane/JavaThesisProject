@@ -19,12 +19,13 @@ public class StaySyncService {
     private static final String LANDLORD_PASSWORD = "1234";
     private static final String[] ROOM_TYPES = { "Standard", "Deluxe", "Family" };
     private static final int DEFAULT_DUE_DAY = 5;
+    private static final Path ACCOUNTS_STORAGE_FILE = Path.of("storage", "accounts.json");
     private static final Path RECEIPT_STORAGE_DIRECTORY = Path.of("storage", "receipts");
 
     private final List<TenantAccount> tenants = new ArrayList<>();
 
     public StaySyncService() {
-        seedDemoData();
+        loadTenants();
     }
 
     public synchronized String registerTenant(
@@ -63,6 +64,7 @@ public class StaySyncService {
                 password,
                 contactNumber.trim(),
                 roomInfo));
+        saveTenants();
         return null;
     }
 
@@ -139,6 +141,7 @@ public class StaySyncService {
                     "Tenant",
                     storedReceipt.toString(),
                     sourceImage.getFileName().toString());
+            saveTenants();
             return null;
         } catch (IOException exception) {
             return "The receipt photo could not be saved. Please try a different image.";
@@ -166,6 +169,7 @@ public class StaySyncService {
         storedTenant.updateProfile(
                 fullName.trim(),
                 contactNumber.trim());
+        saveTenants();
         return null;
     }
 
@@ -189,6 +193,7 @@ public class StaySyncService {
         }
 
         storedTenant.updateRoomAssignment(roomNumber.trim(), roomType, monthlyRent);
+        saveTenants();
         return null;
     }
 
@@ -212,6 +217,7 @@ public class StaySyncService {
         }
 
         storedTenant.updateMonthlyRent(monthlyRent);
+        saveTenants();
         return null;
     }
 
@@ -238,6 +244,35 @@ public class StaySyncService {
         }
 
         storedTenant.changePassword(newPassword);
+        saveTenants();
+        return null;
+    }
+
+    public synchronized String resetTenantPassword(
+            String loginValue,
+            String contactNumber,
+            String newPassword,
+            String confirmPassword) {
+        if (isBlank(loginValue) || isBlank(contactNumber) || isBlank(newPassword) || isBlank(confirmPassword)) {
+            return "All reset fields are required.";
+        }
+
+        TenantAccount storedTenant = findTenantByLogin(loginValue);
+        if (storedTenant == null) {
+            return "No tenant account matches that username or email.";
+        }
+
+        if (!storedTenant.getContactNumber().trim().equals(contactNumber.trim())) {
+            return "Contact number does not match this account.";
+        }
+
+        String validationMessage = validatePasswordReset(storedTenant, newPassword, confirmPassword);
+        if (validationMessage != null) {
+            return validationMessage;
+        }
+
+        storedTenant.changePassword(newPassword);
+        saveTenants();
         return null;
     }
 
@@ -281,6 +316,7 @@ public class StaySyncService {
                 "Co-occupant request sent",
                 "Your request for " + normalizedRequestedName + " was sent to the landlord for approval.",
                 "System");
+        saveTenants();
         return null;
     }
 
@@ -308,6 +344,7 @@ public class StaySyncService {
                 request.getRequestedName() + " was approved as a co-occupant for room "
                         + storedTenant.getRoomInfo().getRoomNumber() + ".",
                 "Landlord");
+        saveTenants();
         return null;
     }
 
@@ -335,6 +372,7 @@ public class StaySyncService {
                 "Co-occupant request rejected",
                 "Your request for " + requestedName + " was reviewed and not approved.",
                 "Landlord");
+        saveTenants();
         return null;
     }
 
@@ -349,6 +387,7 @@ public class StaySyncService {
         }
 
         tenants.remove(storedTenant);
+        saveTenants();
         return null;
     }
 
@@ -373,6 +412,7 @@ public class StaySyncService {
         }
 
         storedTenant.addNotification(type, title.trim(), message.trim(), "Landlord");
+        saveTenants();
         return null;
     }
 
@@ -526,6 +566,22 @@ public class StaySyncService {
         return null;
     }
 
+    private String validatePasswordReset(TenantAccount tenant, String newPassword, String confirmPassword) {
+        if (newPassword.length() < 4) {
+            return "New password must contain at least 4 characters.";
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            return "New password and confirm password do not match.";
+        }
+
+        if (tenant != null && tenant.passwordMatches(newPassword)) {
+            return "New password must be different from the current password.";
+        }
+
+        return null;
+    }
+
     private synchronized List<TenantAccount> searchTenants(String query) {
         if (query.isEmpty()) {
             return Collections.unmodifiableList(new ArrayList<>(tenants));
@@ -554,10 +610,12 @@ public class StaySyncService {
             if (status == null) {
                 if (!storedTenant.isPaymentAwaitingVerification()) {
                     storedTenant.submitPaymentForVerification(note, updatedBy);
+                    saveTenants();
                 }
                 return;
             }
             storedTenant.updatePaymentStatus(status, note, updatedBy);
+            saveTenants();
         }
     }
 
@@ -674,6 +732,30 @@ public class StaySyncService {
             }
         }
         return false;
+    }
+
+    private void loadTenants() {
+        tenants.clear();
+        try {
+            List<TenantAccount> storedTenants = TenantAccountJsonStore.load(ACCOUNTS_STORAGE_FILE);
+            if (storedTenants != null) {
+                tenants.addAll(storedTenants);
+                return;
+            }
+        } catch (IOException exception) {
+            System.err.println("Unable to load tenant accounts from " + ACCOUNTS_STORAGE_FILE + ": " + exception.getMessage());
+        }
+
+        seedDemoData();
+        saveTenants();
+    }
+
+    private void saveTenants() {
+        try {
+            TenantAccountJsonStore.save(ACCOUNTS_STORAGE_FILE, tenants);
+        } catch (IOException exception) {
+            System.err.println("Unable to save tenant accounts to " + ACCOUNTS_STORAGE_FILE + ": " + exception.getMessage());
+        }
     }
 
     private void seedDemoData() {

@@ -29,7 +29,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
@@ -311,17 +310,6 @@ public class StaySyncApp extends Application {
         PasswordField passwordField = createPasswordField("Enter password");
         passwordField.setText(loginPassword);
 
-        CheckBox rememberMeBox = new CheckBox("Remember me");
-        rememberMeBox.getStyleClass().add("remember-check");
-
-        Label forgotPasswordLabel = new Label("Forgot password?");
-        forgotPasswordLabel.getStyleClass().add("inline-link");
-
-        Region utilitySpacer = new Region();
-        HBox.setHgrow(utilitySpacer, Priority.ALWAYS);
-        HBox utilityRow = new HBox(10, rememberMeBox, utilitySpacer, forgotPasswordLabel);
-        utilityRow.setAlignment(Pos.CENTER_LEFT);
-
         Button loginButton = createPrimaryButton("Sign in");
         loginButton.setMaxWidth(Double.MAX_VALUE);
         loginButton.setOnAction(event -> {
@@ -337,7 +325,6 @@ public class StaySyncApp extends Application {
                 feedback,
                 createFieldGroup("Username or email", usernameField),
                 createFieldGroup("Password", passwordField),
-                utilityRow,
                 loginButton);
         return form;
     }
@@ -1871,6 +1858,8 @@ public class StaySyncApp extends Application {
         Dialog<ButtonType> dialog = createDialog("Change Password");
         ButtonType saveType = new ButtonType("Save", ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveType, ButtonType.CANCEL);
+        dialog.getDialogPane().setPrefWidth(500);
+        styleDialogButtons(dialog, saveType);
 
         Label feedback = createFeedbackLabel("", false);
         feedback.setVisible(false);
@@ -1880,11 +1869,16 @@ public class StaySyncApp extends Application {
         PasswordField newField = createPasswordField("New Password");
         PasswordField confirmField = createPasswordField("Confirm Password");
 
-        VBox content = new VBox(12,
+        VBox form = new VBox(12,
                 feedback,
                 createFieldGroup("CURRENT PASSWORD", currentField),
                 createFieldGroup("NEW PASSWORD", newField),
                 createFieldGroup("CONFIRM PASSWORD", confirmField));
+        VBox content = createDialogShell(
+                "Tenant security",
+                "Change your password",
+                "Use a fresh password that is easy for you to remember and hard for others to guess.",
+                form);
         dialog.getDialogPane().setContent(content);
 
         Node saveButton = dialog.getDialogPane().lookupButton(saveType);
@@ -1909,6 +1903,51 @@ public class StaySyncApp extends Application {
         });
 
         dialog.showAndWait();
+    }
+
+    private Dialog<ButtonType> createSystemDialog(String title) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(stage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle(title);
+        dialog.getDialogPane().setHeaderText(null);
+        dialog.getDialogPane().setGraphic(null);
+        return dialog;
+    }
+
+    private VBox createSystemFieldGroup(String labelText, Node control) {
+        VBox box = new VBox(6);
+        Label label = new Label(labelText);
+        if (control instanceof Region region) {
+            region.setMaxWidth(Double.MAX_VALUE);
+        }
+        box.getChildren().addAll(label, control);
+        return box;
+    }
+
+    private VBox createDialogShell(String eyebrowText, String titleText, String descriptionText, Node... content) {
+        VBox shell = new VBox(18);
+        shell.getStyleClass().add("dialog-content-shell");
+
+        VBox header = new VBox(8);
+        header.getStyleClass().add("dialog-copy-block");
+
+        Label eyebrow = new Label(eyebrowText.toUpperCase(Locale.ROOT));
+        eyebrow.getStyleClass().add("eyebrow-copy");
+        Label title = new Label(titleText);
+        title.getStyleClass().addAll("section-title", "dialog-title");
+        title.setWrapText(true);
+        Label description = new Label(descriptionText);
+        description.getStyleClass().addAll("body-copy", "dialog-copy");
+        description.setWrapText(true);
+
+        Separator separator = new Separator();
+        separator.getStyleClass().add("dialog-separator");
+
+        header.getChildren().addAll(eyebrow, title, description);
+        shell.getChildren().addAll(header, separator);
+        shell.getChildren().addAll(content);
+        return shell;
     }
 
     private Dialog<ButtonType> createDialog(String title) {
@@ -2078,6 +2117,20 @@ public class StaySyncApp extends Application {
                 button.setTranslateY(0);
             }
         });
+    }
+
+    private void styleDialogButtons(Dialog<ButtonType> dialog, ButtonType primaryType) {
+        Node primaryButtonNode = dialog.getDialogPane().lookupButton(primaryType);
+        if (primaryButtonNode instanceof ButtonBase primaryButton) {
+            primaryButton.getStyleClass().add("primary-button");
+            applyButtonHoverAnimation(primaryButton);
+        }
+
+        Node cancelButtonNode = dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        if (cancelButtonNode instanceof ButtonBase cancelButton) {
+            cancelButton.getStyleClass().add("secondary-button");
+            applyButtonHoverAnimation(cancelButton);
+        }
     }
 
     private ScrollPane createPageScrollPane(Node content, double initialVvalue, DoubleConsumer onVvalueChanged) {

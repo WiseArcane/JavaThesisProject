@@ -25,24 +25,85 @@ public class TenantAccount {
     }
 
     public TenantAccount(String fullName, String email, String username, String password, String contactNumber, RoomInfo roomInfo) {
+        this(
+                fullName,
+                email,
+                username,
+                password,
+                contactNumber,
+                roomInfo,
+                PaymentStatus.PENDING,
+                false,
+                null,
+                null,
+                "",
+                null,
+                true);
+    }
+
+    TenantAccount(
+            String fullName,
+            String email,
+            String username,
+            String password,
+            String contactNumber,
+            RoomInfo roomInfo,
+            PaymentStatus paymentStatus,
+            boolean paymentAwaitingVerification,
+            List<PaymentRecord> paymentHistory,
+            List<NotificationRecord> notifications,
+            String approvedCoOccupantName,
+            CoOccupantRequest coOccupantRequest) {
+        this(
+                fullName,
+                email,
+                username,
+                password,
+                contactNumber,
+                roomInfo,
+                paymentStatus,
+                paymentAwaitingVerification,
+                paymentHistory,
+                notifications,
+                approvedCoOccupantName,
+                coOccupantRequest,
+                false);
+    }
+
+    private TenantAccount(
+            String fullName,
+            String email,
+            String username,
+            String password,
+            String contactNumber,
+            RoomInfo roomInfo,
+            PaymentStatus paymentStatus,
+            boolean paymentAwaitingVerification,
+            List<PaymentRecord> paymentHistory,
+            List<NotificationRecord> notifications,
+            String approvedCoOccupantName,
+            CoOccupantRequest coOccupantRequest,
+            boolean createInitialPaymentRecord) {
         this.fullName = fullName;
         this.email = email == null ? "" : email.trim();
         this.username = username;
         this.password = password;
         this.contactNumber = contactNumber;
         this.roomInfo = roomInfo;
-        this.paymentStatus = PaymentStatus.PENDING;
-        this.paymentAwaitingVerification = false;
-        this.paymentHistory = new ArrayList<>();
-        this.notifications = new ArrayList<>();
-        this.approvedCoOccupantName = "";
-        this.coOccupantRequest = null;
-        addPaymentRecord(
-                PaymentStatus.PENDING,
-                roomInfo.isAssignmentComplete()
-                        ? "Account created. Payment is waiting to be settled."
-                        : "Account created. Waiting for the landlord to assign a room and monthly rent.",
-                "System");
+        this.paymentStatus = paymentStatus == null ? PaymentStatus.PENDING : paymentStatus;
+        this.paymentAwaitingVerification = paymentAwaitingVerification;
+        this.paymentHistory = paymentHistory == null ? new ArrayList<>() : new ArrayList<>(paymentHistory);
+        this.notifications = notifications == null ? new ArrayList<>() : new ArrayList<>(notifications);
+        this.approvedCoOccupantName = approvedCoOccupantName == null ? "" : approvedCoOccupantName;
+        this.coOccupantRequest = coOccupantRequest;
+        if (createInitialPaymentRecord) {
+            addPaymentRecord(
+                    PaymentStatus.PENDING,
+                    roomInfo.isAssignmentComplete()
+                            ? "Account created. Payment is waiting to be settled."
+                            : "Account created. Waiting for the landlord to assign a room and monthly rent.",
+                    "System");
+        }
     }
 
     public String getFullName() {
@@ -105,6 +166,10 @@ public class TenantAccount {
 
     public boolean passwordMatches(String value) {
         return password.equals(value);
+    }
+
+    String getPasswordForPersistence() {
+        return password;
     }
 
     public void updateProfile(String fullName, String contactNumber) {
@@ -352,12 +417,26 @@ public class TenantAccount {
                 String updatedBy,
                 String receiptImagePath,
                 String receiptFileName) {
-            this.timestamp = LocalDateTime.now();
+            this(LocalDateTime.now(), status, note, updatedBy, receiptImagePath, receiptFileName);
+        }
+
+        public PaymentRecord(
+                LocalDateTime timestamp,
+                PaymentStatus status,
+                String note,
+                String updatedBy,
+                String receiptImagePath,
+                String receiptFileName) {
+            this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
             this.status = status;
             this.note = note;
             this.updatedBy = updatedBy;
             this.receiptImagePath = receiptImagePath == null ? "" : receiptImagePath;
             this.receiptFileName = receiptFileName == null ? "" : receiptFileName;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
         }
 
         public PaymentStatus getStatus() {
@@ -404,16 +483,40 @@ public class TenantAccount {
         private String updatedBy;
 
         public CoOccupantRequest(String requestedName, String note, String updatedBy) {
+            this(
+                    requestedName,
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    CoOccupantRequestStatus.PENDING,
+                    note,
+                    updatedBy);
+        }
+
+        public CoOccupantRequest(
+                String requestedName,
+                LocalDateTime submittedAt,
+                LocalDateTime updatedAt,
+                CoOccupantRequestStatus status,
+                String note,
+                String updatedBy) {
             this.requestedName = requestedName == null ? "" : requestedName.trim();
-            this.submittedAt = LocalDateTime.now();
-            this.updatedAt = submittedAt;
-            this.status = CoOccupantRequestStatus.PENDING;
+            this.submittedAt = submittedAt == null ? LocalDateTime.now() : submittedAt;
+            this.updatedAt = updatedAt == null ? this.submittedAt : updatedAt;
+            this.status = status == null ? CoOccupantRequestStatus.PENDING : status;
             this.note = note == null ? "" : note;
             this.updatedBy = updatedBy == null ? "" : updatedBy;
         }
 
         public String getRequestedName() {
             return requestedName;
+        }
+
+        public LocalDateTime getSubmittedAt() {
+            return submittedAt;
+        }
+
+        public LocalDateTime getUpdatedAt() {
+            return updatedAt;
         }
 
         public CoOccupantRequestStatus getStatus() {
@@ -470,11 +573,19 @@ public class TenantAccount {
         private final String sentBy;
 
         public NotificationRecord(NotificationType type, String title, String message, String sentBy) {
-            this.timestamp = LocalDateTime.now();
+            this(LocalDateTime.now(), type, title, message, sentBy);
+        }
+
+        public NotificationRecord(LocalDateTime timestamp, NotificationType type, String title, String message, String sentBy) {
+            this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
             this.type = type;
             this.title = title;
             this.message = message;
             this.sentBy = sentBy;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
         }
 
         public NotificationType getType() {
