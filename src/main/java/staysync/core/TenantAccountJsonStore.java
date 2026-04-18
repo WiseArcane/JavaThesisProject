@@ -18,49 +18,55 @@ import staysync.core.TenantAccount.NotificationType;
 import staysync.core.TenantAccount.PaymentRecord;
 import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
+import staysync.core.TenantAccount.VerificationStatus;
+import staysync.core.StaySyncService.LandlordNotification;
+import staysync.core.StaySyncService.LandlordNotificationType;
 
 final class TenantAccountJsonStore {
     private static final String VERSION_KEY = "version";
     private static final String TENANTS_KEY = "tenants";
+    private static final String LANDLORD_NOTIFICATIONS_KEY = "landlordNotifications";
 
     private TenantAccountJsonStore() {
     }
 
-    static List<TenantAccount> load(Path file) throws IOException {
+    static StoreData load(Path file) throws IOException {
         if (!Files.exists(file)) {
             return null;
         }
 
         String json = Files.readString(file, StandardCharsets.UTF_8);
         if (json.trim().isEmpty()) {
-            return new ArrayList<>();
+            return new StoreData(new ArrayList<>(), new ArrayList<>());
         }
 
         Object root = new JsonParser(json).parse();
         Map<String, Object> rootObject = requireObject(root, "root");
         List<Object> tenantObjects = requireArray(rootObject.get(TENANTS_KEY), TENANTS_KEY);
+        List<Object> landlordNotificationObjects = optionalArray(rootObject.get(LANDLORD_NOTIFICATIONS_KEY), LANDLORD_NOTIFICATIONS_KEY);
 
         List<TenantAccount> tenants = new ArrayList<>();
         for (Object tenantObject : tenantObjects) {
             tenants.add(readTenant(requireObject(tenantObject, "tenant")));
         }
-        return tenants;
+        return new StoreData(tenants, readLandlordNotifications(landlordNotificationObjects));
     }
 
-    static void save(Path file, List<TenantAccount> tenants) throws IOException {
+    static void save(Path file, List<TenantAccount> tenants, List<LandlordNotification> landlordNotifications) throws IOException {
         Path parent = file.getParent();
         if (parent != null) {
             Files.createDirectories(parent);
         }
 
         Map<String, Object> root = new LinkedHashMap<>();
-        root.put(VERSION_KEY, 1);
+        root.put(VERSION_KEY, 4);
 
         List<Object> serializedTenants = new ArrayList<>();
         for (TenantAccount tenant : tenants) {
             serializedTenants.add(writeTenant(tenant));
         }
         root.put(TENANTS_KEY, serializedTenants);
+        root.put(LANDLORD_NOTIFICATIONS_KEY, writeLandlordNotifications(landlordNotifications));
 
         String json = JsonWriter.write(root);
         Files.writeString(file, json, StandardCharsets.UTF_8);
@@ -74,7 +80,7 @@ final class TenantAccountJsonStore {
         tenantObject.put("password", tenant.getPasswordForPersistence());
         tenantObject.put("contactNumber", tenant.getContactNumber());
         tenantObject.put("paymentStatus", tenant.getPaymentStatus().name());
-        tenantObject.put("paymentAwaitingVerification", tenant.isPaymentAwaitingVerification());
+        tenantObject.put("verificationStatus", tenant.getVerificationStatus().name());
         tenantObject.put("approvedCoOccupantName", tenant.getApprovedCoOccupantName());
         tenantObject.put("roomInfo", writeRoomInfo(tenant.getRoomInfo()));
         tenantObject.put("paymentHistory", writePaymentHistory(tenant.getPaymentHistory()));
@@ -100,6 +106,9 @@ final class TenantAccountJsonStore {
             recordObject.put("status", record.getStatus().name());
             recordObject.put("note", record.getNote());
             recordObject.put("updatedBy", record.getUpdatedBy());
+            recordObject.put("billingMonth", record.getBillingMonth());
+            recordObject.put("amount", record.getAmount());
+            recordObject.put("referenceNumber", record.getReferenceNumber());
             recordObject.put("receiptImagePath", record.getReceiptImagePath());
             recordObject.put("receiptFileName", record.getReceiptFileName());
             records.add(recordObject);
@@ -116,6 +125,27 @@ final class TenantAccountJsonStore {
             notificationObject.put("title", notification.getTitle());
             notificationObject.put("message", notification.getMessage());
             notificationObject.put("sentBy", notification.getSentBy());
+            notificationObject.put("read", notification.isRead());
+            serializedNotifications.add(notificationObject);
+        }
+        return serializedNotifications;
+    }
+
+    private static List<Object> writeLandlordNotifications(List<LandlordNotification> notifications) {
+        List<Object> serializedNotifications = new ArrayList<>();
+        if (notifications == null) {
+            return serializedNotifications;
+        }
+
+        for (LandlordNotification notification : notifications) {
+            Map<String, Object> notificationObject = new LinkedHashMap<>();
+            notificationObject.put("timestamp", notification.getTimestamp().toString());
+            notificationObject.put("type", notification.getType().name());
+            notificationObject.put("tenantUsername", notification.getTenantUsername());
+            notificationObject.put("tenantName", notification.getTenantName());
+            notificationObject.put("title", notification.getTitle());
+            notificationObject.put("message", notification.getMessage());
+            notificationObject.put("read", notification.isRead());
             serializedNotifications.add(notificationObject);
         }
         return serializedNotifications;
@@ -150,7 +180,7 @@ final class TenantAccountJsonStore {
                 readString(tenantObject, "contactNumber", ""),
                 roomInfo,
                 readEnum(tenantObject, "paymentStatus", PaymentStatus.class, PaymentStatus.PENDING),
-                readBoolean(tenantObject, "paymentAwaitingVerification", false),
+                readVerificationStatus(tenantObject),
                 paymentHistory,
                 notifications,
                 readString(tenantObject, "approvedCoOccupantName", ""),
@@ -182,6 +212,9 @@ final class TenantAccountJsonStore {
                     readEnum(recordMap, "status", PaymentStatus.class, PaymentStatus.PENDING),
                     readString(recordMap, "note", ""),
                     readString(recordMap, "updatedBy", ""),
+                    readString(recordMap, "billingMonth", ""),
+                    readDouble(recordMap, "amount", 0),
+                    readString(recordMap, "referenceNumber", ""),
                     readString(recordMap, "receiptImagePath", ""),
                     readString(recordMap, "receiptFileName", "")));
         }
@@ -201,9 +234,48 @@ final class TenantAccountJsonStore {
                     readEnum(recordMap, "type", NotificationType.class, NotificationType.GENERAL_UPDATE),
                     readString(recordMap, "title", ""),
                     readString(recordMap, "message", ""),
-                    readString(recordMap, "sentBy", "")));
+                    readString(recordMap, "sentBy", ""),
+                    readBoolean(recordMap, "read", false)));
         }
         return notifications;
+    }
+
+    private static List<LandlordNotification> readLandlordNotifications(List<Object> records) throws IOException {
+        List<LandlordNotification> notifications = new ArrayList<>();
+        if (records == null) {
+            return notifications;
+        }
+
+        for (Object recordObject : records) {
+            Map<String, Object> recordMap = requireObject(recordObject, "landlordNotification");
+            notifications.add(new LandlordNotification(
+                    readDateTime(recordMap, "timestamp"),
+                    readEnum(recordMap, "type", LandlordNotificationType.class, LandlordNotificationType.NOTICE_OR_CONCERN),
+                    readString(recordMap, "tenantUsername", ""),
+                    readString(recordMap, "tenantName", ""),
+                    readString(recordMap, "title", ""),
+                    readString(recordMap, "message", ""),
+                    readBoolean(recordMap, "read", false)));
+        }
+        return notifications;
+    }
+
+    static final class StoreData {
+        private final List<TenantAccount> tenants;
+        private final List<LandlordNotification> landlordNotifications;
+
+        private StoreData(List<TenantAccount> tenants, List<LandlordNotification> landlordNotifications) {
+            this.tenants = tenants == null ? new ArrayList<>() : new ArrayList<>(tenants);
+            this.landlordNotifications = landlordNotifications == null ? new ArrayList<>() : new ArrayList<>(landlordNotifications);
+        }
+
+        List<TenantAccount> getTenants() {
+            return tenants;
+        }
+
+        List<LandlordNotification> getLandlordNotifications() {
+            return landlordNotifications;
+        }
     }
 
     private static CoOccupantRequest readCoOccupantRequest(Map<String, Object> requestObject) throws IOException {
@@ -324,6 +396,16 @@ final class TenantAccountJsonStore {
         } catch (IllegalArgumentException exception) {
             throw new IOException("Invalid value for " + key + ".", exception);
         }
+    }
+
+    private static VerificationStatus readVerificationStatus(Map<String, Object> tenantObject) throws IOException {
+        Object explicitValue = tenantObject.get("verificationStatus");
+        if (explicitValue != null && !String.valueOf(explicitValue).isBlank()) {
+            return readEnum(tenantObject, "verificationStatus", VerificationStatus.class, VerificationStatus.CLEAR);
+        }
+        return readBoolean(tenantObject, "paymentAwaitingVerification", false)
+                ? VerificationStatus.FOR_REVIEW
+                : VerificationStatus.CLEAR;
     }
 
     private static final class JsonWriter {

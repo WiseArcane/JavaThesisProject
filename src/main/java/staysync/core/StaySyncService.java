@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import staysync.core.TenantAccount.NotificationType;
+import staysync.core.TenantAccount.NotificationRecord;
 import staysync.core.TenantAccount.CoOccupantRequest;
+import staysync.core.TenantAccount.PaymentRecord;
 import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
+import staysync.core.TenantAccount.VerificationStatus;
 
 public class StaySyncService {
     private static final String LANDLORD_USERNAME = "wise";
@@ -23,6 +28,7 @@ public class StaySyncService {
     private static final Path RECEIPT_STORAGE_DIRECTORY = Path.of("storage", "receipts");
 
     private final List<TenantAccount> tenants = new ArrayList<>();
+    private final List<LandlordNotification> landlordNotifications = new ArrayList<>();
 
     public StaySyncService() {
         loadTenants();
@@ -100,23 +106,113 @@ public class StaySyncService {
     }
 
     public synchronized void markTenantAsPaid(TenantAccount tenant) {
-        submitTenantPaymentForVerification(tenant);
+        submitTenantPaymentForVerification(tenant, "");
     }
 
     public synchronized void submitTenantPaymentForVerification(TenantAccount tenant) {
-        updatePaymentStatus(
-                tenant,
-                null,
-                "Payment submitted by the tenant and is waiting for landlord verification.",
-                "Tenant");
+        submitTenantPaymentForVerification(tenant, "");
+    }
+
+    public synchronized String submitTenantPaymentForVerification(TenantAccount tenant, String referenceNumber) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (!storedTenant.getRoomInfo().isAssignmentComplete()) {
+            return "Your landlord needs to assign your room and monthly rent before you can submit payment proof.";
+        }
+        if (storedTenant.getPaymentStatus() == PaymentStatus.PAID) {
+            return "This billing cycle is already marked as paid.";
+        }
+        if (storedTenant.isPaymentAwaitingVerification()) {
+            return "Your payment proof is already with the landlord for review.";
+        }
+        if (findLatestReceiptRecord(storedTenant) == null) {
+            return "Upload a receipt photo before submitting payment proof.";
+        }
+        if (isBlank(referenceNumber)) {
+            return "Enter the payment reference number before submitting payment proof.";
+        }
+
+        storedTenant.submitPaymentForVerification(
+                "Payment proof submitted by the tenant and is ready for landlord review.",
+                "Tenant",
+                referenceNumber.trim());
+        addLandlordNotification(
+                LandlordNotificationType.PAYMENT_SUBMITTED,
+                storedTenant,
+                "Payment proof submitted",
+                storedTenant.getFullName() + " submitted payment proof for "
+                        + storedTenant.getCurrentBillingMonth()
+                        + ". Reference: " + referenceNumber.trim() + ".");
+        saveTenants();
+        return null;
     }
 
     public synchronized void updateTenantStatusFromLandlord(TenantAccount tenant, PaymentStatus status) {
+        updateTenantStatusFromLandlord(tenant, status, "Payment status updated by the landlord.");
+    }
+
+    public synchronized String updateTenantStatusFromLandlord(TenantAccount tenant, PaymentStatus status, String note) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+        if (status == null) {
+            return "Choose a billing status.";
+        }
+
         updatePaymentStatus(
                 tenant,
                 status,
-                "Payment status updated by the landlord.",
+                isBlank(note) ? "Payment status updated by the landlord." : note.trim(),
                 "Landlord");
+        return null;
+    }
+
+    public synchronized String verifyTenantPaymentSubmission(TenantAccount tenant, String note) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (!storedTenant.isPaymentAwaitingVerification()) {
+            return "This tenant does not have a payment proof waiting for review.";
+        }
+
+        storedTenant.updatePaymentStatus(
+                PaymentStatus.PAID,
+                isBlank(note) ? "Payment verified by the landlord." : note.trim(),
+                "Landlord");
+        saveTenants();
+        return null;
+    }
+
+    public synchronized String rejectTenantPaymentSubmission(TenantAccount tenant, String note) {
+        if (tenant == null) {
+            return "Select a tenant first.";
+        }
+        if (isBlank(note)) {
+            return "Enter a short reason so the tenant knows what to fix.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (!storedTenant.isPaymentAwaitingVerification()) {
+            return "This tenant does not have a payment proof waiting for review.";
+        }
+
+        storedTenant.rejectPaymentSubmission(note.trim(), "Landlord");
+        saveTenants();
+        return null;
     }
 
     public synchronized String submitTenantPaymentReceipt(TenantAccount tenant, Path sourceImage) {
@@ -133,11 +229,17 @@ public class StaySyncService {
         if (storedTenant == null) {
             return "Tenant account was not found.";
         }
+        if (!storedTenant.getRoomInfo().isAssignmentComplete()) {
+            return "Your landlord needs to assign your room and monthly rent before you can upload payment proof.";
+        }
+        if (storedTenant.getPaymentStatus() == PaymentStatus.PAID) {
+            return "This billing cycle is already marked as paid.";
+        }
 
         try {
             Path storedReceipt = storeReceiptCopy(storedTenant, sourceImage);
             storedTenant.submitPaymentReceipt(
-                    "Receipt photo submitted by the tenant for landlord review.",
+                    "Receipt photo uploaded for the current billing review.",
                     "Tenant",
                     storedReceipt.toString(),
                     sourceImage.getFileName().toString());
@@ -320,6 +422,35 @@ public class StaySyncService {
         return null;
     }
 
+    public synchronized String submitTenantConcern(TenantAccount tenant, String title, String message) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (isBlank(title) || isBlank(message)) {
+            return "Enter both a subject and message for your notice or concern.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        String normalizedTitle = title.trim();
+        String normalizedMessage = message.trim();
+        addLandlordNotification(
+                LandlordNotificationType.NOTICE_OR_CONCERN,
+                storedTenant,
+                normalizedTitle,
+                normalizedMessage);
+        storedTenant.addNotification(
+                NotificationType.GENERAL_UPDATE,
+                "Notice or concern sent",
+                "Your notice or concern was sent to the landlord. They can review it from their notification bell.",
+                "System");
+        saveTenants();
+        return null;
+    }
+
     public synchronized String approveCoOccupantRequest(TenantAccount tenant) {
         if (tenant == null) {
             return "Select a tenant first.";
@@ -416,6 +547,42 @@ public class StaySyncService {
         return null;
     }
 
+    public synchronized String updateTenantNotificationReadState(
+            TenantAccount tenant,
+            NotificationRecord notification,
+            boolean read) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+        if (notification == null) {
+            return "Notification record was not found.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        storedTenant.updateNotificationReadState(notification, read);
+        saveTenants();
+        return null;
+    }
+
+    public synchronized String markAllTenantNotificationsRead(TenantAccount tenant) {
+        if (tenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
+        if (storedTenant == null) {
+            return "Tenant account was not found.";
+        }
+
+        storedTenant.markAllNotificationsRead();
+        saveTenants();
+        return null;
+    }
+
     public synchronized DashboardSnapshot getLandlordDashboardData(String query) {
         String normalizedQuery = query == null ? "" : query.trim();
         List<TenantAccount> matchingTenants = searchTenants(normalizedQuery);
@@ -427,6 +594,45 @@ public class StaySyncService {
                 countByStatus(PaymentStatus.PENDING),
                 countByStatus(PaymentStatus.LATE),
                 normalizedQuery);
+    }
+
+    public synchronized List<LandlordNotification> getLandlordNotifications() {
+        return Collections.unmodifiableList(new ArrayList<>(landlordNotifications));
+    }
+
+    public synchronized int getUnreadLandlordNotificationCount() {
+        int unreadCount = 0;
+        for (LandlordNotification notification : landlordNotifications) {
+            if (notification != null && notification.isUnread()) {
+                unreadCount++;
+            }
+        }
+        return unreadCount;
+    }
+
+    public synchronized String updateLandlordNotificationReadState(LandlordNotification notification, boolean read) {
+        if (notification == null) {
+            return "Notification record was not found.";
+        }
+
+        for (LandlordNotification existingNotification : landlordNotifications) {
+            if (existingNotification != null && existingNotification.matches(notification)) {
+                existingNotification.setRead(read);
+                saveTenants();
+                return null;
+            }
+        }
+        return "Notification record was not found.";
+    }
+
+    public synchronized String markAllLandlordNotificationsRead() {
+        for (LandlordNotification notification : landlordNotifications) {
+            if (notification != null) {
+                notification.markRead();
+            }
+        }
+        saveTenants();
+        return null;
     }
 
     public synchronized int getTenantCount() {
@@ -607,16 +813,21 @@ public class StaySyncService {
 
         TenantAccount storedTenant = findTenantByUsername(tenant.getUsername());
         if (storedTenant != null) {
-            if (status == null) {
-                if (!storedTenant.isPaymentAwaitingVerification()) {
-                    storedTenant.submitPaymentForVerification(note, updatedBy);
-                    saveTenants();
-                }
-                return;
-            }
             storedTenant.updatePaymentStatus(status, note, updatedBy);
             saveTenants();
         }
+    }
+
+    private PaymentRecord findLatestReceiptRecord(TenantAccount tenant) {
+        if (tenant == null) {
+            return null;
+        }
+        for (PaymentRecord record : tenant.getPaymentHistory()) {
+            if (record.hasReceiptImage()) {
+                return record;
+            }
+        }
+        return null;
     }
 
     private TenantAccount findTenantByLogin(String loginValue) {
@@ -736,10 +947,13 @@ public class StaySyncService {
 
     private void loadTenants() {
         tenants.clear();
+        landlordNotifications.clear();
         try {
-            List<TenantAccount> storedTenants = TenantAccountJsonStore.load(ACCOUNTS_STORAGE_FILE);
-            if (storedTenants != null) {
-                tenants.addAll(storedTenants);
+            TenantAccountJsonStore.StoreData storeData = TenantAccountJsonStore.load(ACCOUNTS_STORAGE_FILE);
+            if (storeData != null) {
+                tenants.addAll(storeData.getTenants());
+                landlordNotifications.addAll(storeData.getLandlordNotifications());
+                backfillLandlordNotifications();
                 return;
             }
         } catch (IOException exception) {
@@ -752,19 +966,48 @@ public class StaySyncService {
 
     private void saveTenants() {
         try {
-            TenantAccountJsonStore.save(ACCOUNTS_STORAGE_FILE, tenants);
+            TenantAccountJsonStore.save(ACCOUNTS_STORAGE_FILE, tenants, landlordNotifications);
         } catch (IOException exception) {
             System.err.println("Unable to save tenant accounts to " + ACCOUNTS_STORAGE_FILE + ": " + exception.getMessage());
         }
     }
 
     private void seedDemoData() {
-        addDemoTenant("Maria Santos", "maria.s", "maria123", "09171234567", "A-101", "Standard", PaymentStatus.PAID,
-                "Payment settled for the current month.", "Landlord");
-        addDemoTenant("Joshua Lim", "josh.l", "josh123", "09184561234", "B-204", "Deluxe", PaymentStatus.PENDING,
-                "Awaiting payment before the due date.", "System");
-        addDemoTenant("Angela Cruz", "angela.c", "angela123", "09221239876", "C-301", "Family", PaymentStatus.LATE,
-                "Payment has not been received after the deadline.", "Landlord");
+        landlordNotifications.clear();
+        addDemoTenant(
+                "Maria Santos",
+                "maria.s",
+                "maria123",
+                "09171234567",
+                "A-101",
+                "Standard",
+                PaymentStatus.PAID,
+                VerificationStatus.CLEAR,
+                "Payment verified for the current billing cycle.",
+                "Landlord");
+        addDemoTenant(
+                "Joshua Lim",
+                "josh.l",
+                "josh123",
+                "09184561234",
+                "B-204",
+                "Deluxe",
+                PaymentStatus.PENDING,
+                VerificationStatus.FOR_REVIEW,
+                "Payment proof submitted and waiting for landlord review.",
+                "Tenant");
+        addDemoTenant(
+                "Angela Cruz",
+                "angela.c",
+                "angela123",
+                "09221239876",
+                "C-301",
+                "Family",
+                PaymentStatus.LATE,
+                VerificationStatus.REJECTED,
+                "Receipt was too blurry to verify. Please upload a clearer image and resubmit.",
+                "Landlord");
+        backfillLandlordNotifications();
     }
 
     private void addDemoTenant(
@@ -775,12 +1018,187 @@ public class StaySyncService {
             String roomNumber,
             String roomType,
             PaymentStatus paymentStatus,
+            VerificationStatus verificationStatus,
             String note,
             String updatedBy) {
         RoomInfo roomInfo = new RoomInfo(roomNumber, roomType, getMonthlyRentForRoomType(roomType), DEFAULT_DUE_DAY);
         TenantAccount tenant = new TenantAccount(fullName, username, password, contactNumber, roomInfo);
-        tenant.updatePaymentStatus(paymentStatus, note, updatedBy);
+        if (verificationStatus == VerificationStatus.FOR_REVIEW) {
+            tenant.submitPaymentReceipt(
+                    "Receipt photo uploaded for the current billing review.",
+                    "Tenant",
+                    "",
+                    "");
+            tenant.submitPaymentForVerification(note, updatedBy, "DEMO-2026-" + username.toUpperCase(Locale.ROOT));
+        } else if (verificationStatus == VerificationStatus.REJECTED) {
+            tenant.submitPaymentReceipt(
+                    "Receipt photo uploaded for the current billing review.",
+                    "Tenant",
+                    "",
+                    "");
+            tenant.submitPaymentForVerification("Payment proof submitted by the tenant and is ready for landlord review.", "Tenant",
+                    "DEMO-2026-" + username.toUpperCase(Locale.ROOT));
+            tenant.rejectPaymentSubmission(note, updatedBy);
+        } else {
+            tenant.updatePaymentStatus(paymentStatus, note, updatedBy);
+        }
         tenants.add(tenant);
+    }
+
+    private void addLandlordNotification(
+            LandlordNotificationType type,
+            TenantAccount tenant,
+            String title,
+            String message) {
+        if (tenant == null) {
+            return;
+        }
+
+        landlordNotifications.add(0, new LandlordNotification(
+                type,
+                tenant.getUsername(),
+                tenant.getFullName(),
+                title,
+                message));
+    }
+
+    private void backfillLandlordNotifications() {
+        if (!landlordNotifications.isEmpty()) {
+            return;
+        }
+
+        for (TenantAccount tenant : tenants) {
+            if (tenant == null) {
+                continue;
+            }
+
+            if (tenant.isPaymentAwaitingVerification()) {
+                String reference = "No reference";
+                for (PaymentRecord paymentRecord : tenant.getPaymentHistory()) {
+                    if (paymentRecord != null && paymentRecord.hasReferenceNumber()) {
+                        reference = paymentRecord.getReferenceNumber();
+                        break;
+                    }
+                }
+                addLandlordNotification(
+                        LandlordNotificationType.PAYMENT_SUBMITTED,
+                        tenant,
+                        "Payment proof submitted",
+                        tenant.getFullName() + " already has a payment proof waiting for review. Reference: " + reference + ".");
+            }
+        }
+    }
+
+    public enum LandlordNotificationType {
+        PAYMENT_SUBMITTED("Payment submitted"),
+        NOTICE_OR_CONCERN("Notice/concern");
+
+        private final String label;
+
+        LandlordNotificationType(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    public static final class LandlordNotification {
+        private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+
+        private final LocalDateTime timestamp;
+        private final LandlordNotificationType type;
+        private final String tenantUsername;
+        private final String tenantName;
+        private final String title;
+        private final String message;
+        private boolean read;
+
+        public LandlordNotification(
+                LandlordNotificationType type,
+                String tenantUsername,
+                String tenantName,
+                String title,
+                String message) {
+            this(LocalDateTime.now(), type, tenantUsername, tenantName, title, message, false);
+        }
+
+        public LandlordNotification(
+                LocalDateTime timestamp,
+                LandlordNotificationType type,
+                String tenantUsername,
+                String tenantName,
+                String title,
+                String message,
+                boolean read) {
+            this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
+            this.type = type == null ? LandlordNotificationType.NOTICE_OR_CONCERN : type;
+            this.tenantUsername = tenantUsername == null ? "" : tenantUsername.trim();
+            this.tenantName = tenantName == null ? "" : tenantName.trim();
+            this.title = title == null ? "" : title.trim();
+            this.message = message == null ? "" : message.trim();
+            this.read = read;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public LandlordNotificationType getType() {
+            return type;
+        }
+
+        public String getTenantUsername() {
+            return tenantUsername;
+        }
+
+        public String getTenantName() {
+            return tenantName;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public boolean isRead() {
+            return read;
+        }
+
+        public boolean isUnread() {
+            return !read;
+        }
+
+        public void markRead() {
+            read = true;
+        }
+
+        public void setRead(boolean read) {
+            this.read = read;
+        }
+
+        public boolean matches(LandlordNotification other) {
+            return other != null
+                    && timestamp.equals(other.timestamp)
+                    && type == other.type
+                    && tenantUsername.equals(other.tenantUsername)
+                    && tenantName.equals(other.tenantName)
+                    && title.equals(other.title)
+                    && message.equals(other.message);
+        }
+
+        public String getFormattedTimestamp() {
+            return timestamp.format(DISPLAY_FORMATTER);
+        }
     }
 
     public static final class DashboardSnapshot {

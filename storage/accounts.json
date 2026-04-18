@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "tenants": [
     {
       "fullName": "Maria Santos",
@@ -7,8 +7,8 @@
       "username": "maria.s",
       "password": "maria123",
       "contactNumber": "09171234567",
-      "paymentStatus": "PAID",
-      "paymentAwaitingVerification": false,
+      "paymentStatus": "PENDING",
+      "verificationStatus": "FOR_REVIEW",
       "approvedCoOccupantName": "",
       "roomInfo": {
         "roomNumber": "A-101",
@@ -18,10 +18,46 @@
       },
       "paymentHistory": [
         {
-          "timestamp": "2026-04-08T19:50:31.174600500",
-          "status": "PAID",
-          "note": "Payment settled for the current month.",
+          "timestamp": "2026-04-18T19:24:53.284008",
+          "status": "PENDING",
+          "note": "Payment proof submitted by the tenant and is ready for landlord review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "MS-APR-2026-1102",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T19:24:53.282979200",
+          "status": "PENDING",
+          "note": "Receipt photo uploaded for the current billing review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "MS-APR-2026-1102",
+          "receiptImagePath": "C:\\Users\\rendi\\Downloads\\2ndSemProjects\\experiment\\storage\\receipts\\maria.s\\receipt-1776511493266.png",
+          "receiptFileName": "Tenant and Landlord-2026-04-17-021808.png"
+        },
+        {
+          "timestamp": "2026-04-18T19:22:54.147685100",
+          "status": "PENDING",
+          "note": "Payment status updated by the landlord.",
           "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "MS-APR-2026-1102",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T11:22:10",
+          "status": "PAID",
+          "note": "Payment verified for the current billing cycle.",
+          "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "MS-APR-2026-1102",
           "receiptImagePath": "",
           "receiptFileName": ""
         },
@@ -30,6 +66,9 @@
           "status": "PENDING",
           "note": "Account created. Payment is waiting to be settled.",
           "updatedBy": "System",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "",
           "receiptImagePath": "",
           "receiptFileName": ""
         }
@@ -43,8 +82,8 @@
       "username": "josh.l",
       "password": "josh123",
       "contactNumber": "09184561234",
-      "paymentStatus": "PENDING",
-      "paymentAwaitingVerification": false,
+      "paymentStatus": "PAID",
+      "verificationStatus": "CLEAR",
       "approvedCoOccupantName": "",
       "roomInfo": {
         "roomNumber": "B-204",
@@ -54,18 +93,57 @@
       },
       "paymentHistory": [
         {
-          "timestamp": "2026-04-08T19:50:31.174600500",
-          "status": "PENDING",
-          "note": "Awaiting payment before the due date.",
-          "updatedBy": "System",
+          "timestamp": "2026-04-18T18:36:32.730266800",
+          "status": "PAID",
+          "note": "Payment status updated by the landlord.",
+          "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 4500.0,
+          "referenceNumber": "JL-APR-2026-4821",
           "receiptImagePath": "",
           "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T18:34:53.111558700",
+          "status": "PENDING",
+          "note": "Receipt photo uploaded for the current billing review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 4500.0,
+          "referenceNumber": "JL-APR-2026-4821",
+          "receiptImagePath": "C:\\Users\\rendi\\Downloads\\2ndSemProjects\\experiment\\storage\\receipts\\josh.l\\receipt-1776508493106.png",
+          "receiptFileName": "Screenshot 2025-10-24 170802.png"
+        },
+        {
+          "timestamp": "2026-04-18T15:14:45",
+          "status": "PENDING",
+          "note": "Payment proof submitted by the tenant and is ready for landlord review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 4500.0,
+          "referenceNumber": "JL-APR-2026-4821",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T15:12:10",
+          "status": "PENDING",
+          "note": "Receipt photo uploaded for the current billing review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 4500.0,
+          "referenceNumber": "",
+          "receiptImagePath": "C:\\Users\\rendi\\Downloads\\2ndSemProjects\\experiment\\storage\\receipts\\josh.l\\receipt-demo.bmp",
+          "receiptFileName": "receipt-demo.bmp"
         },
         {
           "timestamp": "2026-04-08T19:50:31.174600500",
           "status": "PENDING",
           "note": "Account created. Payment is waiting to be settled.",
           "updatedBy": "System",
+          "billingMonth": "April 2026",
+          "amount": 4500.0,
+          "referenceNumber": "",
           "receiptImagePath": "",
           "receiptFileName": ""
         }
@@ -80,7 +158,7 @@
       "password": "angela123",
       "contactNumber": "09221239876",
       "paymentStatus": "LATE",
-      "paymentAwaitingVerification": false,
+      "verificationStatus": "REJECTED",
       "approvedCoOccupantName": "",
       "roomInfo": {
         "roomNumber": "C-301",
@@ -90,18 +168,99 @@
       },
       "paymentHistory": [
         {
-          "timestamp": "2026-04-08T19:50:31.174600500",
+          "timestamp": "2026-04-18T14:50:22",
           "status": "LATE",
-          "note": "Payment has not been received after the deadline.",
+          "note": "Receipt was too blurry to verify. Please upload a clearer image and resubmit.",
           "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 6000.0,
+          "referenceNumber": "AC-APR-2026-9017",
           "receiptImagePath": "",
           "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T14:44:08",
+          "status": "LATE",
+          "note": "Payment proof submitted by the tenant and is ready for landlord review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 6000.0,
+          "referenceNumber": "AC-APR-2026-9017",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T14:40:02",
+          "status": "LATE",
+          "note": "Receipt photo uploaded for the current billing review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 6000.0,
+          "referenceNumber": "",
+          "receiptImagePath": "C:\\Users\\rendi\\Downloads\\2ndSemProjects\\experiment\\storage\\receipts\\angela.c\\receipt-demo.bmp",
+          "receiptFileName": "receipt-demo.bmp"
         },
         {
           "timestamp": "2026-04-08T19:50:31.174600500",
           "status": "PENDING",
           "note": "Account created. Payment is waiting to be settled.",
           "updatedBy": "System",
+          "billingMonth": "April 2026",
+          "amount": 6000.0,
+          "referenceNumber": "",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        }
+      ],
+      "notifications": [],
+      "coOccupantRequest": null
+    },
+    {
+      "fullName": "Rendil Robosa",
+      "email": "rendilgtz@gmail.com",
+      "username": "Rendil",
+      "password": "1234",
+      "contactNumber": "09293879981",
+      "paymentStatus": "PAID",
+      "verificationStatus": "CLEAR",
+      "approvedCoOccupantName": "",
+      "roomInfo": {
+        "roomNumber": "30",
+        "roomType": "Deluxe",
+        "monthlyRent": 5000.0,
+        "dueDay": 5
+      },
+      "paymentHistory": [
+        {
+          "timestamp": "2026-04-18T13:56:57.708611600",
+          "status": "PAID",
+          "note": "Payment status updated by the landlord.",
+          "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 0.0,
+          "referenceNumber": "",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T13:36:02.419288700",
+          "status": "PENDING",
+          "note": "Payment status updated by the landlord.",
+          "updatedBy": "Landlord",
+          "billingMonth": "April 2026",
+          "amount": 0.0,
+          "referenceNumber": "",
+          "receiptImagePath": "",
+          "receiptFileName": ""
+        },
+        {
+          "timestamp": "2026-04-18T13:35:28.834145200",
+          "status": "PENDING",
+          "note": "Account created. Waiting for the landlord to assign a room and monthly rent.",
+          "updatedBy": "System",
+          "billingMonth": "April 2026",
+          "amount": 0.0,
+          "referenceNumber": "",
           "receiptImagePath": "",
           "receiptFileName": ""
         }

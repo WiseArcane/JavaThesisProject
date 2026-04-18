@@ -184,11 +184,31 @@
     -fx-alignment: top-left;
 }
 
+.landlord-stats-row {
+    -fx-alignment: top-left;
+}
+
 .landlord-controls-row {
+    -fx-alignment: top-left;
+    -fx-hgap: 16px;
+    -fx-vgap: 16px;
+}
+
+.landlord-residents-top-row {
+    -fx-alignment: top-left;
+}
+
+.landlord-residents-layout {
     -fx-alignment: top-left;
 }
 
 .controls-primary-column {
+    -fx-spacing: 14px;
+}
+
+.controls-main-column,
+.controls-secondary-column,
+.residents-side-column {
     -fx-spacing: 14px;
 }
 
@@ -198,22 +218,43 @@
 
 .controls-summary-card,
 .controls-form-card {
-    -fx-padding: 24px;
-    -fx-spacing: 16px;
+    -fx-padding: 20px;
+    -fx-spacing: 12px;
+}
+
+.controls-summary-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.12)),
+        radial-gradient(center 14% 16%, radius 64%, rgba(216, 168, 76, 0.14), rgba(216, 168, 76, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 2%) 0%, -color-panel-muted 58%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 32px, 31px, 30px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-radius: 32px;
+}
+
+.controls-receipt-card,
+.controls-secondary-card {
+    -fx-padding: 20px;
+    -fx-spacing: 12px;
 }
 
 .controls-badge-row,
 .controls-inline-actions {
     -fx-alignment: center-left;
-    -fx-spacing: 10px;
+    -fx-spacing: 8px;
+}
+
+.selected-tenant-badge-row {
+    -fx-pref-wrap-length: 320px;
 }
 
 .controls-detail-grid {
-    -fx-padding: 2px 0 0 0;
+    -fx-padding: 0;
 }
 
 .controls-detail-cell {
-    -fx-padding: 14px 16px;
+    -fx-padding: 12px 14px;
     -fx-spacing: 4px;
     -fx-background-color:
         rgba(255, 255, 255, 0.22),
@@ -230,12 +271,39 @@
     -fx-font-weight: 700;
 }
 
+.selected-tenant-hero {
+    -fx-alignment: center-left;
+    -fx-spacing: 12px;
+}
+
+.selected-tenant-avatar {
+    -fx-min-width: 64px;
+    -fx-min-height: 64px;
+    -fx-max-width: 64px;
+    -fx-max-height: 64px;
+}
+
+.selected-tenant-name {
+    -fx-font-size: 17px;
+}
+
+.selected-tenant-room {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-soft;
+}
+
+.selected-tenant-summary,
+.selected-tenant-guidance {
+    -fx-font-size: 12px;
+    -fx-line-spacing: 3px;
+}
+
 .controls-form-grid {
-    -fx-padding: 2px 0 0 0;
+    -fx-padding: 0;
 }
 
 .controls-action-grid {
-    -fx-padding: 2px 0 0 0;
+    -fx-padding: 0;
 }
 
 .controls-notification-card .text-area {
@@ -258,6 +326,78 @@
 .landlord-guide-card {
     -fx-padding: 24px;
     -fx-spacing: 16px;
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.08)),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 1%) 0%, derive(-color-warning-bg, 20%) 58%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 32px, 31px;
+    -fx-border-color: rgba(200, 165, 106, 0.34);
+    -fx-border-radius: 32px;
+}
+
+.landlord-stat-card {
+    -fx-padding: 18px 20px 20px 20px;
+    -fx-spacing: 6px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.28),
+        linear-gradient(to bottom right, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 28px, 27px;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 28px;
+    -fx-effect: dropshadow(gaussian, -color-shadow-soft, 24, 0.12, 0, 7);
+}
+
+.landlord-stat-card.primary {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.12)),
+        radial-gradient(center 14% 18%, radius 52%, rgba(216, 168, 76, 0.20), rgba(216, 168, 76, 0) 72%),
+        linear-gradient(to right, derive(-color-surface-strong, 4%) 0%, -color-panel-muted 54%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 30px, 29px, 28px;
+    -fx-border-color: rgba(109, 81, 28, 0.20);
+}
+
+.landlord-stat-card.performance {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom right, derive(-color-success-bg, 16%) 0%, derive(-color-surface-strong, 2%) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(145, 166, 132, 0.40);
+}
+
+.landlord-stat-card.warning {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom right, derive(-color-warning-bg, 6%) 0%, derive(-color-surface-muted, 1%) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(200, 165, 106, 0.48);
+}
+
+.landlord-stat-card.alert {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom right, derive(-color-danger-bg, 10%) 0%, derive(-color-surface-muted, 1%) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(200, 139, 130, 0.50);
+}
+
+.landlord-stat-card.calm {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.24),
+        linear-gradient(to bottom right, derive(-color-success-bg, 10%) 0%, derive(-color-surface-muted, 1%) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(145, 166, 132, 0.42);
+}
+
+.landlord-stat-value {
+    -fx-font-size: 40px;
+    -fx-line-spacing: -4px;
+}
+
+.landlord-stat-title {
+    -fx-font-size: 19px;
+}
 }
 
 .overview-header-row,
@@ -272,11 +412,11 @@
 }
 
 .overview-badge {
-    -fx-padding: 7px 12px;
+    -fx-padding: 6px 10px;
     -fx-background-radius: 999px;
     -fx-border-radius: 999px;
     -fx-border-width: 1px;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
@@ -363,6 +503,25 @@
     -fx-line-spacing: 4px;
 }
 
+.landlord-stat-helper,
+.overview-lead {
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.summary-footer-band {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 6px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to right, rgba(216, 168, 76, 0.14) 0%, rgba(255, 255, 255, 0.00) 44%),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 20px, 19px, 18px;
+    -fx-border-color: rgba(109, 81, 28, 0.16);
+    -fx-border-radius: 20px;
+}
+
 .portfolio-chip-row {
     -fx-hgap: 8px;
     -fx-vgap: 8px;
@@ -378,53 +537,96 @@
 }
 
 .residents-insight-card {
-    -fx-padding: 22px;
-    -fx-spacing: 14px;
+    -fx-padding: 24px;
+    -fx-spacing: 18px;
     -fx-background-color:
-        linear-gradient(to bottom right, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.10)),
-        radial-gradient(center 12% 14%, radius 60%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 72%),
-        linear-gradient(to bottom right, derive(-color-surface-strong, 2%) 0%, -color-panel-muted 54%, -color-panel-strong 100%);
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.10)),
+        radial-gradient(center 14% 14%, radius 62%, rgba(216, 168, 76, 0.16), rgba(216, 168, 76, 0) 74%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 3%) 0%, -color-panel-muted 54%, -color-panel-strong 100%);
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 30px, 29px, 28px;
-    -fx-border-color: rgba(109, 81, 28, 0.16);
+    -fx-border-color: rgba(109, 81, 28, 0.18);
     -fx-border-radius: 30px;
 }
 
+.residents-insight-head {
+    -fx-alignment: center-left;
+}
+
+.residents-insight-title-copy {
+    -fx-spacing: 4px;
+}
+
+.residents-insight-card .overview-badge {
+    -fx-padding: 6px 10px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
 .residents-insight-summary {
-    -fx-font-size: 15px;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.residents-insight-context {
+    -fx-alignment: center-left;
 }
 
 .residents-insight-spotlight {
-    -fx-padding: 16px 18px;
+    -fx-padding: 18px 18px;
     -fx-spacing: 16px;
     -fx-background-color:
         rgba(255, 255, 255, 0.18),
+        linear-gradient(to right, rgba(216, 168, 76, 0.18) 0%, rgba(216, 168, 76, 0.08) 42%, rgba(255, 255, 255, 0.06) 100%),
         linear-gradient(to bottom, derive(-color-accent-soft, 18%) 0%, -color-accent-soft 100%);
-    -fx-background-insets: 0, 1;
-    -fx-background-radius: 24px, 23px;
-    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 24px, 23px, 22px;
+    -fx-border-color: rgba(109, 81, 28, 0.16);
     -fx-border-radius: 24px;
+}
+
+.residents-insight-spotlight-copy {
+    -fx-spacing: 5px;
+}
+
+.residents-insight-spotlight .sidebar-name {
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+
+.residents-insight-spotlight .meta-copy {
+    -fx-font-size: 12px;
 }
 
 .residents-insight-spotlight-value {
     -fx-min-width: 72px;
+    -fx-min-height: 72px;
     -fx-alignment: center;
-    -fx-padding: 12px 0;
+    -fx-padding: 0;
     -fx-background-color:
         rgba(255, 255, 255, 0.28),
         linear-gradient(to bottom, derive(-color-accent, 12%) 0%, -color-accent 62%, -color-accent-strong 100%);
     -fx-background-insets: 0, 1;
-    -fx-background-radius: 22px, 21px;
-    -fx-border-color: rgba(109, 81, 28, 0.24);
-    -fx-border-radius: 22px;
-    -fx-font-size: 34px;
+    -fx-background-radius: 24px, 23px;
+    -fx-border-color: rgba(109, 81, 28, 0.22);
+    -fx-border-radius: 24px;
+    -fx-font-size: 30px;
     -fx-font-weight: 800;
     -fx-text-fill: #231a0e;
 }
 
 .residents-insight-helper {
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-line-spacing: 4px;
+}
+
+.residents-insight-actions {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.residents-insight-action-button {
+    -fx-padding: 12px 16px;
 }
 
 .residents-insight-stats {
@@ -434,7 +636,8 @@
 
 .residents-insight-stat {
     -fx-padding: 14px 16px;
-    -fx-spacing: 4px;
+    -fx-spacing: 5px;
+    -fx-min-width: 132px;
     -fx-background-color:
         rgba(255, 255, 255, 0.22),
         linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
@@ -458,7 +661,7 @@
 }
 
 .residents-insight-stat-value {
-    -fx-font-size: 30px;
+    -fx-font-size: 26px;
     -fx-font-weight: 800;
     -fx-text-fill: -color-text;
 }
@@ -476,7 +679,7 @@
 }
 
 .residents-insight-stat-meta {
-    -fx-font-size: 12px;
+    -fx-font-size: 11px;
     -fx-line-spacing: 3px;
 }
 
@@ -534,11 +737,47 @@
         linear-gradient(to bottom, -color-sidebar 0%, -color-panel-strong 100%);
 }
 
+.sidebar-nav-stack,
+.sidebar-footer-actions {
+    -fx-spacing: 8px;
+}
+
+.sidebar-section-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-text-soft;
+}
+
+.residents-workspace-card {
+    -fx-spacing: 16px;
+}
+
 .content-header {
     -fx-background-color:
         rgba(255, 255, 255, 0.34),
         linear-gradient(to bottom, -color-surface-strong 0%, -color-panel-muted 100%);
-    -fx-padding: 22px 24px;
+    -fx-padding: 20px 24px;
+}
+
+.landlord-content-header {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.50), rgba(255, 255, 255, 0.12)),
+        radial-gradient(center 12% 16%, radius 60%, rgba(216, 168, 76, 0.18), rgba(216, 168, 76, 0) 70%),
+        linear-gradient(to right, derive(-color-surface-strong, 2%) 0%, -color-panel-muted 56%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 34px, 33px, 32px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-radius: 34px;
+    -fx-padding: 20px 24px 18px 24px;
+    -fx-spacing: 6px;
+}
+
+.landlord-header-kicker {
+    -fx-text-fill: -color-accent-deep;
+}
+
+.landlord-section-subtitle {
+    -fx-max-width: 560px;
 }
 
 .mini-panel,
@@ -635,10 +874,75 @@
     -fx-border-color: rgba(215, 170, 86, 0.18);
 }
 
+.app-root.dark-mode .landlord-content-header {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 14% 14%, radius 64%, rgba(215, 170, 86, 0.08), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to right, derive(-color-panel, 3%) 0%, -color-panel-muted 60%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.18);
+}
+
+.app-root.dark-mode .landlord-guide-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        linear-gradient(to bottom right, rgba(188, 152, 90, 0.10) 0%, derive(-color-panel-muted, -1%) 62%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(188, 152, 90, 0.24);
+}
+
+.app-root.dark-mode .landlord-stat-card {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom right, derive(-color-panel, 2%) 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(238, 231, 212, 0.10);
+}
+
+.app-root.dark-mode .landlord-stat-card.primary {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 16% 16%, radius 56%, rgba(215, 170, 86, 0.10), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to right, derive(-color-panel, 3%) 0%, -color-panel-muted 58%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.20);
+}
+
+.app-root.dark-mode .landlord-stat-card.performance,
+.app-root.dark-mode .landlord-stat-card.calm {
+    -fx-border-color: rgba(88, 118, 96, 0.42);
+}
+
+.app-root.dark-mode .landlord-stat-card.warning {
+    -fx-border-color: rgba(188, 152, 90, 0.42);
+}
+
+.app-root.dark-mode .landlord-stat-card.alert {
+    -fx-border-color: rgba(186, 122, 112, 0.42);
+}
+
+.app-root.dark-mode .summary-footer-band {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to right, rgba(215, 170, 86, 0.10) 0%, rgba(255, 255, 255, 0.00) 40%),
+        linear-gradient(to bottom, derive(-color-panel, 2%) 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.16);
+}
+
 .app-root.dark-mode .residents-insight-card {
     -fx-background-color:
         linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-        radial-gradient(center 15% 12%, radius 64%, rgba(215, 170, 86, 0.07), rgba(215, 170, 86, 0) 72%),
+        radial-gradient(center 15% 12%, radius 64%, rgba(215, 170, 86, 0.10), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-panel, 2%) 0%, -color-panel-muted 58%, derive(-color-panel-strong, -2%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-border-color: rgba(215, 170, 86, 0.16);
+}
+
+.app-root.dark-mode .controls-summary-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 15% 12%, radius 64%, rgba(215, 170, 86, 0.08), rgba(215, 170, 86, 0) 72%),
         linear-gradient(to bottom right, derive(-color-panel, 2%) 0%, -color-panel-muted 58%, derive(-color-panel-strong, -2%) 100%);
     -fx-background-insets: 0, 1, 2;
     -fx-border-color: rgba(215, 170, 86, 0.16);
@@ -764,7 +1068,12 @@
     -fx-background-color:
         rgba(255, 255, 255, 0.02),
         linear-gradient(to bottom, #23201b 0%, #1d1b17 100%);
+    -fx-control-inner-background: transparent;
     -fx-border-color: rgba(238, 231, 212, 0.14);
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-soft;
+    -fx-highlight-fill: rgba(215, 170, 86, 0.24);
+    -fx-highlight-text-fill: -color-text;
 }
 
 .app-root.dark-mode .text-input:focused,
@@ -783,6 +1092,17 @@
         rgba(255, 255, 255, 0.04),
         linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
     -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .text-area .content,
+.app-root.dark-mode .ui-text-area .content,
+.app-root.dark-mode .text-area .viewport,
+.app-root.dark-mode .ui-text-area .viewport,
+.app-root.dark-mode .text-area .scroll-pane,
+.app-root.dark-mode .ui-text-area .scroll-pane,
+.app-root.dark-mode .text-area .scroll-pane .corner,
+.app-root.dark-mode .ui-text-area .scroll-pane .corner {
+    -fx-background-color: transparent;
 }
 
 .app-root.dark-mode .table-view,
@@ -893,6 +1213,10 @@
     -fx-font-size: 26px;
 }
 
+.sidebar-section-label {
+    -fx-font-family: "Segoe UI";
+}
+
 .hero-headline {
     -fx-font-size: 66px;
     -fx-font-weight: 700;
@@ -906,7 +1230,7 @@
 }
 
 .card-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 20px;
     -fx-font-weight: 700;
     -fx-text-fill: -color-text;
 }
@@ -1329,7 +1653,7 @@
 }
 
 .status-pill {
-    -fx-padding: 8px 14px;
+    -fx-padding: 7px 12px;
     -fx-background-radius: 999px;
     -fx-border-radius: 999px;
     -fx-border-width: 1px;
@@ -1487,6 +1811,101 @@
     -fx-text-fill: -color-text-muted;
 }
 
+.tenant-payment-layout {
+    -fx-alignment: top-left;
+}
+
+.tenant-payment-column {
+    -fx-spacing: 14px;
+}
+
+.tenant-payment-cycle-card,
+.tenant-payment-receipt-card {
+    -fx-spacing: 16px;
+}
+
+.tenant-payment-cycle-card {
+    -fx-padding: 24px;
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.10)),
+        radial-gradient(center 16% 16%, radius 64%, rgba(216, 168, 76, 0.14), rgba(216, 168, 76, 0) 74%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 2%) 0%, -color-panel-muted 60%, -color-panel-strong 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 32px, 31px, 30px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-radius: 32px;
+}
+
+.tenant-payment-intro {
+    -fx-font-size: 15px;
+    -fx-line-spacing: 5px;
+}
+
+.tenant-payment-badge-row {
+    -fx-padding: 2px 0 0 0;
+}
+
+.tenant-payment-callout {
+    -fx-spacing: 5px;
+    -fx-padding: 14px 16px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.20),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: rgba(109, 81, 28, 0.14);
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.tenant-payment-callout-copy {
+    -fx-font-size: 13px;
+}
+
+.tenant-payment-facts-card {
+    -fx-spacing: 16px;
+}
+
+.tenant-payment-fact-grid {
+    -fx-padding: 2px 0 0 0;
+}
+
+.tenant-payment-fact-card {
+    -fx-spacing: 4px;
+    -fx-padding: 14px 16px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.22),
+        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22px, 21px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.tenant-payment-fact-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-text;
+}
+
+.tenant-payment-fact-helper {
+    -fx-font-size: 12px;
+}
+
+.tenant-payment-action-row {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.tenant-payment-action-row .button {
+    -fx-font-size: 13px;
+}
+
+.tenant-payment-helper {
+    -fx-font-size: 13px;
+}
+
 .payment-history-card {
     -fx-spacing: 18px;
 }
@@ -1568,6 +1987,18 @@
 
 .payment-history-author-cell {
     -fx-font-weight: 700;
+}
+
+.payment-history-billing-cell,
+.payment-history-reference-cell {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+}
+
+.payment-history-amount-cell {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-data-strong;
 }
 
 .payment-history-note-cell {
@@ -1656,6 +2087,9 @@
 }
 
 .app-root.dark-mode .payment-history-table .column-header .label,
+.app-root.dark-mode .payment-history-billing-cell,
+.app-root.dark-mode .payment-history-reference-cell,
+.app-root.dark-mode .payment-history-amount-cell,
 .app-root.dark-mode .payment-history-timestamp-cell,
 .app-root.dark-mode .payment-history-note-cell {
     -fx-text-fill: -color-text-muted;
@@ -1665,6 +2099,26 @@
     -fx-background-color: rgba(243, 236, 220, 0.06);
     -fx-border-color: rgba(243, 236, 220, 0.12);
     -fx-text-fill: -color-text-muted;
+}
+
+.app-root.dark-mode .tenant-payment-cycle-card {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 16% 16%, radius 64%, rgba(215, 170, 86, 0.08), rgba(215, 170, 86, 0) 74%),
+        linear-gradient(to bottom right, #2b2721 0%, #23201b 62%, #1e1b17 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .tenant-payment-callout,
+.app-root.dark-mode .tenant-payment-fact-card {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.04),
+        linear-gradient(to bottom, rgba(51, 46, 38, 0.94) 0%, rgba(38, 34, 29, 0.98) 100%);
+    -fx-border-color: rgba(238, 231, 212, 0.10);
+}
+
+.app-root.dark-mode .tenant-payment-fact-value {
+    -fx-text-fill: -color-text;
 }
 
 .dialog-pane {
@@ -1792,7 +2246,7 @@
 
 .receipt-preview {
     -fx-alignment: center;
-    -fx-padding: 12px;
+    -fx-padding: 10px;
     -fx-background-color:
         rgba(255, 255, 255, 0.20),
         linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
@@ -1822,25 +2276,90 @@
 }
 
 .resident-picker-section {
-    -fx-spacing: 10px;
+    -fx-spacing: 12px;
 }
 
 .resident-picker-grid {
-    -fx-hgap: 10px;
-    -fx-vgap: 10px;
+    -fx-hgap: 12px;
+    -fx-vgap: 12px;
 }
 
 .resident-picker-card {
-    -fx-padding: 16px 18px;
+    -fx-padding: 16px;
     -fx-spacing: 12px;
     -fx-background-color:
-        rgba(255, 255, 255, 0.20),
-        linear-gradient(to bottom, -color-surface-strong 0%, -color-surface-muted 100%);
-    -fx-background-insets: 0, 1;
-    -fx-background-radius: 24px, 23px;
-    -fx-border-color: -color-border;
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.08)),
+        radial-gradient(center 14% 14%, radius 60%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 72%),
+        linear-gradient(to bottom right, -color-surface-strong 0%, -color-surface-muted 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 26px, 25px, 24px;
+    -fx-border-color: rgba(109, 81, 28, 0.14);
     -fx-border-width: 1px;
-    -fx-border-radius: 24px;
+    -fx-border-radius: 26px;
+    -fx-effect: dropshadow(gaussian, rgba(124, 104, 54, 0.10), 20, 0.12, 0, 6);
+}
+
+.resident-picker-header {
+    -fx-alignment: center-left;
+}
+
+.resident-picker-header-content {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.resident-avatar {
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-background-color:
+        rgba(255, 255, 255, 0.28),
+        linear-gradient(to bottom, derive(-color-accent-soft, 26%) 0%, -color-accent-soft 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20px, 19px;
+    -fx-border-color: rgba(109, 81, 28, 0.18);
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+}
+
+.resident-avatar-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-accent-deep;
+}
+
+.resident-avatar-empty {
+    -fx-opacity: 0.82;
+}
+
+.resident-picker-name {
+    -fx-font-size: 17px;
+}
+
+.resident-picker-room {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-soft;
+}
+
+.resident-picker-handle {
+    -fx-font-size: 12px;
+}
+
+.resident-picker-status-column {
+    -fx-alignment: center-left;
+    -fx-row-valignment: center;
+}
+
+.resident-picker-status-band {
+    -fx-pref-wrap-length: 220px;
+    -fx-padding: 2px 0 0 0;
+}
+
+.resident-picker-summary-band {
+    -fx-hgap: 8px;
+    -fx-vgap: 8px;
+    -fx-padding: 2px 0 0 0;
 }
 
 .resident-picker-details {
@@ -1848,26 +2367,64 @@
 }
 
 .resident-picker-detail {
-    -fx-padding: 10px 12px;
-    -fx-spacing: 2px;
+    -fx-padding: 11px 12px;
+    -fx-spacing: 3px;
     -fx-background-color:
-        rgba(255, 255, 255, 0.14),
+        rgba(255, 255, 255, 0.16),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 16px, 15px;
-    -fx-border-color: rgba(99, 95, 67, 0.10);
+    -fx-border-color: rgba(99, 95, 67, 0.12);
     -fx-border-width: 1px;
     -fx-border-radius: 16px;
 }
 
+.resident-picker-helper {
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
 .resident-picker-actions {
+    -fx-alignment: center-left;
     -fx-spacing: 10px;
 }
 
+.resident-picker-card .overview-badge {
+    -fx-padding: 6px 10px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.resident-picker-card .status-pill {
+    -fx-padding: 6px 11px;
+}
+
+.resident-picker-card .status-label {
+    -fx-font-size: 11px;
+}
+
+.resident-picker-card .detail-value {
+    -fx-font-size: 14px;
+}
+
+.resident-picker-card .button {
+    -fx-font-size: 13px;
+    -fx-padding: 12px 14px;
+}
+
 .resident-picker-card.selected {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.10)),
+        radial-gradient(center 14% 14%, radius 60%, rgba(216, 168, 76, 0.16), rgba(216, 168, 76, 0) 72%),
+        linear-gradient(to bottom right, derive(-color-surface-strong, 4%) 0%, -color-panel-muted 100%);
+    -fx-background-insets: 0, 1, 2;
     -fx-border-color: rgba(193, 141, 51, 0.58);
     -fx-border-width: 2px;
-    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.18), 18, 0.16, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(193, 141, 51, 0.22), 20, 0.18, 0, 6);
+}
+
+.resident-picker-card.selected .resident-avatar {
+    -fx-border-color: rgba(193, 141, 51, 0.30);
 }
 
 .resident-picker-card.selected .resident-picker-detail {
@@ -1899,9 +2456,23 @@
 
 .app-root.dark-mode .resident-picker-card {
     -fx-background-color:
-        rgba(255, 255, 255, 0.03),
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+        radial-gradient(center 14% 14%, radius 60%, rgba(215, 170, 86, 0.04), rgba(215, 170, 86, 0) 72%),
         linear-gradient(to bottom, #2a2721 0%, #22201b 100%);
+    -fx-background-insets: 0, 1, 2;
     -fx-border-color: rgba(238, 231, 212, 0.12);
+}
+
+.app-root.dark-mode .resident-avatar {
+    -fx-background-color:
+        rgba(255, 255, 255, 0.06),
+        linear-gradient(to bottom, rgba(215, 170, 86, 0.24) 0%, rgba(215, 170, 86, 0.10) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-border-color: rgba(240, 201, 123, 0.14);
+}
+
+.app-root.dark-mode .resident-avatar-label {
+    -fx-text-fill: -color-accent-deep;
 }
 
 .app-root.dark-mode .resident-picker-detail {
@@ -1912,9 +2483,18 @@
 }
 
 .app-root.dark-mode .resident-picker-card.selected {
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        radial-gradient(center 14% 14%, radius 62%, rgba(215, 170, 86, 0.10), rgba(215, 170, 86, 0) 72%),
+        linear-gradient(to bottom, #2d2922 0%, #24211b 100%);
+    -fx-background-insets: 0, 1, 2;
     -fx-border-color: rgba(215, 170, 86, 0.46);
     -fx-border-width: 2px;
     -fx-effect: dropshadow(gaussian, rgba(215, 170, 86, 0.16), 18, 0.16, 0, 4);
+}
+
+.app-root.dark-mode .resident-picker-card.selected .resident-avatar {
+    -fx-border-color: rgba(215, 170, 86, 0.28);
 }
 
 .app-root.dark-mode .resident-picker-card.selected .resident-picker-detail {

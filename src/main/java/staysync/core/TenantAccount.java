@@ -1,10 +1,13 @@
 package staysync.core;
 
+import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class TenantAccount {
     private String fullName;
@@ -14,7 +17,7 @@ public class TenantAccount {
     private String contactNumber;
     private final RoomInfo roomInfo;
     private PaymentStatus paymentStatus;
-    private boolean paymentAwaitingVerification;
+    private VerificationStatus verificationStatus;
     private final List<PaymentRecord> paymentHistory;
     private final List<NotificationRecord> notifications;
     private String approvedCoOccupantName;
@@ -33,7 +36,7 @@ public class TenantAccount {
                 contactNumber,
                 roomInfo,
                 PaymentStatus.PENDING,
-                false,
+                VerificationStatus.CLEAR,
                 null,
                 null,
                 "",
@@ -49,7 +52,7 @@ public class TenantAccount {
             String contactNumber,
             RoomInfo roomInfo,
             PaymentStatus paymentStatus,
-            boolean paymentAwaitingVerification,
+            VerificationStatus verificationStatus,
             List<PaymentRecord> paymentHistory,
             List<NotificationRecord> notifications,
             String approvedCoOccupantName,
@@ -62,7 +65,7 @@ public class TenantAccount {
                 contactNumber,
                 roomInfo,
                 paymentStatus,
-                paymentAwaitingVerification,
+                verificationStatus,
                 paymentHistory,
                 notifications,
                 approvedCoOccupantName,
@@ -78,7 +81,7 @@ public class TenantAccount {
             String contactNumber,
             RoomInfo roomInfo,
             PaymentStatus paymentStatus,
-            boolean paymentAwaitingVerification,
+            VerificationStatus verificationStatus,
             List<PaymentRecord> paymentHistory,
             List<NotificationRecord> notifications,
             String approvedCoOccupantName,
@@ -91,7 +94,7 @@ public class TenantAccount {
         this.contactNumber = contactNumber;
         this.roomInfo = roomInfo;
         this.paymentStatus = paymentStatus == null ? PaymentStatus.PENDING : paymentStatus;
-        this.paymentAwaitingVerification = paymentAwaitingVerification;
+        this.verificationStatus = verificationStatus == null ? VerificationStatus.CLEAR : verificationStatus;
         this.paymentHistory = paymentHistory == null ? new ArrayList<>() : new ArrayList<>(paymentHistory);
         this.notifications = notifications == null ? new ArrayList<>() : new ArrayList<>(notifications);
         this.approvedCoOccupantName = approvedCoOccupantName == null ? "" : approvedCoOccupantName;
@@ -134,8 +137,26 @@ public class TenantAccount {
         return Collections.unmodifiableList(paymentHistory);
     }
 
+    public VerificationStatus getVerificationStatus() {
+        return verificationStatus;
+    }
+
     public List<NotificationRecord> getNotifications() {
         return Collections.unmodifiableList(notifications);
+    }
+
+    public int getUnreadNotificationCount() {
+        int unreadCount = 0;
+        for (NotificationRecord notification : notifications) {
+            if (notification != null && notification.isUnread()) {
+                unreadCount++;
+            }
+        }
+        return unreadCount;
+    }
+
+    public boolean hasUnreadNotifications() {
+        return getUnreadNotificationCount() > 0;
     }
 
     public String getApprovedCoOccupantName() {
@@ -147,7 +168,11 @@ public class TenantAccount {
     }
 
     public boolean isPaymentAwaitingVerification() {
-        return paymentAwaitingVerification;
+        return verificationStatus == VerificationStatus.FOR_REVIEW;
+    }
+
+    public boolean hasRejectedPaymentSubmission() {
+        return verificationStatus == VerificationStatus.REJECTED;
     }
 
     public boolean hasApprovedCoOccupant() {
@@ -193,21 +218,71 @@ public class TenantAccount {
 
     public void updatePaymentStatus(PaymentStatus paymentStatus, String note, String updatedBy) {
         this.paymentStatus = paymentStatus;
-        this.paymentAwaitingVerification = false;
-        addPaymentRecord(paymentStatus, note, updatedBy);
+        this.verificationStatus = VerificationStatus.CLEAR;
+        addPaymentRecord(paymentStatus, note, updatedBy, resolveCurrentBillingMonth(), roomInfo.getMonthlyRent(), findLatestReferenceNumber(), "", "");
     }
 
     public void submitPaymentReceipt(String note, String updatedBy, String receiptImagePath, String receiptFileName) {
-        addPaymentRecord(paymentStatus, note, updatedBy, receiptImagePath, receiptFileName);
+        addPaymentRecord(
+                paymentStatus,
+                note,
+                updatedBy,
+                resolveCurrentBillingMonth(),
+                roomInfo.getMonthlyRent(),
+                findLatestReferenceNumber(),
+                receiptImagePath,
+                receiptFileName);
     }
 
-    public void submitPaymentForVerification(String note, String updatedBy) {
-        paymentAwaitingVerification = true;
-        addPaymentRecord(paymentStatus, note, updatedBy);
+    public void submitPaymentForVerification(String note, String updatedBy, String referenceNumber) {
+        verificationStatus = VerificationStatus.FOR_REVIEW;
+        addPaymentRecord(
+                paymentStatus,
+                note,
+                updatedBy,
+                resolveCurrentBillingMonth(),
+                roomInfo.getMonthlyRent(),
+                referenceNumber,
+                "",
+                "");
+    }
+
+    public void rejectPaymentSubmission(String note, String updatedBy) {
+        verificationStatus = VerificationStatus.REJECTED;
+        addPaymentRecord(
+                paymentStatus,
+                note,
+                updatedBy,
+                resolveCurrentBillingMonth(),
+                roomInfo.getMonthlyRent(),
+                findLatestReferenceNumber(),
+                "",
+                "");
     }
 
     public void addNotification(NotificationType type, String title, String message, String sentBy) {
         notifications.add(0, new NotificationRecord(type, title, message, sentBy));
+    }
+
+    public void markAllNotificationsRead() {
+        for (NotificationRecord notification : notifications) {
+            if (notification != null) {
+                notification.markRead();
+            }
+        }
+    }
+
+    public void updateNotificationReadState(NotificationRecord target, boolean read) {
+        if (target == null) {
+            return;
+        }
+
+        for (NotificationRecord notification : notifications) {
+            if (notification != null && notification.matches(target)) {
+                notification.setRead(read);
+                return;
+            }
+        }
     }
 
     public void submitCoOccupantRequest(String requestedName, String note, String updatedBy) {
@@ -235,43 +310,99 @@ public class TenantAccount {
         return paymentStatus.getLabel();
     }
 
+    public String getVerificationStatusLabel() {
+        return verificationStatus.getLabel();
+    }
+
+    public String getCurrentBillingMonth() {
+        return resolveCurrentBillingMonth();
+    }
+
     public String getDueNotificationMessage() {
         if (!roomInfo.isAssignmentComplete()) {
             return "Your landlord will assign your room and monthly rent before billing starts.";
         }
         if (paymentStatus == PaymentStatus.PAID) {
-            return "No due payment right now. Your account is updated.";
+            return "Payment verified for " + resolveCurrentBillingMonth() + ". Your account is up to date.";
         }
-        if (paymentAwaitingVerification) {
-            return "Payment sent. Waiting for the landlord to verify and update your account.";
+        if (verificationStatus == VerificationStatus.FOR_REVIEW) {
+            return "Payment proof submitted. Waiting for the landlord to review your receipt and reference number.";
+        }
+        if (verificationStatus == VerificationStatus.REJECTED) {
+            return "Your latest payment proof needs revision. Review the landlord note, upload a clearer receipt if needed, and resubmit.";
         }
         if (paymentStatus == PaymentStatus.LATE) {
             return "Payment is overdue. Please settle it as soon as possible.";
         }
-        return "Payment is pending. Please pay on or before day " + roomInfo.getDueDay() + " of the month.";
+        return "Payment is not paid yet. Please pay on or before day " + roomInfo.getDueDay() + " of the month.";
     }
 
     private void addPaymentRecord(PaymentStatus status, String note, String updatedBy) {
-        addPaymentRecord(status, note, updatedBy, "", "");
+        addPaymentRecord(status, note, updatedBy, resolveCurrentBillingMonth(), roomInfo.getMonthlyRent(), findLatestReferenceNumber(), "", "");
     }
 
     private void addPaymentRecord(
             PaymentStatus status,
             String note,
             String updatedBy,
+            String billingMonth,
+            double amount,
+            String referenceNumber,
             String receiptImagePath,
             String receiptFileName) {
-        paymentHistory.add(0, new PaymentRecord(status, note, updatedBy, receiptImagePath, receiptFileName));
+        paymentHistory.add(0, new PaymentRecord(
+                status,
+                note,
+                updatedBy,
+                billingMonth,
+                amount,
+                referenceNumber,
+                receiptImagePath,
+                receiptFileName));
+    }
+
+    private String findLatestReferenceNumber() {
+        for (PaymentRecord record : paymentHistory) {
+            if (record.hasReferenceNumber()) {
+                return record.getReferenceNumber();
+            }
+        }
+        return "";
+    }
+
+    private String resolveCurrentBillingMonth() {
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM yyyy"));
     }
 
     public enum PaymentStatus {
         PAID("Paid"),
-        PENDING("Pending"),
+        PENDING("Not paid yet"),
         LATE("Late");
 
         private final String label;
 
         PaymentStatus(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    public enum VerificationStatus {
+        CLEAR("Verification clear"),
+        FOR_REVIEW("For review"),
+        REJECTED("Rejected");
+
+        private final String label;
+
+        VerificationStatus(String label) {
             this.label = label;
         }
 
@@ -399,25 +530,32 @@ public class TenantAccount {
 
     public static final class PaymentRecord {
         private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+        private static final NumberFormat AMOUNT_FORMAT = NumberFormat.getCurrencyInstance(new Locale("en", "PH"));
 
         private final LocalDateTime timestamp;
         private final PaymentStatus status;
         private final String note;
         private final String updatedBy;
+        private final String billingMonth;
+        private final double amount;
+        private final String referenceNumber;
         private final String receiptImagePath;
         private final String receiptFileName;
 
         public PaymentRecord(PaymentStatus status, String note, String updatedBy) {
-            this(status, note, updatedBy, "", "");
+            this(status, note, updatedBy, "", 0, "", "", "");
         }
 
         public PaymentRecord(
                 PaymentStatus status,
                 String note,
                 String updatedBy,
+                String billingMonth,
+                double amount,
+                String referenceNumber,
                 String receiptImagePath,
                 String receiptFileName) {
-            this(LocalDateTime.now(), status, note, updatedBy, receiptImagePath, receiptFileName);
+            this(LocalDateTime.now(), status, note, updatedBy, billingMonth, amount, referenceNumber, receiptImagePath, receiptFileName);
         }
 
         public PaymentRecord(
@@ -425,12 +563,18 @@ public class TenantAccount {
                 PaymentStatus status,
                 String note,
                 String updatedBy,
+                String billingMonth,
+                double amount,
+                String referenceNumber,
                 String receiptImagePath,
                 String receiptFileName) {
             this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
             this.status = status;
             this.note = note;
             this.updatedBy = updatedBy;
+            this.billingMonth = billingMonth == null ? "" : billingMonth;
+            this.amount = amount;
+            this.referenceNumber = referenceNumber == null ? "" : referenceNumber.trim();
             this.receiptImagePath = receiptImagePath == null ? "" : receiptImagePath;
             this.receiptFileName = receiptFileName == null ? "" : receiptFileName;
         }
@@ -451,6 +595,18 @@ public class TenantAccount {
             return updatedBy;
         }
 
+        public String getBillingMonth() {
+            return billingMonth;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public String getReferenceNumber() {
+            return referenceNumber;
+        }
+
         public String getReceiptImagePath() {
             return receiptImagePath;
         }
@@ -463,8 +619,16 @@ public class TenantAccount {
             return !receiptImagePath.isBlank();
         }
 
+        public boolean hasReferenceNumber() {
+            return !referenceNumber.isBlank();
+        }
+
         public String getReceiptStatusLabel() {
             return hasReceiptImage() ? "Photo attached" : "No photo";
+        }
+
+        public String getFormattedAmount() {
+            return amount > 0 ? AMOUNT_FORMAT.format(amount) : "To be assigned";
         }
 
         public String getFormattedTimestamp() {
@@ -571,17 +735,29 @@ public class TenantAccount {
         private final String title;
         private final String message;
         private final String sentBy;
+        private boolean read;
 
         public NotificationRecord(NotificationType type, String title, String message, String sentBy) {
-            this(LocalDateTime.now(), type, title, message, sentBy);
+            this(LocalDateTime.now(), type, title, message, sentBy, false);
         }
 
         public NotificationRecord(LocalDateTime timestamp, NotificationType type, String title, String message, String sentBy) {
+            this(timestamp, type, title, message, sentBy, false);
+        }
+
+        public NotificationRecord(
+                LocalDateTime timestamp,
+                NotificationType type,
+                String title,
+                String message,
+                String sentBy,
+                boolean read) {
             this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
-            this.type = type;
-            this.title = title;
-            this.message = message;
-            this.sentBy = sentBy;
+            this.type = type == null ? NotificationType.GENERAL_UPDATE : type;
+            this.title = title == null ? "" : title;
+            this.message = message == null ? "" : message;
+            this.sentBy = sentBy == null ? "" : sentBy;
+            this.read = read;
         }
 
         public LocalDateTime getTimestamp() {
@@ -602,6 +778,35 @@ public class TenantAccount {
 
         public String getSentBy() {
             return sentBy;
+        }
+
+        public boolean isRead() {
+            return read;
+        }
+
+        public boolean isUnread() {
+            return !read;
+        }
+
+        public void markRead() {
+            read = true;
+        }
+
+        public void markUnread() {
+            read = false;
+        }
+
+        public void setRead(boolean read) {
+            this.read = read;
+        }
+
+        public boolean matches(NotificationRecord other) {
+            return other != null
+                    && timestamp.equals(other.timestamp)
+                    && type == other.type
+                    && title.equals(other.title)
+                    && message.equals(other.message)
+                    && sentBy.equals(other.sentBy);
         }
 
         public String getFormattedTimestamp() {
