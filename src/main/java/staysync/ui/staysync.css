@@ -1525,8 +1525,9 @@
 }
 
 .tab-strip {
+    -fx-alignment: center-left;
     -fx-padding: 8px;
-    -fx-spacing: 10px;
+    -fx-spacing: 8px;
     -fx-background-color:
         rgba(255, 255, 255, 0.20),
         linear-gradient(to bottom, -color-panel-strong 0%, -color-surface-muted 100%);
@@ -1538,9 +1539,23 @@
 }
 
 .tab-button {
+    -fx-alignment: center;
+    -fx-padding: 14px 18px;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
     -fx-background-color: transparent;
+    -fx-background-radius: 18px;
     -fx-border-color: transparent;
+    -fx-border-radius: 18px;
     -fx-text-fill: -color-text-muted;
+}
+
+.tab-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.18);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(109, 81, 28, 0.10);
+    -fx-border-radius: 18px;
+    -fx-text-fill: -color-text;
 }
 
 .tab-button:selected,
@@ -1552,6 +1567,8 @@
         linear-gradient(to bottom, derive(-color-accent, 10%) 0%, -color-accent 58%, -color-accent-strong 100%);
     -fx-background-insets: 0, 1;
     -fx-border-color: rgba(109, 81, 28, 0.38);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
     -fx-text-fill: #21190f;
 }
 
@@ -1564,6 +1581,8 @@
         linear-gradient(to bottom, derive(-color-accent, 10%) 0%, -color-accent 58%, -color-accent-strong 100%);
     -fx-background-insets: 0, 1;
     -fx-border-color: rgba(109, 81, 28, 0.38);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
     -fx-text-fill: #21190f;
 }
 

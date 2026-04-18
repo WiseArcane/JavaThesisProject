@@ -3153,6 +3153,8 @@ public class StaySyncApp extends Application {
         button.setToggleGroup(group);
         button.setSelected(selected);
         button.getStyleClass().add("tab-button");
+        button.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(button, Priority.ALWAYS);
         applyButtonHoverAnimation(button);
         return button;
     }
