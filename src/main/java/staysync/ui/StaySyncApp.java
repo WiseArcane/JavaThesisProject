@@ -162,6 +162,7 @@ public class StaySyncApp extends Application {
 
         themeButton.getStyleClass().addAll("ui-button", "theme-button");
         applyButtonHoverAnimation(themeButton);
+        // theme button logic for app
         themeButton.setOnAction(event -> {
             darkMode = !darkMode;
             applyThemeMode();
@@ -285,9 +286,9 @@ public class StaySyncApp extends Application {
         ToggleGroup authTabGroup = new ToggleGroup();
         ToggleButton loginTabButton = createTabButton("Sign in", authTabGroup, authTab == AuthTab.LOGIN);
         ToggleButton registerTabButton = createTabButton("Create account", authTabGroup, authTab == AuthTab.REGISTER);
-        // auth tab button logic
+        // auth tab button logic for sign in
         loginTabButton.setOnAction(event -> switchAuthTab(AuthTab.LOGIN));
-        // auth tab button logic
+        // auth tab button logic for registration
         registerTabButton.setOnAction(event -> switchAuthTab(AuthTab.REGISTER));
         tabs.getChildren().addAll(loginTabButton, registerTabButton);
 
@@ -321,7 +322,7 @@ public class StaySyncApp extends Application {
 
         Button loginButton = createPrimaryButton("Sign in");
         loginButton.setMaxWidth(Double.MAX_VALUE);
-        // login button logic
+        // login button logic for auth
         loginButton.setOnAction(event -> {
             loginUsername = usernameField.getText();
             loginPassword = passwordField.getText();
@@ -383,7 +384,7 @@ public class StaySyncApp extends Application {
 
         Button createButton = createPrimaryButton("Create account");
         createButton.setMaxWidth(Double.MAX_VALUE);
-        // create account button logic
+        // create account button logic for auth
         createButton.setOnAction(event -> {
             registerFullName = fullNameField.getText();
             registerEmail = emailField.getText();
@@ -436,11 +437,12 @@ public class StaySyncApp extends Application {
         Button markPaidButton = createPrimaryButton(getTenantPaymentActionLabel(currentTenant));
         markPaidButton.setDisable(!canTenantSubmitPayment(currentTenant));
         markPaidButton.setMaxWidth(Double.MAX_VALUE);
+        // payment button logic for tenant
         markPaidButton.setOnAction(event -> showSubmitPaymentDialog(currentTenant));
 
         Button signOutButton = createSecondaryButton("SIGN OUT");
         signOutButton.setMaxWidth(Double.MAX_VALUE);
-        // tenant sign out button logic
+        // sign out button logic for tenant
         signOutButton.setOnAction(event -> signOut());
 
         Label note = new Label("Use Payments to finish one billing proof at a time, then return to Account for profile and password changes.");
@@ -757,12 +759,13 @@ public class StaySyncApp extends Application {
         Button workflowButton = createPrimaryButton(getTenantPaymentActionLabel(currentTenant));
         workflowButton.setDisable(!billingAssigned || currentTenant.getPaymentStatus() == PaymentStatus.PAID);
         workflowButton.setMaxWidth(Double.MAX_VALUE);
+        // payment workflow button logic for tenant
         workflowButton.setOnAction(event -> showSubmitPaymentDialog(currentTenant));
 
         Button openReceiptButton = createSecondaryButton("OPEN LAST RECEIPT");
         openReceiptButton.setDisable(latestReceipt == null || !latestReceipt.hasReceiptImage());
         openReceiptButton.setMaxWidth(Double.MAX_VALUE);
-        // tenant open receipt button logic
+        // open receipt button logic for tenant
         openReceiptButton.setOnAction(event -> openReceiptImage(latestReceipt, false));
 
         HBox receiptActions = new HBox(10, workflowButton, openReceiptButton);
@@ -845,7 +848,7 @@ public class StaySyncApp extends Application {
         Button requestButton = createPrimaryButton(request != null && request.isPending() ? "Update request" : "Send request");
         requestButton.setMaxWidth(Double.MAX_VALUE);
         requestButton.setDisable(currentTenant == null || !currentTenant.getRoomInfo().hasAssignedRoom());
-        // tenant request button logic
+        // request button logic for tenant
         requestButton.setOnAction(event -> {
             tenantCoOccupantRequestName = coOccupantField.getText();
             String result = staySyncService.submitCoOccupantRequest(currentTenant, tenantCoOccupantRequestName);
@@ -896,16 +899,17 @@ public class StaySyncApp extends Application {
 
         Button editButton = createSecondaryButton("EDIT PROFILE");
         editButton.setMaxWidth(Double.MAX_VALUE);
-        // tenant edit button logic
+        // edit profile button logic for tenant
         editButton.setOnAction(event -> showProfileDialog());
 
         Button passwordButton = createSecondaryButton("CHANGE PASSWORD");
         passwordButton.setMaxWidth(Double.MAX_VALUE);
-        // tenant password button logic
+        // password button logic for tenant
         passwordButton.setOnAction(event -> showPasswordDialog());
 
         Button concernButton = createSecondaryButton("SEND NOTICE / CONCERN");
         concernButton.setMaxWidth(Double.MAX_VALUE);
+        // concern button logic for tenant
         concernButton.setOnAction(event -> showTenantConcernDialog());
 
         card.getChildren().addAll(
@@ -951,16 +955,17 @@ public class StaySyncApp extends Application {
 
         Button refreshButton = createPrimaryButton("Refresh data");
         refreshButton.setMaxWidth(Double.MAX_VALUE);
-        // landlord refresh button logic
+        // refresh button logic for landlord
         refreshButton.setOnAction(event -> renderCurrentView());
 
         Button resetButton = createSecondaryButton("Clear search");
         resetButton.setMaxWidth(Double.MAX_VALUE);
+        // reset button logic for landlord
         resetButton.setOnAction(event -> resetLandlordDiscovery());
 
         Button signOutButton = createSecondaryButton("Sign out");
         signOutButton.setMaxWidth(Double.MAX_VALUE);
-        // landlord sign out button logic
+        // sign out button logic for landlord
         signOutButton.setOnAction(event -> signOut());
 
         Label note = new Label("Use Residents to choose tenants, Controls for billing and approvals, and Notifications for reminders and updates.");
@@ -1203,6 +1208,7 @@ public class StaySyncApp extends Application {
 
         TextField searchField = createTextField("Search tenant or room");
         searchField.setText(landlordQuery);
+        // search field logic for landlord
         searchField.setOnAction(event -> {
             landlordQuery = searchField.getText();
             landlordSelectedUsername = null;
@@ -1210,7 +1216,7 @@ public class StaySyncApp extends Application {
         });
 
         Button searchButton = createPrimaryButton("Search");
-        // landlord search button logic
+        // search button logic for landlord
         searchButton.setOnAction(event -> {
             landlordQuery = searchField.getText();
             landlordSelectedUsername = null;
@@ -1218,7 +1224,7 @@ public class StaySyncApp extends Application {
         });
 
         Button clearButton = createSecondaryButton("Clear");
-        // landlord clear button logic
+        // clear button logic for landlord
         clearButton.setOnAction(event -> {
             landlordQuery = "";
             landlordFilter = null;
@@ -1266,11 +1272,13 @@ public class StaySyncApp extends Application {
 
         Button watchlistButton = createSecondaryButton("Open watchlist");
         watchlistButton.setMaxWidth(Double.MAX_VALUE);
+        // watchlist button logic for landlord
         watchlistButton.setOnAction(event -> openLandlordWatchlist());
 
         Button selectedButton = createPrimaryButton("Open selected in Controls");
         selectedButton.setDisable(selectedTenant == null);
         selectedButton.setMaxWidth(Double.MAX_VALUE);
+        // selected tenant button logic for landlord
         selectedButton.setOnAction(event -> openLandlordSelectedTenant());
 
         HBox actions = new HBox(10, watchlistButton, selectedButton);
@@ -1367,6 +1375,7 @@ public class StaySyncApp extends Application {
         if (tenant == null) {
             Button residentsButton = createPrimaryButton("Open residents");
             residentsButton.setMaxWidth(Double.MAX_VALUE);
+            // residents button logic for landlord
             residentsButton.setOnAction(event -> switchLandlordSection(LandlordSection.RESIDENTS));
 
             card.getChildren().addAll(
@@ -1436,6 +1445,7 @@ public class StaySyncApp extends Application {
         Button openReceiptButton = createSecondaryButton("Open full photo");
         openReceiptButton.setDisable(latestReceipt == null || !latestReceipt.hasReceiptImage());
         openReceiptButton.setMaxWidth(Double.MAX_VALUE);
+        // open receipt button logic for landlord
         openReceiptButton.setOnAction(event -> openReceiptImage(latestReceipt, true));
         receiptPanel.getChildren().add(openReceiptButton);
 
@@ -1475,6 +1485,7 @@ public class StaySyncApp extends Application {
 
         Button applyButton = createPrimaryButton("Save billing state");
         applyButton.setMaxWidth(Double.MAX_VALUE);
+        // billing state button logic for landlord
         applyButton.setOnAction(event -> {
             String result = staySyncService.updateTenantStatusFromLandlord(tenant, statusBox.getValue(), reviewNoteArea.getText());
             if (result != null) {
@@ -1489,15 +1500,18 @@ public class StaySyncApp extends Application {
         Button verifyButton = createSecondaryButton("Verify payment");
         verifyButton.setDisable(!tenant.isPaymentAwaitingVerification());
         verifyButton.setMaxWidth(Double.MAX_VALUE);
+        // verify payment button logic for landlord
         verifyButton.setOnAction(event -> showVerifyPaymentDialog(tenant, reviewNoteArea.getText()));
 
         Button rejectButton = createDangerButton("Reject proof");
         rejectButton.setDisable(!tenant.isPaymentAwaitingVerification());
         rejectButton.setMaxWidth(Double.MAX_VALUE);
+        // reject proof button logic for landlord
         rejectButton.setOnAction(event -> showRejectPaymentDialog(tenant, reviewNoteArea.getText()));
 
         Button assignRoomButton = createSecondaryButton("Save room and rent");
         assignRoomButton.setMaxWidth(Double.MAX_VALUE);
+        // save room button logic for landlord
         assignRoomButton.setOnAction(event -> {
             double monthlyRent;
             try {
@@ -1525,10 +1539,12 @@ public class StaySyncApp extends Application {
 
         Button residentsButton = createSecondaryButton("Back to residents");
         residentsButton.setMaxWidth(Double.MAX_VALUE);
+        // back to residents button logic for landlord
         residentsButton.setOnAction(event -> switchLandlordSection(LandlordSection.RESIDENTS));
 
         Button deleteButton = createDangerButton("Delete tenant");
         deleteButton.setMaxWidth(Double.MAX_VALUE);
+        // delete tenant button logic for landlord
         deleteButton.setOnAction(event -> handleTenantDeletion(tenant));
 
         GridPane assignmentGrid = new GridPane();
@@ -1713,6 +1729,7 @@ public class StaySyncApp extends Application {
 
         Button openButton = createSecondaryButton("Open full photo");
         openButton.setMaxWidth(Double.MAX_VALUE);
+        // open photo button logic for landlord
         openButton.setOnAction(event -> openReceiptImage(latestReceipt, true));
 
         card.getChildren().addAll(
@@ -1761,6 +1778,7 @@ public class StaySyncApp extends Application {
         Button applyButton = createPrimaryButton("Save billing state");
         applyButton.setDisable(tenant == null);
         applyButton.setMaxWidth(Double.MAX_VALUE);
+        // billing state button logic for landlord
         applyButton.setOnAction(event -> {
             if (tenant != null && statusBox.getValue() != null) {
                 String result = staySyncService.updateTenantStatusFromLandlord(tenant, statusBox.getValue(), reviewNoteArea.getText());
@@ -1777,17 +1795,19 @@ public class StaySyncApp extends Application {
         Button verifyButton = createSecondaryButton("Verify payment");
         verifyButton.setDisable(tenant == null || !tenant.isPaymentAwaitingVerification());
         verifyButton.setMaxWidth(Double.MAX_VALUE);
+        // verify payment button logic for landlord
         verifyButton.setOnAction(event -> showVerifyPaymentDialog(tenant, reviewNoteArea.getText()));
 
         Button rejectButton = createDangerButton("Reject proof");
         rejectButton.setDisable(tenant == null || !tenant.isPaymentAwaitingVerification());
         rejectButton.setMaxWidth(Double.MAX_VALUE);
+        // reject proof button logic for landlord
         rejectButton.setOnAction(event -> showRejectPaymentDialog(tenant, reviewNoteArea.getText()));
 
         Button assignRoomButton = createSecondaryButton("Save room and rent");
         assignRoomButton.setDisable(tenant == null);
         assignRoomButton.setMaxWidth(Double.MAX_VALUE);
-        // save room button logic
+        // save room button logic for landlord
         assignRoomButton.setOnAction(event -> {
             if (tenant == null) {
                 return;
@@ -1820,12 +1840,12 @@ public class StaySyncApp extends Application {
         Button deleteButton = createDangerButton("Delete tenant");
         deleteButton.setDisable(tenant == null);
         deleteButton.setMaxWidth(Double.MAX_VALUE);
-        // delete tenant button logic
+        // delete tenant button logic for landlord
         deleteButton.setOnAction(event -> handleTenantDeletion(tenant));
 
         Button residentsButton = createSecondaryButton("Back to residents");
         residentsButton.setMaxWidth(Double.MAX_VALUE);
-        // back to residents button logic
+        // back to residents button logic for landlord
         residentsButton.setOnAction(event -> {
             landlordSection = LandlordSection.RESIDENTS;
             renderCurrentView();
@@ -1912,7 +1932,7 @@ public class StaySyncApp extends Application {
         Button approveButton = createPrimaryButton("Approve request");
         approveButton.setMaxWidth(Double.MAX_VALUE);
         approveButton.setDisable(request == null || !request.isPending());
-        // landlord approve button logic
+        // approve button logic for landlord
         approveButton.setOnAction(event -> {
             String result = staySyncService.approveCoOccupantRequest(tenant);
             if (result != null) {
@@ -1928,7 +1948,7 @@ public class StaySyncApp extends Application {
         Button rejectButton = createSecondaryButton("Reject request");
         rejectButton.setMaxWidth(Double.MAX_VALUE);
         rejectButton.setDisable(request == null || !request.isPending());
-        // landlord reject button logic
+        // reject button logic for landlord
         rejectButton.setOnAction(event -> {
             String result = staySyncService.rejectCoOccupantRequest(tenant);
             if (result != null) {
@@ -2034,7 +2054,7 @@ public class StaySyncApp extends Application {
         Button sendButton = createPrimaryButton("Send notification");
         sendButton.setDisable(tenant == null);
         sendButton.setMaxWidth(Double.MAX_VALUE);
-        // send notification button logic
+        // send notification button logic for landlord
         sendButton.setOnAction(event -> {
             landlordNotificationType = typeBox.getValue();
             landlordNotificationTitle = titleField.getText();
@@ -2183,6 +2203,7 @@ public class StaySyncApp extends Application {
         proofQueueButton.setMaxWidth(Double.MAX_VALUE);
         proofQueueButton.setWrapText(true);
         proofQueueButton.getStyleClass().add("residents-insight-action-button");
+        // proof queue button logic for landlord
         proofQueueButton.setOnAction(event -> openLandlordProofQueue());
 
         Button lateAccountsButton = createSecondaryButton(late > 0 ? "Review late accounts" : "Late accounts clear");
@@ -2190,6 +2211,7 @@ public class StaySyncApp extends Application {
         lateAccountsButton.setMaxWidth(Double.MAX_VALUE);
         lateAccountsButton.setWrapText(true);
         lateAccountsButton.getStyleClass().add("residents-insight-action-button");
+        // late accounts button logic for landlord
         lateAccountsButton.setOnAction(event -> setLandlordFilter(PaymentStatus.LATE));
 
         VBox actions = new VBox(10, proofQueueButton, lateAccountsButton);
@@ -2207,7 +2229,7 @@ public class StaySyncApp extends Application {
     }
 
     private void handleLogin() {
-        // auth login logic
+        // login logic for auth
         String validationMessage = staySyncService.validateLoginCredentials(loginUsername, loginPassword);
         if (validationMessage != null) {
             showAuthMessage(validationMessage, false);
@@ -2240,7 +2262,7 @@ public class StaySyncApp extends Application {
     }
 
     private void handleRegistration() {
-        // auth registration logic
+        // registration logic for auth
         if (registerEmail == null || registerEmail.trim().isEmpty()) {
             showAuthMessage("Email is required.", false);
             return;
@@ -2276,7 +2298,7 @@ public class StaySyncApp extends Application {
     }
 
     private void showAuthMessage(String message, boolean success) {
-        // auth message logic
+        // message logic for auth
         authMessage = message == null ? "" : message;
         authMessageSuccess = success;
         view = View.AUTH;
@@ -2284,7 +2306,7 @@ public class StaySyncApp extends Application {
     }
 
     private void switchAuthTab(AuthTab target) {
-        // auth tab switch logic
+        // tab switch logic for auth
         authTab = target;
         authMessage = "";
         renderCurrentView();
@@ -2374,7 +2396,7 @@ public class StaySyncApp extends Application {
     }
 
     private double getLandlordScrollVvalue() {
-        // landlord scroll state logic
+        // scroll state logic for landlord
         return switch (landlordSection) {
             case RESIDENTS -> landlordResidentsScrollVvalue;
             case CONTROLS -> landlordControlsScrollVvalue;
@@ -2384,7 +2406,7 @@ public class StaySyncApp extends Application {
     }
 
     private void setLandlordScrollVvalue(double value) {
-        // landlord scroll update logic
+        // scroll update logic for landlord
         switch (landlordSection) {
             case RESIDENTS -> landlordResidentsScrollVvalue = value;
             case CONTROLS -> landlordControlsScrollVvalue = value;
@@ -2544,6 +2566,7 @@ public class StaySyncApp extends Application {
         Button chooseReceiptButton = createSecondaryButton(
                 latestReceipt == null ? "Choose receipt photo" : awaitingReview ? "Replace receipt photo" : "Change receipt photo");
         chooseReceiptButton.setMaxWidth(Double.MAX_VALUE);
+        // choose receipt button logic for tenant
         chooseReceiptButton.setOnAction(event -> {
             Path chosenReceipt = chooseReceiptImage();
             if (chosenReceipt == null) {
@@ -3114,6 +3137,7 @@ public class StaySyncApp extends Application {
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
         applyButtonHoverAnimation(button);
+        // nav button logic for layout
         button.setOnAction(event -> action.run());
         return button;
     }
@@ -3140,6 +3164,7 @@ public class StaySyncApp extends Application {
             button.getStyleClass().add("active-chip");
         }
         applyButtonHoverAnimation(button);
+        // filter button logic for layout
         button.setOnAction(event -> action.run());
         return button;
     }
@@ -3226,7 +3251,7 @@ public class StaySyncApp extends Application {
         scrollPane.getStyleClass().add("page-scroll");
         scrollPane.setFitToWidth(true);
         scrollPane.setPannable(true);
-        // scroll wheel logic
+        // scroll wheel logic for page
         scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
             double contentHeight = scrollPane.getContent().getBoundsInLocal().getHeight();
             double viewportHeight = scrollPane.getViewportBounds().getHeight();
@@ -3242,10 +3267,10 @@ public class StaySyncApp extends Application {
             event.consume();
         });
         if (onVvalueChanged != null) {
-            // scroll position save logic
+            // scroll position save logic for page
             scrollPane.vvalueProperty().addListener((observable, oldValue, newValue) -> onVvalueChanged.accept(newValue.doubleValue()));
         }
-        // scroll restore logic
+        // scroll restore logic for page
         Platform.runLater(() -> scrollPane.setVvalue(initialVvalue));
         return scrollPane;
     }
@@ -3289,7 +3314,7 @@ public class StaySyncApp extends Application {
         button.getStyleClass().addAll("ui-button", "notification-bell-button");
         button.setGraphic(createNotificationBellGraphic(currentTenant == null ? 0 : currentTenant.getUnreadNotificationCount()));
         applyButtonHoverAnimation(button);
-        // tenant notification button logic
+        // notification button logic for tenant
         button.setOnAction(event -> {
             if (tenantNotificationMenu != null && tenantNotificationMenu.isShowing()) {
                 tenantNotificationMenu.hide();
@@ -3369,6 +3394,7 @@ public class StaySyncApp extends Application {
         button.getStyleClass().addAll("ui-button", "notification-bell-button");
         button.setGraphic(createNotificationBellGraphic(staySyncService.getUnreadLandlordNotificationCount()));
         applyButtonHoverAnimation(button);
+        // notification button logic for landlord
         button.setOnAction(event -> {
             if (landlordNotificationMenu != null && landlordNotificationMenu.isShowing()) {
                 landlordNotificationMenu.hide();
@@ -3462,6 +3488,7 @@ public class StaySyncApp extends Application {
         Button button = new Button(darkMode ? "Light mode" : "Dark mode");
         button.getStyleClass().addAll("ui-button", "theme-button", "auth-theme-button");
         applyButtonHoverAnimation(button);
+        // theme button logic for auth
         button.setOnAction(event -> {
             darkMode = !darkMode;
             applyThemeMode();
@@ -3885,7 +3912,7 @@ public class StaySyncApp extends Application {
         if (selected) {
             selectButton.getStyleClass().add("resident-picker-action-active");
         }
-        // select button logic
+        // select button logic for landlord
         selectButton.setOnAction(event -> {
             landlordSelectedUsername = tenant.getUsername();
             renderCurrentView();
@@ -3894,7 +3921,7 @@ public class StaySyncApp extends Application {
         Button controlsButton = createPrimaryButton("Open controls");
         controlsButton.setMaxWidth(Double.MAX_VALUE);
         controlsButton.setWrapText(true);
-        // open controls button logic
+        // open controls button logic for landlord
         controlsButton.setOnAction(event -> openLandlordControlsFor(tenant));
 
         HBox actions = new HBox(10, selectButton, controlsButton);
@@ -4221,6 +4248,7 @@ public class StaySyncApp extends Application {
         HBox.setHgrow(headerSpacer, Priority.ALWAYS);
         Button toggleReadButton = createSecondaryButton(notification.isUnread() ? "Mark read" : "Mark unread");
         toggleReadButton.getStyleClass().add("notification-toggle-button");
+        // notification toggle button logic for tenant
         toggleReadButton.setOnAction(event -> handleTenantNotificationReadState(notification, notification.isUnread()));
         header.getChildren().addAll(type, state, headerSpacer, toggleReadButton);
 
@@ -4267,6 +4295,7 @@ public class StaySyncApp extends Application {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button markAllReadButton = createSecondaryButton("Mark all as read");
         markAllReadButton.setDisable(unreadCount == 0);
+        // mark all read button logic for tenant
         markAllReadButton.setOnAction(event -> handleMarkAllTenantNotificationsRead());
         toolbar.getChildren().addAll(unreadSummary, spacer, markAllReadButton);
 
@@ -4293,6 +4322,7 @@ public class StaySyncApp extends Application {
         HBox.setHgrow(headerSpacer, Priority.ALWAYS);
         Button toggleReadButton = createSecondaryButton(notification.isUnread() ? "Mark read" : "Mark unread");
         toggleReadButton.getStyleClass().add("notification-toggle-button");
+        // notification toggle button logic for landlord
         toggleReadButton.setOnAction(event -> handleLandlordNotificationReadState(notification, notification.isUnread()));
         header.getChildren().addAll(type, state, headerSpacer, toggleReadButton);
 
@@ -4343,6 +4373,7 @@ public class StaySyncApp extends Application {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button markAllReadButton = createSecondaryButton("Mark all as read");
         markAllReadButton.setDisable(unreadCount == 0);
+        // mark all read button logic for landlord
         markAllReadButton.setOnAction(event -> handleMarkAllLandlordNotificationsRead());
         toolbar.getChildren().addAll(unreadSummary, spacer, markAllReadButton);
 
