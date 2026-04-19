@@ -10,10 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
-import staysync.core.TenantAccount.NotificationType;
-import staysync.core.TenantAccount.NotificationRecord;
 import staysync.core.TenantAccount.CoOccupantRequest;
+import staysync.core.TenantAccount.NotificationRecord;
+import staysync.core.TenantAccount.NotificationType;
 import staysync.core.TenantAccount.PaymentRecord;
 import staysync.core.TenantAccount.PaymentStatus;
 import staysync.core.TenantAccount.RoomInfo;
@@ -969,6 +968,7 @@ public class StaySyncService {
             TenantAccountJsonStore.save(ACCOUNTS_STORAGE_FILE, tenants, landlordNotifications);
         } catch (IOException exception) {
             System.err.println("Unable to save tenant accounts to " + ACCOUNTS_STORAGE_FILE + ": " + exception.getMessage());
+            throw new RuntimeException("CRITICAL: Failed to write data to disk. Your recent changes were not saved.", exception);
         }
     }
 
