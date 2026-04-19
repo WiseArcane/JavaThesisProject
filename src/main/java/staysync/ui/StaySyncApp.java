@@ -68,7 +68,6 @@ import javafx.util.StringConverter;
 import staysync.core.StaySyncService;
 import staysync.core.StaySyncService.DashboardSnapshot;
 import staysync.core.StaySyncService.LandlordNotification;
-import staysync.core.StaySyncService.LandlordNotificationType;
 import staysync.core.TenantAccount;
 import staysync.core.TenantAccount.CoOccupantRequest;
 import staysync.core.TenantAccount.NotificationRecord;
@@ -1696,220 +1695,6 @@ public class StaySyncApp extends Application {
         return card;
     }
 
-    private Node createLandlordReceiptReviewCard() {
-        VBox card = createPanelCard("controls-receipt-card");
-        Label eyebrow = new Label("Receipt review");
-        eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Latest tenant receipt");
-        title.getStyleClass().add("card-title");
-        title.setWrapText(true);
-
-        TenantAccount tenant = getSelectedTenant();
-        if (tenant == null) {
-            card.getChildren().addAll(
-                    eyebrow,
-                    title,
-                    createMutedCopy("Select a tenant from Residents to review the latest payment receipt photo."));
-            return card;
-        }
-
-        PaymentRecord latestReceipt = findLatestReceiptRecord(tenant);
-        if (latestReceipt == null) {
-            card.getChildren().addAll(
-                    eyebrow,
-                    title,
-                    createMutedCopy("No receipt photo has been submitted for " + tenant.getFullName() + " yet."));
-            return card;
-        }
-
-        Label submittedMeta = createMutedCopy(
-                latestReceipt.getFormattedTimestamp() + " | " + latestReceipt.getReceiptFileName());
-        submittedMeta.getStyleClass().add("receipt-meta");
-        PaymentRecord latestReferenceRecord = findLatestReferenceRecord(tenant);
-
-        Button openButton = createSecondaryButton("Open full photo");
-        openButton.setMaxWidth(Double.MAX_VALUE);
-        // open photo button logic for landlord
-        openButton.setOnAction(event -> openReceiptImage(latestReceipt, true));
-
-        card.getChildren().addAll(
-                eyebrow,
-                title,
-                createOverviewBadge(tenant.getVerificationStatusLabel(), getVerificationTone(tenant.getVerificationStatus())),
-                submittedMeta,
-                createDetailRow("BILLING MONTH", latestReceipt.getBillingMonth().isBlank() ? tenant.getCurrentBillingMonth() : latestReceipt.getBillingMonth()),
-                createDetailRow("AMOUNT", latestReceipt.getFormattedAmount()),
-                createDetailRow("REFERENCE", latestReferenceRecord == null || !latestReferenceRecord.hasReferenceNumber()
-                        ? "Not submitted yet"
-                        : latestReferenceRecord.getReferenceNumber()),
-                createReceiptPreview(latestReceipt, "Receipt image is unavailable.", 320, 176),
-                openButton,
-                createMutedCopy(latestReceipt.getNote()));
-        return card;
-    }
-
-    private Node createLandlordStatusControlCard() {
-        VBox card = createPanelCard("controls-form-card");
-        Label eyebrow = new Label("Controls");
-        eyebrow.getStyleClass().add("eyebrow-copy");
-        Label title = new Label("Review proof, update billing, and assign rent");
-        title.getStyleClass().add("card-title");
-        title.setWrapText(true);
-
-        TenantAccount tenant = getSelectedTenant();
-        ComboBox<PaymentStatus> statusBox = new ComboBox<>(FXCollections.observableArrayList(PaymentStatus.values()));
-        statusBox.getStyleClass().add("ui-combo");
-        statusBox.setMaxWidth(Double.MAX_VALUE);
-        statusBox.setValue(tenant == null ? PaymentStatus.PENDING : tenant.getPaymentStatus());
-        TextArea reviewNoteArea = createTextArea("Add a short review note for the tenant");
-        reviewNoteArea.setPrefRowCount(3);
-
-        TextField roomField = createTextField("Enter room number");
-        roomField.setText(tenant == null || !tenant.getRoomInfo().hasAssignedRoom() ? "" : tenant.getRoomInfo().getRoomNumber());
-
-        ComboBox<String> roomTypeBox = new ComboBox<>(FXCollections.observableArrayList(StaySyncService.getRoomTypes()));
-        roomTypeBox.getStyleClass().add("ui-combo");
-        roomTypeBox.setMaxWidth(Double.MAX_VALUE);
-        roomTypeBox.setValue(tenant == null || !tenant.getRoomInfo().hasAssignedRoomType() ? null : tenant.getRoomInfo().getRoomType());
-
-        TextField rentField = createTextField("Enter monthly rent");
-        rentField.setText(tenant == null || !tenant.getRoomInfo().hasAssignedRent() ? "" : formatEditableAmount(tenant.getRoomInfo().getMonthlyRent()));
-
-        Button applyButton = createPrimaryButton("Save billing state");
-        applyButton.setDisable(tenant == null);
-        applyButton.setMaxWidth(Double.MAX_VALUE);
-        // billing state button logic for landlord
-        applyButton.setOnAction(event -> {
-            if (tenant != null && statusBox.getValue() != null) {
-                String result = staySyncService.updateTenantStatusFromLandlord(tenant, statusBox.getValue(), reviewNoteArea.getText());
-                if (result != null) {
-                    showLandlordMessage(result, false);
-                    renderCurrentView();
-                    return;
-                }
-                showLandlordMessage("Billing state updated for " + tenant.getFullName() + ".", true);
-                renderCurrentView();
-            }
-        });
-
-        Button verifyButton = createSecondaryButton("Verify payment");
-        verifyButton.setDisable(tenant == null || !tenant.isPaymentAwaitingVerification());
-        verifyButton.setMaxWidth(Double.MAX_VALUE);
-        // verify payment button logic for landlord
-        verifyButton.setOnAction(event -> showVerifyPaymentDialog(tenant, reviewNoteArea.getText()));
-
-        Button rejectButton = createDangerButton("Reject proof");
-        rejectButton.setDisable(tenant == null || !tenant.isPaymentAwaitingVerification());
-        rejectButton.setMaxWidth(Double.MAX_VALUE);
-        // reject proof button logic for landlord
-        rejectButton.setOnAction(event -> showRejectPaymentDialog(tenant, reviewNoteArea.getText()));
-
-        Button assignRoomButton = createSecondaryButton("Save room and rent");
-        assignRoomButton.setDisable(tenant == null);
-        assignRoomButton.setMaxWidth(Double.MAX_VALUE);
-        // save room button logic for landlord
-        assignRoomButton.setOnAction(event -> {
-            if (tenant == null) {
-                return;
-            }
-
-            double monthlyRent;
-            try {
-                monthlyRent = Double.parseDouble(rentField.getText().trim());
-            } catch (NumberFormatException exception) {
-                showLandlordMessage("Enter a valid rent amount.", false);
-                renderCurrentView();
-                return;
-            }
-
-            String result = staySyncService.updateTenantRoomAssignment(
-                    tenant,
-                    roomField.getText(),
-                    roomTypeBox.getValue(),
-                    monthlyRent);
-            if (result != null) {
-                showLandlordMessage(result, false);
-                renderCurrentView();
-                return;
-            }
-
-            showLandlordMessage("Room and monthly rent updated for " + tenant.getFullName() + ".", true);
-            renderCurrentView();
-        });
-
-        Button deleteButton = createDangerButton("Delete tenant");
-        deleteButton.setDisable(tenant == null);
-        deleteButton.setMaxWidth(Double.MAX_VALUE);
-        // delete tenant button logic for landlord
-        deleteButton.setOnAction(event -> handleTenantDeletion(tenant));
-
-        Button residentsButton = createSecondaryButton("Back to residents");
-        residentsButton.setMaxWidth(Double.MAX_VALUE);
-        // back to residents button logic for landlord
-        residentsButton.setOnAction(event -> {
-            landlordSection = LandlordSection.RESIDENTS;
-            renderCurrentView();
-        });
-
-        Label hint = createMutedCopy(tenant == null
-                ? "Select a tenant to enable proof review, billing, room, and rent controls."
-                : tenant.isPaymentAwaitingVerification()
-                        ? "Payment proof is waiting for review. Add a short note, then verify the payment or reject it with guidance."
-                        : tenant.hasRejectedPaymentSubmission()
-                                ? "The last proof was rejected. The tenant can upload a new receipt and resubmit when ready."
-                                : "Adjust billing status or assign the tenant's room, room type, and monthly rent here.");
-
-        Label deleteHint = createMutedCopy(tenant == null
-                ? "Delete stays disabled until a tenant is selected."
-                : "Deleting a tenant permanently removes the resident account and cannot be undone.");
-
-        GridPane assignmentGrid = new GridPane();
-        assignmentGrid.getStyleClass().add("controls-form-grid");
-        assignmentGrid.setHgap(12);
-        assignmentGrid.setVgap(12);
-        ColumnConstraints assignmentColumn = new ColumnConstraints();
-        assignmentColumn.setPercentWidth(50);
-        assignmentColumn.setHgrow(Priority.ALWAYS);
-        assignmentGrid.getColumnConstraints().addAll(assignmentColumn, assignmentColumn);
-        assignmentGrid.add(createFieldGroup("ROOM NUMBER", roomField), 0, 0);
-        assignmentGrid.add(createFieldGroup("ROOM TYPE", roomTypeBox), 1, 0);
-        Node rentGroup = createFieldGroup("MONTHLY RENT", rentField);
-        GridPane.setColumnSpan(rentGroup, 2);
-        assignmentGrid.add(rentGroup, 0, 1);
-
-        GridPane actionGrid = new GridPane();
-        actionGrid.getStyleClass().add("controls-action-grid");
-        actionGrid.setHgap(10);
-        actionGrid.setVgap(10);
-        ColumnConstraints actionColumn = new ColumnConstraints();
-        actionColumn.setPercentWidth(100.0 / 3.0);
-        actionColumn.setHgrow(Priority.ALWAYS);
-        actionGrid.getColumnConstraints().addAll(actionColumn, actionColumn, actionColumn);
-        GridPane.setHgrow(applyButton, Priority.ALWAYS);
-        GridPane.setHgrow(verifyButton, Priority.ALWAYS);
-        GridPane.setHgrow(rejectButton, Priority.ALWAYS);
-        GridPane.setHgrow(assignRoomButton, Priority.ALWAYS);
-        GridPane.setHgrow(residentsButton, Priority.ALWAYS);
-        GridPane.setHgrow(deleteButton, Priority.ALWAYS);
-        actionGrid.add(applyButton, 0, 0);
-        actionGrid.add(verifyButton, 1, 0);
-        actionGrid.add(rejectButton, 2, 0);
-        actionGrid.add(assignRoomButton, 0, 1);
-        actionGrid.add(residentsButton, 1, 1);
-        actionGrid.add(deleteButton, 2, 1);
-
-        card.getChildren().addAll(
-                eyebrow,
-                title,
-                createFieldGroup("BILLING STATUS", statusBox),
-                createFieldGroup("REVIEW NOTE", reviewNoteArea),
-                assignmentGrid,
-                actionGrid,
-                hint,
-                deleteHint);
-        return card;
-    }
-
     private Node createLandlordCoOccupantCard() {
         VBox card = createPanelCard("controls-form-card", "controls-secondary-card");
         Label eyebrow = new Label("Residence approval");
@@ -3004,26 +2789,6 @@ public class StaySyncApp extends Application {
         dialog.showAndWait();
     }
 
-    private Dialog<ButtonType> createSystemDialog(String title) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.initOwner(stage);
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle(title);
-        dialog.getDialogPane().setHeaderText(null);
-        dialog.getDialogPane().setGraphic(null);
-        return dialog;
-    }
-
-    private VBox createSystemFieldGroup(String labelText, Node control) {
-        VBox box = new VBox(6);
-        Label label = new Label(labelText);
-        if (control instanceof Region region) {
-            region.setMaxWidth(Double.MAX_VALUE);
-        }
-        box.getChildren().addAll(label, control);
-        return box;
-    }
-
     private VBox createDialogShell(String eyebrowText, String titleText, String descriptionText, Node... content) {
         VBox shell = new VBox(18);
         shell.getStyleClass().add("dialog-content-shell");
@@ -3091,18 +2856,6 @@ public class StaySyncApp extends Application {
             }
         });
         sequence.play();
-    }
-
-    private VBox createConsoleStat(String labelText, String valueText) {
-        VBox stat = new VBox(4);
-        stat.getStyleClass().add("console-stat");
-        Label label = new Label(labelText);
-        label.getStyleClass().add("field-label");
-        Label value = new Label(valueText);
-        value.getStyleClass().add("console-value");
-        stat.getChildren().addAll(label, value);
-        HBox.setHgrow(stat, Priority.ALWAYS);
-        return stat;
     }
 
     private VBox createSideInfoCard(String title, Node main, Node sub, Node extra) {
@@ -4079,13 +3832,6 @@ public class StaySyncApp extends Application {
 
         cell.getChildren().addAll(label, value);
         return cell;
-    }
-
-    private void expandCard(Node node) {
-        if (node instanceof Region region) {
-            region.setMinWidth(0);
-            region.setMaxWidth(Double.MAX_VALUE);
-        }
     }
 
     private VBox createMetricCard(String title, String value, String helperText) {

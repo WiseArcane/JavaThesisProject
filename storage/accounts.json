@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "tenants": [
     {
       "fullName": "Maria Santos",
@@ -17,6 +17,17 @@
         "dueDay": 5
       },
       "paymentHistory": [
+        {
+          "timestamp": "2026-04-19T12:06:15.201819600",
+          "status": "PENDING",
+          "note": "Receipt photo uploaded for the current billing review.",
+          "updatedBy": "Tenant",
+          "billingMonth": "April 2026",
+          "amount": 3200.0,
+          "referenceNumber": "MS-APR-2026-1102",
+          "receiptImagePath": "C:\\Users\\rendi\\Downloads\\2ndSemProjects\\experiment\\storage\\receipts\\maria.s\\receipt-1776571575198.png",
+          "receiptFileName": "Screenshot 2026-04-19 120603.png"
+        },
         {
           "timestamp": "2026-04-18T19:24:53.284008",
           "status": "PENDING",
@@ -267,6 +278,17 @@
       ],
       "notifications": [],
       "coOccupantRequest": null
+    }
+  ],
+  "landlordNotifications": [
+    {
+      "timestamp": "2026-04-19T12:03:38.937367600",
+      "type": "PAYMENT_SUBMITTED",
+      "tenantUsername": "maria.s",
+      "tenantName": "Maria Santos",
+      "title": "Payment proof submitted",
+      "message": "Maria Santos already has a payment proof waiting for review. Reference: MS-APR-2026-1102.",
+      "read": true
     }
   ]
 }
